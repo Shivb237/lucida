@@ -1,0 +1,19 @@
+{
+  "name": "genkart-router",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "GenKart router: text in, encoder call, scatter to shard workers, gather, merge, route. No framework; Node runs the TypeScript directly.",
+  "engines": {
+    "node": ">=25"
+  },
+  "scripts": {
+    "start": "node src/index.ts",
+    "test": "node --test \"test/*.test.ts\"",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "typescript": "5.9.3"
+  }
+}

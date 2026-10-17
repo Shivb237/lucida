@@ -1,0 +1,40 @@
+{"run": 1792077841, "t": 0.0, "text": "men's navy blazer for a winter wedding", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 30.6}
+{"run": 1792077841, "t": 1.0, "text": "white sneakers for college", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 17.7}
+{"run": 1792077841, "t": 2.0, "text": "black saree for cocktail party", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 16.6}
+{"run": 1792077841, "t": 3.0, "text": "kids kurta for diwali", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 34.2}
+{"run": 1792077841, "t": 4.0, "text": "women's yellow kurti set under 1500", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 18.2}
+{"run": 1792077841, "t": 5.0, "text": "men's formal shoes brown", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 18.0}
+{"run": 1792077841, "t": 6.0, "text": "summer linen shirt men", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 26.7}
+{"run": 1792077841, "t": 7.0, "text": "red lehenga for sister sangeet", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 21.1}
+{"run": 1792077841, "t": 8.0, "text": "men's navy blazer for a winter wedding", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 21.9}
+{"run": 1792077841, "t": 9.0, "text": "white sneakers for college", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 29.4}
+{"run": 1792077841, "t": 10.0, "text": "black saree for cocktail party", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 18.3}
+{"run": 1792077841, "t": 11.1, "text": "kids kurta for diwali", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 28.2}
+{"run": 1792077841, "t": 12.1, "text": "women's yellow kurti set under 1500", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 20.1}
+{"run": 1792077841, "t": 13.1, "text": "men's formal shoes brown", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 24.2}
+{"run": 1792077841, "t": 14.1, "text": "summer linen shirt men", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 21.8}
+{"run": 1792077841, "t": 15.1, "text": "red lehenga for sister sangeet", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 17.9}
+{"run": 1792077841, "t": 16.1, "text": "men's navy blazer for a winter wedding", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 21.3}
+{"run": 1792077841, "t": 17.1, "text": "white sneakers for college", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 17.7}
+{"run": 1792077841, "t": 18.1, "text": "black saree for cocktail party", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 22.0}
+{"run": 1792077841, "t": 19.1, "text": "kids kurta for diwali", "status": 0, "error": "<urlopen error [Errno 61] Connection refused>", "total_ms": 18.4}
+{"run": 1792078139, "t": 0.0, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 318.49, "shards_ms": 67.06, "top": "8369582464638506756"}
+{"run": 1792078139, "t": 1.0, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 313, "shards_ms": 67.18, "top": "14674132905800401037"}
+{"run": 1792078139, "t": 2.0, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 319.02, "shards_ms": 72.18, "top": "211021"}
+{"run": 1792078139, "t": 3.0, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 1, "total_ms": 300.14, "shards_ms": 55.87, "top": "316633465854659707"}
+{"run": 1792078139, "t": 4.0, "text": "women's yellow kurti set under 1500", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 320.41, "shards_ms": 73.76, "top": "213995"}
+{"run": 1792078139, "t": 5.0, "text": "men's formal shoes brown", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 314.95, "shards_ms": 65.54, "top": "8187522292694633329"}
+{"run": 1792078139, "t": 6.0, "text": "summer linen shirt men", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 303.37, "shards_ms": 57.77, "top": "7085500006808481956"}
+{"run": 1792078139, "t": 7.0, "text": "red lehenga for sister sangeet", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 315.23, "shards_ms": 64.81, "top": "209444"}
+{"run": 1792078139, "t": 8.0, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 304.78, "shards_ms": 58.38, "top": "8369582464638506756"}
+{"run": 1792078139, "t": 9.0, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 344.71, "shards_ms": 87.31, "top": "14674132905800401037"}
+{"run": 1792078139, "t": 10.0, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 308.1, "shards_ms": 62.13, "top": "211021"}
+{"run": 1792078139, "t": 11.0, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 327.58, "shards_ms": 84.37, "top": "316633465854659707"}
+{"run": 1792078139, "t": 12.0, "text": "women's yellow kurti set under 1500", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 328.08, "shards_ms": 84.31, "top": "213995"}
+{"run": 1792078139, "t": 13.0, "text": "men's formal shoes brown", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 312.08, "shards_ms": 67.54, "top": "8187522292694633329"}
+{"run": 1792078139, "t": 14.1, "text": "summer linen shirt men", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 317.98, "shards_ms": 65.24, "top": "7085500006808481956"}
+{"run": 1792078139, "t": 15.1, "text": "red lehenga for sister sangeet", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 322.01, "shards_ms": 78.8, "top": "209444"}
+{"run": 1792078139, "t": 16.1, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 334.08, "shards_ms": 87.44, "top": "8369582464638506756"}
+{"run": 1792078139, "t": 17.1, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 332.49, "shards_ms": 85.8, "top": "14674132905800401037"}
+{"run": 1792078139, "t": 18.1, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 316.13, "shards_ms": 69.99, "top": "211021"}
+{"run": 1792078139, "t": 19.1, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 318.49, "shards_ms": 71.74, "top": "316633465854659707"}

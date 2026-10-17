@@ -1,0 +1,98 @@
+{
+  "n_products": 40513,
+  "n_pairs_ge_0.95": 2230,
+  "by_tau": {
+    "0.99": {
+      "clusters": 39834,
+      "clusters_with_copies": 667,
+      "products_in_such_clusters": 1346,
+      "share_of_products": 0.0332,
+      "largest": 3
+    },
+    "0.97": {
+      "clusters": 39508,
+      "clusters_with_copies": 945,
+      "products_in_such_clusters": 1950,
+      "share_of_products": 0.0481,
+      "largest": 6
+    },
+    "0.95": {
+      "clusters": 38633,
+      "clusters_with_copies": 1418,
+      "products_in_such_clusters": 3298,
+      "share_of_products": 0.0814,
+      "largest": 29
+    }
+  },
+  "label_consistency": {
+    "groups_inside_a_query": 313,
+    "groups_disagreeing_on_relevance": 90
+  },
+  "rescoring": {
+    "bm25": {
+      "std": 0.262,
+      "ded": 0.2657,
+      "rec_std": 0.2877,
+      "rec_ded": 0.2889,
+      "top10_repeat_share": 0.0134
+    },
+    "siglip-base": {
+      "std": 0.3014,
+      "ded": 0.3075,
+      "rec_std": 0.4345,
+      "rec_ded": 0.4366,
+      "top10_repeat_share": 0.0254
+    },
+    "marqo-fashionsiglip": {
+      "std": 0.3271,
+      "ded": 0.3338,
+      "rec_std": 0.4818,
+      "rec_ded": 0.4826,
+      "top10_repeat_share": 0.0262
+    }
+  },
+  "rescoring_pairs": {
+    "marqo-fashionsiglip - bm25": {
+      "std": [
+        0.0651,
+        0.049,
+        0.0794
+      ],
+      "ded": [
+        0.0681,
+        0.0527,
+        0.0822
+      ]
+    },
+    "marqo-fashionsiglip - siglip-base": {
+      "std": [
+        0.0257,
+        0.0184,
+        0.0339
+      ],
+      "ded": [
+        0.0263,
+        0.0185,
+        0.0346
+      ]
+    },
+    "siglip-base - bm25": {
+      "std": [
+        0.0393,
+        0.0249,
+        0.0535
+      ],
+      "ded": [
+        0.0419,
+        0.0267,
+        0.0561
+      ]
+    }
+  },
+  "rated_rows": {
+    "rows": 83,
+    "rows_with_repeat": 8,
+    "mean_rating_with_repeat": 2.0,
+    "mean_rating_without_repeat": 1.773
+  }
+}

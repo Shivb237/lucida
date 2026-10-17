@@ -1,0 +1,87 @@
+{
+ "what": "AWS SQS ingestion on ap-south-1 (FIFO queue + DLQ, ingest worker on the router host, two shard replicas in zones a and b)",
+ "source": "numbers copied from outputs the user pasted (journalctl, curl /health, aws sqs commands); not written by a script, so treat as observed-by-hand",
+ "baseline_products_per_shard": [
+  26988,
+  27006,
+  26936,
+  27121
+ ],
+ "test1_happy_path": {
+  "sent": 20,
+  "each_shard_added_on_A_and_B": 5,
+  "A_equals_B": true
+ },
+ "test1b_dedup": {
+  "sent_then_resent_same_5_within_seconds": true,
+  "worker_handled": 5,
+  "expected_without_dedup": 10
+ },
+ "test2_replica_machine_off": {
+  "sent": 10,
+  "first_worker_version": "crash loop (9 restarts): ChangeMessageVisibility InvalidParameterValue after the 20 s hiding time expired behind 10 s timeouts",
+  "after_fix": "no crash, about 2.7 s per failed write",
+  "messages_in_dlq_when_B_still_down": 10,
+  "cause_of_dlq": "crash-restarts burned the 8 receives per message",
+  "before_replay": {
+   "A": [
+    26996,
+    27014,
+    26944,
+    27130
+   ],
+   "B": [
+    26994,
+    27013,
+    26942,
+    27127
+   ],
+   "B_replayed_from_write_ahead_log": [
+    6,
+    7,
+    6,
+    6
+   ]
+  },
+  "after_redrive_of_10": {
+   "A": [
+    26996,
+    27015,
+    26945,
+    27130
+   ],
+   "B": [
+    26996,
+    27015,
+    26945,
+    27130
+   ],
+   "redrive_task": "COMPLETED, 10 of 10 moved"
+  }
+ },
+ "test3_permanent_error": {
+  "sent": 2,
+  "dead_lettered_immediately_with_reason": "embed: photo not found: s3://.../ingest-photos/90000090X.jpg",
+  "after_uploading_photos_and_redrive": {
+   "A": [
+    26996,
+    27016,
+    26946,
+    27130
+   ],
+   "B": [
+    26996,
+    27016,
+    26946,
+    27130
+   ]
+  }
+ },
+ "totals": "37 new test products on both replicas (+20, +5, +10, +2); 108,051 -> 108,088 per replica",
+ "bugs_found_by_the_tests": [
+  "worker crash loop on expired receipt",
+  "visibility 20 s shorter than a batch of 10 s timeouts",
+  "10 s connect timeout to a switched-off machine (now 2 s)",
+  "GPU torch pulled on ARM (earlier)"
+ ]
+}

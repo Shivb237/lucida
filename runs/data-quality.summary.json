@@ -1,0 +1,22 @@
+{
+  "n_products": 40513,
+  "n_queries": 852,
+  "flag_counts": {
+    "image_extreme_shape": 25,
+    "image_nearly_blank": 28,
+    "query_has_duplicate_products": 220,
+    "title_mostly_non_ascii": 1,
+    "title_word_repeated_4x": 145
+  },
+  "duplicate_clusters_with_copies": 945,
+  "products_in_duplicate_clusters": 1950,
+  "share_in_duplicate_clusters": 0.0481,
+  "largest_cluster": 6,
+  "duplicate_groups_inside_one_query_list": 313,
+  "products_per_query": {
+    "min": 10,
+    "median": 50,
+    "max": 65
+  },
+  "unique_products_after_merge": 39508
+}

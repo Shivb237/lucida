@@ -1,0 +1,15 @@
+{
+  "n": 50,
+  "word_kept_qwen": 0.488,
+  "word_kept_claude": 0.528,
+  "diff_claude_minus_qwen": 0.04,
+  "diff_ci95": [
+    -0.003,
+    0.084
+  ],
+  "pieces_mean_qwen": 1.32,
+  "pieces_mean_claude": 1.26,
+  "gender_agree": 49,
+  "claude_plans_valid": 50,
+  "claude_cost_usd": 0.3395
+}

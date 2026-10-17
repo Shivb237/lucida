@@ -1,0 +1,83 @@
+{
+ "setup": {
+  "test": "test set 4: 50 Indian-occasion prompts, nothing tuned on them",
+  "n_options_rated": 141,
+  "A": "raw sentence, general catalogue only",
+  "B": "raw sentence, all four catalogues",
+  "C": "understood plan, all four catalogues",
+  "date": "2026-10-14",
+  "rating_scale": "good=2, okay=1, bad=0",
+  "rater": "the project owner, who also wrote the prompts (single rater, rated blind: method names hidden)"
+ },
+ "methods": {
+  "A": {
+   "n_prompts": 50,
+   "mean": 0.58,
+   "ci95": [
+    0.36,
+    0.8
+   ],
+   "good": 9,
+   "okay": 11,
+   "bad": 30
+  },
+  "B": {
+   "n_prompts": 50,
+   "mean": 1.58,
+   "ci95": [
+    1.36,
+    1.78
+   ],
+   "good": 37,
+   "okay": 5,
+   "bad": 8
+  },
+  "C": {
+   "n_prompts": 50,
+   "mean": 1.66,
+   "ci95": [
+    1.5,
+    1.8
+   ],
+   "good": 37,
+   "okay": 9,
+   "bad": 4
+  }
+ },
+ "paired": {
+  "B-A": {
+   "mean": 1.0,
+   "ci95": [
+    0.74,
+    1.26
+   ],
+   "better": 32,
+   "tied": 17,
+   "worse": 1,
+   "n_prompts": 50
+  },
+  "C-B": {
+   "mean": 0.08,
+   "ci95": [
+    -0.14,
+    0.2805
+   ],
+   "better": 11,
+   "tied": 31,
+   "worse": 8,
+   "n_prompts": 50
+  },
+  "C-A": {
+   "mean": 1.08,
+   "ci95": [
+    0.82,
+    1.32
+   ],
+   "better": 35,
+   "tied": 13,
+   "worse": 2,
+   "n_prompts": 50
+  }
+ },
+ "notes": "A, B, C are the answer-key letters; see setup for what each is."
+}

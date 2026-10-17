@@ -1,0 +1,54 @@
+{
+  "n_options": 141,
+  "n_usable": 141,
+  "unparsed": 0,
+  "agreement": 0.61,
+  "agreement_ci95": [
+    0.532,
+    0.688
+  ],
+  "weighted_kappa": 0.532,
+  "kappa_ci95": [
+    0.428,
+    0.631
+  ],
+  "confusion_human_rows_judge_cols": {
+    "good": {
+      "good": 48,
+      "okay": 22,
+      "bad": 7
+    },
+    "okay": {
+      "good": 2,
+      "okay": 8,
+      "bad": 15
+    },
+    "bad": {
+      "good": 1,
+      "okay": 8,
+      "bad": 30
+    }
+  },
+  "human_mean": 1.27,
+  "judge_mean": 0.993,
+  "judge_stricter_share": 0.312,
+  "judge_looser_share": 0.078,
+  "by_method": {
+    "A": {
+      "n": 50,
+      "human_mean": 0.58,
+      "judge_mean": 0.36
+    },
+    "B": {
+      "n": 42,
+      "human_mean": 1.64,
+      "judge_mean": 1.6
+    },
+    "C": {
+      "n": 49,
+      "human_mean": 1.65,
+      "judge_mean": 1.12
+    }
+  },
+  "note": "method 'A'/'B'/'C' = first method listed for the option in the key (options shared by several methods count once)"
+}

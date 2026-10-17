@@ -1,0 +1,459 @@
+{
+  "setup": {
+    "date": "2026-10-13T02:33:30",
+    "n_rewrites": 800,
+    "n_valid": 650,
+    "understanding_model": "qwen3:4b-instruct via langchain-ollama",
+    "retrieval_model": "Marqo/marqo-fashionSigLIP",
+    "index": "data/index/scale-marqo-fashionsiglip"
+  },
+  "results": {
+    "valid_rewrites": {
+      "embed-original": {
+        "ndcg10": {
+          "mean": 0.3168,
+          "ci95": [
+            0.303,
+            0.3319
+          ]
+        },
+        "recall50": {
+          "mean": 0.469,
+          "ci95": [
+            0.4487,
+            0.4889
+          ]
+        },
+        "mrr": {
+          "mean": 0.3349,
+          "ci95": [
+            0.311,
+            0.3623
+          ]
+        }
+      },
+      "bm25-original": {
+        "ndcg10": {
+          "mean": 0.2476,
+          "ci95": [
+            0.2329,
+            0.2641
+          ]
+        },
+        "recall50": {
+          "mean": 0.2578,
+          "ci95": [
+            0.2398,
+            0.2776
+          ]
+        },
+        "mrr": {
+          "mean": 0.2735,
+          "ci95": [
+            0.2505,
+            0.3007
+          ]
+        }
+      },
+      "embed-raw": {
+        "ndcg10": {
+          "mean": 0.2583,
+          "ci95": [
+            0.2446,
+            0.2734
+          ]
+        },
+        "recall50": {
+          "mean": 0.3864,
+          "ci95": [
+            0.3681,
+            0.4062
+          ]
+        },
+        "mrr": {
+          "mean": 0.2744,
+          "ci95": [
+            0.2513,
+            0.2994
+          ]
+        }
+      },
+      "bm25-raw": {
+        "ndcg10": {
+          "mean": 0.1538,
+          "ci95": [
+            0.1402,
+            0.1696
+          ]
+        },
+        "recall50": {
+          "mean": 0.1839,
+          "ci95": [
+            0.1677,
+            0.2009
+          ]
+        },
+        "mrr": {
+          "mean": 0.1815,
+          "ci95": [
+            0.1592,
+            0.2049
+          ]
+        }
+      },
+      "embed-understood": {
+        "ndcg10": {
+          "mean": 0.2963,
+          "ci95": [
+            0.2816,
+            0.3115
+          ]
+        },
+        "recall50": {
+          "mean": 0.4391,
+          "ci95": [
+            0.4179,
+            0.4598
+          ]
+        },
+        "mrr": {
+          "mean": 0.3173,
+          "ci95": [
+            0.2941,
+            0.3422
+          ]
+        }
+      },
+      "bm25-understood": {
+        "ndcg10": {
+          "mean": 0.2532,
+          "ci95": [
+            0.2369,
+            0.2692
+          ]
+        },
+        "recall50": {
+          "mean": 0.2796,
+          "ci95": [
+            0.26,
+            0.2998
+          ]
+        },
+        "mrr": {
+          "mean": 0.2831,
+          "ci95": [
+            0.2584,
+            0.31
+          ]
+        }
+      },
+      "embed-understood - embed-raw | ndcg10": {
+        "mean": 0.038,
+        "ci95": [
+          0.0268,
+          0.0489
+        ]
+      },
+      "embed-understood - embed-raw | recall50": {
+        "mean": 0.0527,
+        "ci95": [
+          0.0409,
+          0.0647
+        ]
+      },
+      "embed-raw - embed-original | ndcg10": {
+        "mean": -0.0584,
+        "ci95": [
+          -0.0698,
+          -0.0476
+        ]
+      },
+      "embed-raw - embed-original | recall50": {
+        "mean": -0.0826,
+        "ci95": [
+          -0.0944,
+          -0.0718
+        ]
+      },
+      "embed-understood - embed-original | ndcg10": {
+        "mean": -0.0205,
+        "ci95": [
+          -0.0282,
+          -0.0133
+        ]
+      },
+      "embed-understood - embed-original | recall50": {
+        "mean": -0.0299,
+        "ci95": [
+          -0.0398,
+          -0.0205
+        ]
+      },
+      "bm25-understood - bm25-raw | ndcg10": {
+        "mean": 0.0994,
+        "ci95": [
+          0.088,
+          0.1108
+        ]
+      },
+      "bm25-understood - bm25-raw | recall50": {
+        "mean": 0.0957,
+        "ci95": [
+          0.0822,
+          0.1094
+        ]
+      },
+      "embed-understood - bm25-understood | ndcg10": {
+        "mean": 0.0431,
+        "ci95": [
+          0.0262,
+          0.0585
+        ]
+      },
+      "embed-understood - bm25-understood | recall50": {
+        "mean": 0.1594,
+        "ci95": [
+          0.1408,
+          0.1792
+        ]
+      }
+    },
+    "all_rewrites": {
+      "embed-original": {
+        "ndcg10": {
+          "mean": 0.3183,
+          "ci95": [
+            0.3046,
+            0.3313
+          ]
+        },
+        "recall50": {
+          "mean": 0.4728,
+          "ci95": [
+            0.4549,
+            0.4918
+          ]
+        },
+        "mrr": {
+          "mean": 0.3318,
+          "ci95": [
+            0.3105,
+            0.3541
+          ]
+        }
+      },
+      "bm25-original": {
+        "ndcg10": {
+          "mean": 0.2494,
+          "ci95": [
+            0.2347,
+            0.2643
+          ]
+        },
+        "recall50": {
+          "mean": 0.2648,
+          "ci95": [
+            0.2466,
+            0.2832
+          ]
+        },
+        "mrr": {
+          "mean": 0.2695,
+          "ci95": [
+            0.2457,
+            0.2936
+          ]
+        }
+      },
+      "embed-raw": {
+        "ndcg10": {
+          "mean": 0.2506,
+          "ci95": [
+            0.2366,
+            0.2641
+          ]
+        },
+        "recall50": {
+          "mean": 0.3789,
+          "ci95": [
+            0.3597,
+            0.3978
+          ]
+        },
+        "mrr": {
+          "mean": 0.2602,
+          "ci95": [
+            0.2378,
+            0.2819
+          ]
+        }
+      },
+      "bm25-raw": {
+        "ndcg10": {
+          "mean": 0.1527,
+          "ci95": [
+            0.1397,
+            0.1655
+          ]
+        },
+        "recall50": {
+          "mean": 0.1833,
+          "ci95": [
+            0.1686,
+            0.1991
+          ]
+        },
+        "mrr": {
+          "mean": 0.179,
+          "ci95": [
+            0.1585,
+            0.1993
+          ]
+        }
+      },
+      "embed-understood": {
+        "ndcg10": {
+          "mean": 0.294,
+          "ci95": [
+            0.2807,
+            0.3067
+          ]
+        },
+        "recall50": {
+          "mean": 0.4354,
+          "ci95": [
+            0.4173,
+            0.4546
+          ]
+        },
+        "mrr": {
+          "mean": 0.3096,
+          "ci95": [
+            0.2861,
+            0.3308
+          ]
+        }
+      },
+      "bm25-understood": {
+        "ndcg10": {
+          "mean": 0.2569,
+          "ci95": [
+            0.2422,
+            0.2716
+          ]
+        },
+        "recall50": {
+          "mean": 0.2858,
+          "ci95": [
+            0.269,
+            0.3044
+          ]
+        },
+        "mrr": {
+          "mean": 0.2848,
+          "ci95": [
+            0.2594,
+            0.3091
+          ]
+        }
+      },
+      "embed-understood - embed-raw | ndcg10": {
+        "mean": 0.0434,
+        "ci95": [
+          0.0338,
+          0.0534
+        ]
+      },
+      "embed-understood - embed-raw | recall50": {
+        "mean": 0.0565,
+        "ci95": [
+          0.0454,
+          0.0681
+        ]
+      },
+      "embed-raw - embed-original | ndcg10": {
+        "mean": -0.0677,
+        "ci95": [
+          -0.0774,
+          -0.0577
+        ]
+      },
+      "embed-raw - embed-original | recall50": {
+        "mean": -0.094,
+        "ci95": [
+          -0.1056,
+          -0.0832
+        ]
+      },
+      "embed-understood - embed-original | ndcg10": {
+        "mean": -0.0243,
+        "ci95": [
+          -0.0314,
+          -0.017
+        ]
+      },
+      "embed-understood - embed-original | recall50": {
+        "mean": -0.0374,
+        "ci95": [
+          -0.0469,
+          -0.0287
+        ]
+      },
+      "bm25-understood - bm25-raw | ndcg10": {
+        "mean": 0.1042,
+        "ci95": [
+          0.0938,
+          0.1151
+        ]
+      },
+      "bm25-understood - bm25-raw | recall50": {
+        "mean": 0.1025,
+        "ci95": [
+          0.0909,
+          0.1156
+        ]
+      },
+      "embed-understood - bm25-understood | ndcg10": {
+        "mean": 0.0371,
+        "ci95": [
+          0.0234,
+          0.0522
+        ]
+      },
+      "embed-understood - bm25-understood | recall50": {
+        "mean": 0.1496,
+        "ci95": [
+          0.1309,
+          0.1673
+        ]
+      }
+    },
+    "by_style_valid": {
+      "conversational": {
+        "n": 149,
+        "ndcg10_original": 0.3126,
+        "ndcg10_raw": 0.2916,
+        "ndcg10_understood": 0.3013
+      },
+      "hinglish": {
+        "n": 150,
+        "ndcg10_original": 0.3216,
+        "ndcg10_raw": 0.2443,
+        "ndcg10_understood": 0.2994
+      },
+      "typos_slang": {
+        "n": 156,
+        "ndcg10_original": 0.316,
+        "ndcg10_raw": 0.224,
+        "ndcg10_understood": 0.2932
+      },
+      "with_reason": {
+        "n": 195,
+        "ndcg10_original": 0.3169,
+        "ndcg10_raw": 0.2712,
+        "ndcg10_understood": 0.2926
+      }
+    }
+  },
+  "understanding_seconds_mean": 3.25
+}

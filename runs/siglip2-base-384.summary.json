@@ -1,0 +1,52 @@
+{
+  "setup": {
+    "method": "siglip2-base-384",
+    "name": "siglip2-base-384",
+    "seed": 0,
+    "n_queries": 64,
+    "n_products": 3128,
+    "dataset": "Marqo/marqo-GS-10M",
+    "dataset_revision": "eb013094f39e8b17f5b9c6ca05a4a1f1ae0c7309",
+    "shards": [
+      "data/in_domain-168.parquet",
+      "data/in_domain-157.parquet"
+    ],
+    "date": "2026-10-12T23:32:06",
+    "model": "google/siglip2-base-patch16-384",
+    "model_revision_at_run_time": "f775b65a79762255128c981547af89addcfe0f88",
+    "device": "mps",
+    "torch": "2.14.1",
+    "query_encode_seconds": 0.544
+  },
+  "embed_seconds": 0.0,
+  "metrics": {
+    "ndcg10": {
+      "mean": 0.4997,
+      "ci95": [
+        0.4597,
+        0.538
+      ]
+    },
+    "recall10": {
+      "mean": 0.2012,
+      "ci95": [
+        0.1656,
+        0.2382
+      ]
+    },
+    "recall50": {
+      "mean": 0.7873,
+      "ci95": [
+        0.7278,
+        0.8445
+      ]
+    },
+    "mrr": {
+      "mean": 0.4059,
+      "ci95": [
+        0.3262,
+        0.4877
+      ]
+    }
+  }
+}

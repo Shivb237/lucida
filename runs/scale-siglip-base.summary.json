@@ -1,0 +1,71 @@
+{
+  "setup": {
+    "method": "siglip-base",
+    "name": "scale-siglip-base",
+    "seed": 0,
+    "n_queries": 852,
+    "n_products": 40513,
+    "dataset": "Marqo/marqo-GS-10M",
+    "dataset_revision": "eb013094f39e8b17f5b9c6ca05a4a1f1ae0c7309",
+    "shards": [
+      "data/in_domain-157.parquet",
+      "data/in_domain-168.parquet",
+      "data/in_domain-116.parquet",
+      "data/in_domain-141.parquet",
+      "data/in_domain-163.parquet",
+      "data/in_domain-20.parquet",
+      "data/in_domain-219.parquet",
+      "data/in_domain-23.parquet",
+      "data/in_domain-24.parquet",
+      "data/in_domain-265.parquet",
+      "data/in_domain-278.parquet",
+      "data/in_domain-287.parquet",
+      "data/in_domain-294.parquet",
+      "data/in_domain-32.parquet",
+      "data/in_domain-323.parquet",
+      "data/in_domain-332.parquet",
+      "data/in_domain-335.parquet",
+      "data/in_domain-369.parquet",
+      "data/in_domain-95.parquet",
+      "data/in_domain-97.parquet"
+    ],
+    "sample": "data/sample_scale",
+    "date": "2026-10-13T00:30:47",
+    "model": "timm/ViT-B-16-SigLIP",
+    "model_revision_at_run_time": "41f575766f40e752fdd1383e9565b7f02388c1c4",
+    "device": "mps",
+    "torch": "2.14.1",
+    "query_encode_seconds": 7.313
+  },
+  "embed_seconds": 1297.51,
+  "metrics": {
+    "ndcg10": {
+      "mean": 0.3014,
+      "ci95": [
+        0.2879,
+        0.3143
+      ]
+    },
+    "recall10": {
+      "mean": 0.124,
+      "ci95": [
+        0.1166,
+        0.1314
+      ]
+    },
+    "recall50": {
+      "mean": 0.4345,
+      "ci95": [
+        0.4182,
+        0.4517
+      ]
+    },
+    "mrr": {
+      "mean": 0.3129,
+      "ci95": [
+        0.2905,
+        0.3348
+      ]
+    }
+  }
+}

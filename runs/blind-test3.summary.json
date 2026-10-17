@@ -1,0 +1,58 @@
+{
+ "setup": {
+  "test": "test set 3, the 30 fresh prompts (positions 21-50)",
+  "n_options_rated": 103,
+  "date": "2026-10-14",
+  "rating_scale": "good=2, okay=1, bad=0",
+  "rater": "the project owner, who also wrote the prompts (single rater, rated blind: method names hidden)"
+ },
+ "methods": {
+  "raw": {
+   "n_prompts": 30,
+   "mean": 1.8667,
+   "ci95": [
+    1.7,
+    2.0
+   ],
+   "good": 27,
+   "okay": 2,
+   "bad": 1
+  },
+  "plan": {
+   "n_prompts": 29,
+   "mean": 1.7241,
+   "ci95": [
+    1.5164,
+    1.8966
+   ],
+   "good": 23,
+   "okay": 4,
+   "bad": 2
+  },
+  "plan_graph": {
+   "n_prompts": 2,
+   "mean": 2.0,
+   "ci95": [
+    2.0,
+    2.0
+   ],
+   "good": 2,
+   "okay": 0,
+   "bad": 0
+  }
+ },
+ "paired": {
+  "plan-raw": {
+   "mean": -0.1379,
+   "ci95": [
+    -0.3448,
+    0.0345
+   ],
+   "better": 1,
+   "tied": 24,
+   "worse": 4,
+   "n_prompts": 29
+  }
+ },
+ "notes": "plan_graph exists only where the knowledge graph changed the plan (few prompts)."
+}

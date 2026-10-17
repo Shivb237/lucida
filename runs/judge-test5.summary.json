@@ -1,0 +1,76 @@
+{
+  "n_options": 132,
+  "unparsed": 0,
+  "agreement": 0.568,
+  "agreement_ci95": [
+    0.485,
+    0.652
+  ],
+  "weighted_kappa": 0.374,
+  "kappa_ci95": [
+    0.255,
+    0.49
+  ],
+  "confusion_human_rows_judge_cols": {
+    "good": {
+      "good": 52,
+      "okay": 31,
+      "bad": 7
+    },
+    "okay": {
+      "good": 4,
+      "okay": 15,
+      "bad": 6
+    },
+    "bad": {
+      "good": 0,
+      "okay": 9,
+      "bad": 8
+    }
+  },
+  "human_mean": 1.553,
+  "judge_mean": 1.265,
+  "method_comparisons": {
+    "C-B": {
+      "n": 50,
+      "human_mean_diff": -0.26,
+      "judge_mean_diff": -0.2,
+      "judge_ci95": [
+        -0.42,
+        0.04
+      ]
+    },
+    "D-B": {
+      "n": 50,
+      "human_mean_diff": -0.26,
+      "judge_mean_diff": -0.16,
+      "judge_ci95": [
+        -0.38,
+        0.06
+      ]
+    },
+    "D-C": {
+      "n": 50,
+      "human_mean_diff": 0,
+      "judge_mean_diff": 0.04,
+      "judge_ci95": [
+        -0.12,
+        0.2
+      ]
+    }
+  },
+  "by_method_mean": {
+    "B": {
+      "human": 1.74,
+      "judge": 1.42
+    },
+    "C": {
+      "human": 1.48,
+      "judge": 1.22
+    },
+    "D": {
+      "human": 1.48,
+      "judge": 1.26
+    }
+  }
+}

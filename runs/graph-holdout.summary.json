@@ -1,0 +1,80 @@
+{
+  "n_train": 30782,
+  "n_test": 7697,
+  "graph_nodes": 106,
+  "graph_edges": 301,
+  "by_usage": {
+    "Casual": {
+      "n_test": 5779,
+      "graph": 0.812,
+      "baseline": 0.8,
+      "diff_ci95": [
+        0.004,
+        0.02
+      ]
+    },
+    "Sports": {
+      "n_test": 798,
+      "graph": 0.961,
+      "baseline": 0.882,
+      "diff_ci95": [
+        0.053,
+        0.103
+      ]
+    },
+    "Ethnic": {
+      "n_test": 643,
+      "graph": 0.938,
+      "baseline": 0.779,
+      "diff_ci95": [
+        0.129,
+        0.191
+      ]
+    },
+    "Formal": {
+      "n_test": 452,
+      "graph": 0.962,
+      "baseline": 0.518,
+      "diff_ci95": [
+        0.392,
+        0.493
+      ]
+    },
+    "Smart Casual": {
+      "n_test": 13,
+      "graph": 0.692,
+      "baseline": 0.692,
+      "diff_ci95": [
+        -0.231,
+        0.231
+      ]
+    },
+    "Party": {
+      "n_test": 6,
+      "graph": 0.667,
+      "baseline": 0.833,
+      "diff_ci95": [
+        -0.5,
+        0.0
+      ]
+    },
+    "Travel": {
+      "n_test": 6,
+      "graph": 0.667,
+      "baseline": 1.0,
+      "diff_ci95": [
+        -0.667,
+        0.0
+      ]
+    }
+  },
+  "overall": {
+    "graph_hit_at_3": 0.8464,
+    "baseline_hit_at_3": 0.7902,
+    "difference": 0.0563,
+    "ci95": [
+      0.0477,
+      0.0638
+    ]
+  }
+}

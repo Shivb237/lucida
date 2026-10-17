@@ -1,0 +1,69 @@
+{
+ "setup": {
+  "test": "30 multi-piece prompts from test sets 3 and 4, whole outfit boards",
+  "n_options_rated": 54,
+  "date": "2026-10-14",
+  "rating_scale": "good=2, okay=1, bad=0",
+  "rater": "the project owner, who also wrote the prompts (single rater, rated blind: method names hidden)"
+ },
+ "methods": {
+  "baseline": {
+   "n_prompts": 30,
+   "mean": 1.8333,
+   "ci95": [
+    1.6667,
+    1.9667
+   ],
+   "good": 26,
+   "okay": 3,
+   "bad": 1
+  },
+  "coherent": {
+   "n_prompts": 30,
+   "mean": 1.8333,
+   "ci95": [
+    1.6667,
+    1.9667
+   ],
+   "good": 26,
+   "okay": 3,
+   "bad": 1
+  },
+  "clash": {
+   "n_prompts": 30,
+   "mean": 1.8,
+   "ci95": [
+    1.6333,
+    1.9667
+   ],
+   "good": 25,
+   "okay": 4,
+   "bad": 1
+  }
+ },
+ "paired": {
+  "coherent-baseline": {
+   "mean": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "better": 0,
+   "tied": 30,
+   "worse": 0,
+   "n_prompts": 30
+  },
+  "clash-baseline": {
+   "mean": -0.0333,
+   "ci95": [
+    -0.1,
+    0.0
+   ],
+   "better": 0,
+   "tied": 29,
+   "worse": 1,
+   "n_prompts": 30
+  }
+ },
+ "notes": "baseline = best match per piece independently; coherent = joint pick by colour harmony; clash = deliberately worst harmony."
+}

@@ -1,0 +1,61 @@
+{
+  "S0 all 8 workers up": {
+    "n": 200,
+    "p50": 33.2,
+    "p95": 39.5,
+    "p99": 40.6,
+    "partial": 0,
+    "failovers": 0,
+    "hedged": 0,
+    "identical_to_full": 1.0,
+    "overlap_with_full_top4": 1.0
+  },
+  "load_split_shard0": [
+    120,
+    121
+  ],
+  "S1 replica B of shard 1 killed": {
+    "n": 200,
+    "p50": 34.2,
+    "p95": 39.2,
+    "p99": 40.8,
+    "partial": 0,
+    "failovers": 100,
+    "hedged": 0,
+    "identical_to_full": 1.0,
+    "overlap_with_full_top4": 1.0
+  },
+  "S3 both replicas of shard 1 killed": {
+    "n": 200,
+    "p50": 31.8,
+    "p95": 38.5,
+    "p99": 40.7,
+    "partial": 200,
+    "failovers": 0,
+    "hedged": 0,
+    "identical_to_full": 0.32,
+    "overlap_with_full_top4": 0.745
+  },
+  "S2 replica A of shard 2 +300 ms (hedged)": {
+    "n": 200,
+    "p50": 59.7,
+    "p95": 75.3,
+    "p99": 80.6,
+    "partial": 0,
+    "failovers": 0,
+    "hedged": 102,
+    "identical_to_full": 1.0,
+    "overlap_with_full_top4": 1.0
+  },
+  "S4 everything restored": {
+    "n": 200,
+    "p50": 32.9,
+    "p95": 38.9,
+    "p99": 41.0,
+    "partial": 0,
+    "failovers": 0,
+    "hedged": 0,
+    "identical_to_full": 1.0,
+    "overlap_with_full_top4": 1.0
+  }
+}

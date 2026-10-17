@@ -1,0 +1,6 @@
+{"id": "p1-o1", "n": 1, "method": "A", "judge": "okay", "human": "good", "rows": [[4089710451316143483, 17840540014415298702, 16308816836245719529, 243185944791834230]]}
+{"id": "p1-o2", "n": 1, "method": "C", "judge": "unparsed:the request is for a simple pastel bandhgala for", "human": "good", "rows": [[4089710451316143483, 9916690325312845290, 16308816836245719529, 17840540014415298702]]}
+{"id": "p2-o1", "n": 2, "method": "C", "judge": "good", "human": "good", "rows": [[200954, 214402, 212300, 204225]]}
+{"id": "p2-o2", "n": 2, "method": "A", "judge": "unparsed:the request is for a pastel lehenga with mirror", "human": "good", "rows": [[18331338395812157286, 9323454285091288146, 11114912112470818290, 5513769614230320504]]}
+{"id": "p2-o3", "n": 2, "method": "B", "judge": "good", "human": "good", "rows": [[214402, 200954, 205204, 206060]]}
+{"id": "p3-o1", "n": 3, "method": "A", "judge": "bad", "human": "bad", "rows": [[16803999995830055906, 10115805285798621181, 14110594723450958173, 12978691339326288548]]}

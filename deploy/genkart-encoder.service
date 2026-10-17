@@ -1,0 +1,24 @@
+[Unit]
+Description=GenKart encoder (turns text into numbers)
+After=network-online.target
+
+[Service]
+User=genkart
+WorkingDirectory=/opt/genkart
+Environment=PYTHONPATH=/opt/genkart/src
+Environment=HF_HOME=/opt/genkart/.cache/huggingface
+# ENCODER_CONCURRENCY lives here so a variant can be switched without rebuilding anything (the leading - means: fine if the file does not exist)
+EnvironmentFile=-/etc/genkart/encoder.env
+# listens on this machine only: only the router (same machine) talks to it
+ExecStart=/opt/genkart/.venv/bin/python -m genkart.encoder_service --port 9000
+Restart=always
+RestartSec=3
+TimeoutStartSec=600
+# logs go to a FILE (CloudWatch reads plain JSON lines from files; from the journal they arrive wrapped in extra fields)
+StandardOutput=append:/var/log/genkart/encoder.log
+StandardError=append:/var/log/genkart/encoder.log
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

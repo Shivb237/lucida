@@ -1,0 +1,21 @@
+[Unit]
+Description=GenKart shard worker %i
+After=network-online.target
+
+[Service]
+User=genkart
+WorkingDirectory=/opt/genkart
+Environment=PYTHONPATH=/opt/genkart/src
+# 0.0.0.0 = listen on the network, not only on this machine; the security group lets only the router in
+ExecStart=/bin/sh -c 'exec /opt/genkart/.venv/bin/python -m genkart.shard_worker --shard %i --of 4 --dir /opt/genkart/shards/n4 --host 0.0.0.0 --port $((9101+%i))'
+# always: a clean exit (for example a polite SIGTERM) must also bring it back; `systemctl stop` still stops it on purpose
+Restart=always
+RestartSec=2
+# logs go to a FILE (CloudWatch reads plain JSON lines from files; from the journal they arrive wrapped in extra fields)
+StandardOutput=append:/var/log/genkart/shard-%i.log
+StandardError=append:/var/log/genkart/shard-%i.log
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

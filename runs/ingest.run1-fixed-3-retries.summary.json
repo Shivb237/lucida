@@ -1,0 +1,113 @@
+{
+  "held_out": 500,
+  "counts_ok": false,
+  "per_worker": {
+    "shard0": [
+      26853,
+      26988
+    ],
+    "shard0b": [
+      26853,
+      26988
+    ],
+    "shard1": [
+      26876,
+      27006
+    ],
+    "shard1b": [
+      26876,
+      27006
+    ],
+    "shard2": [
+      26830,
+      26936
+    ],
+    "shard2b": [
+      26830,
+      26930
+    ],
+    "shard3": [
+      26992,
+      27121
+    ],
+    "shard3b": [
+      26992,
+      27121
+    ]
+  },
+  "dead_letters": 7,
+  "poison_in_dlq": true,
+  "producer": {
+    "producer": "done",
+    "sent": 995,
+    "duplicates_ignored": 7,
+    "times_told_to_wait": 236,
+    "seconds": 48.2,
+    "waiting": 87,
+    "in_flight": 8,
+    "dead": 7,
+    "max_depth": 100
+  },
+  "max_vector_diff": 2.384185791015625e-07,
+  "search_identical": 1002,
+  "search_total": 1002,
+  "search_partial": 0,
+  "events": [
+    [
+      1.3,
+      "107,551 products -> 4 shards [26853, 26876, 26830, 26992] in data/shards/n4h; held out 500 (1s)"
+    ],
+    [
+      10.6,
+      "cluster up on the files without the held-out products: products per worker [26830, 26853, 26876, 26992]"
+    ],
+    [
+      11.6,
+      "producer running; queue stats {'waiting': 100, 'in_flight': 0, 'dead': 0, 'max_depth': 100}"
+    ],
+    [
+      11.6,
+      "ingest worker 1 started"
+    ],
+    [
+      23.7,
+      "KILLED ingest worker and replica B of shard 2 (queue now {'waiting': 96, 'in_flight': 4, 'dead': 0, 'max_depth': 100})"
+    ],
+    [
+      27.7,
+      "ingest worker 2 started while replica B of shard 2 is still down (its products cannot be acked)"
+    ],
+    [
+      41.8,
+      "replica B of shard 2 restarted (queue {'waiting': 45, 'in_flight': 54, 'dead': 0, 'max_depth': 100})"
+    ],
+    [
+      61.8,
+      "queue drained: {'waiting': 0, 'in_flight': 0, 'dead': 7, 'max_depth': 100}"
+    ],
+    [
+      62.9,
+      "per worker: shard0: 26853 -> 26988 (+135, expected +135), shard0b: 26853 -> 26988 (+135, expected +135), shard1: 26876 -> 27006 (+130, expected +130), shard1b: 26876 -> 27006 (+130, expected +130), shard2: 26830 -> 26936 (+106, expected +106), shard2b: 26830 -> 26930 (+100, expected +106), shard3: 26992 -> 27121 (+129, expected +129), shard3b: 26992 -> 27121 (+129, expected +129)"
+    ],
+    [
+      62.9,
+      "dead-letter queue: [('Shein Girls Butterfly Print Cami Top & High Low Hem Tee & Joggers Set,11-12Y', 3, 'write: http://127.0.0.1:9113: [Errno 61] Connection refused'), ('Nike Zoom Hyperace 2 Volleyball Shoes, Black', 3, 'write: http://127.0.0.1:9113: [Errno 61] Connection refused'), ('Men Zipper Pocket Denim Jacket,M', 3, 'write: http://127.0.0.1:9113: [Errno 61] Connection refused'), (\"Norty Men's Soft Brushed Cotton Blend Flannel Shawl Collar Bathrobe 41831-Large ...\", 3, 'write: http://127.0.0.1:9113: [Errno 61] Connection refused'), ('Ren\u00e9 Rof\u00e9 Rene Rofe 2pc Up to Snow Good Robe & Slipper Set', 3, 'write: http://127.0.0.1:9113: [Errno 61] Connection refused'), ('Anime Cartoon Tengen Toppa Gurren Lagann Hat Printing Baseball Cosplay Hip Hop ...', 3, 'write: http://127.0.0.1:9113: [Errno 61] Connection refused'), ('poison', 3, \"embed: Client error '422 Unprocessable Content' for url 'htt\")]"
+    ],
+    [
+      62.9,
+      "producer: {'producer': 'done', 'sent': 995, 'duplicates_ignored': 7, 'times_told_to_wait': 236, 'seconds': 48.2, 'waiting': 87, 'in_flight': 8, 'dead': 7, 'max_depth': 100}"
+    ],
+    [
+      62.9,
+      "ingest worker 2: (killed before printing)"
+    ],
+    [
+      63.0,
+      "re-embedded vectors vs the originals: max absolute difference 2.38e-07 over 500 products"
+    ],
+    [
+      125.5,
+      "search after ingestion vs the full single-process catalogue: identical top-4 on 1002 of 1002 requests (partial 0); results that are late-ingested products: 25"
+    ]
+  ]
+}

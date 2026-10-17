@@ -1,0 +1,15 @@
+{
+  "n": 50,
+  "judge_mean_qwen_plans": 1.14,
+  "judge_mean_claude_plans": 1.46,
+  "diff_claude_minus_qwen": 0.32,
+  "diff_ci95": [
+    0.16,
+    0.5
+  ],
+  "prompts_with_identical_photos": 10,
+  "prompts_claude_better": 14,
+  "prompts_qwen_better": 1,
+  "mean_diff_only_where_photos_differ": 0.375,
+  "n_where_photos_differ": 40
+}

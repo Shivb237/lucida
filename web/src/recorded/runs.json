@@ -1,0 +1,2635 @@
+{
+ "recorded_at": "2026-10-16",
+ "where": "AWS Mumbai (ap-south-1)",
+ "resources": {
+  "measured": "right after the 8 runs, on the computer that recorded them",
+  "server": {
+   "rss_mb": 118.8,
+   "peak_mb": 228.0
+  },
+  "ollama": [
+   {
+    "name": "qwen3:4b-instruct",
+    "size_mb": 3182,
+    "vram_mb": 3182
+   }
+  ],
+  "cluster": [],
+  "computer": {
+   "cpus": 10,
+   "memory_gb": 17.2
+  }
+ },
+ "understand_model": "qwen3:4b-instruct",
+ "note": "No photos. Product ids and titles only for the Marqo catalogue.",
+ "runs": [
+  {
+   "id": "t5-p1",
+   "prompt": "Haldi ceremony outfit for bride's brother, yellow kurta with white pyjama",
+   "test_set": 5,
+   "prompt_no": 1,
+   "author_rating_of_raw_search": "good",
+   "author_rating_of_plan": "good",
+   "plain": {
+    "seconds": 0.4,
+    "hits": [
+     {
+      "id": "kaggle-p10-1",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1579,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-2",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1336,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-3",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1185,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-4",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1165,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-5",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1148,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-6",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1123,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 10.59,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0001,
+     "payload": {
+      "query": "Haldi ceremony outfit for bride's brother, yellow kurta with white pyjama",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 8.4068,
+     "payload": {
+      "plan": {
+       "main_query": "yellow kurta with white pyjama",
+       "gender": "unknown",
+       "occasion": "haldi ceremony",
+       "season": null,
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "top",
+         "search_text": "yellow kurta",
+         "colours": [
+          "yellow"
+         ]
+        },
+        {
+         "kind": "bottom",
+         "search_text": "white pyjama",
+         "colours": [
+          "white"
+         ]
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.692,
+     "payload": {
+      "usages": [
+       "Ethnic"
+      ],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "top",
+        "search_text": "yellow kurta",
+        "colours": [
+         "yellow"
+        ]
+       },
+       {
+        "kind": "bottom",
+        "search_text": "white pyjama",
+        "colours": [
+         "white"
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.6718,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 2
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 230.93,
+          "shards": 64.8,
+          "merge": 0.12,
+          "total": 295.85
+         },
+         "failed": []
+        },
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 2
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 232.33,
+          "shards": 67.07,
+          "merge": 0.12,
+          "total": 299.53
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "top",
+        "text": "yellow kurta",
+        "seconds": 0.3341,
+        "hits": [
+         {
+          "id": "myntra2-p1-1",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1422,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-2",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1405,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-3",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1401,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-4",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1379,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-5",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1373,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-6",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1369,
+          "image": ""
+         }
+        ]
+       },
+       {
+        "kind": "bottom",
+        "text": "white pyjama",
+        "seconds": 0.3377,
+        "hits": [
+         {
+          "id": "16239014480024441014",
+          "source": "marqo",
+          "title": "KaileysMonogramShop Bridesmaids Personalized Pajama Set, Monogrammed Pajamas ...",
+          "score": 0.1261,
+          "image": ""
+         },
+         {
+          "id": "14114452449327571711",
+          "source": "marqo",
+          "title": "Spring Autumn Solid Simple Trousers Soft Cotton 0-24 Months Baby Boys Girls Pants ...",
+          "score": 0.1157,
+          "image": ""
+         },
+         {
+          "id": "2839472557874808252",
+          "source": "marqo",
+          "title": "Cord of Love - White Cotton Animal Printed Night Wear for Boys at Pernia's Pop Up ...",
+          "score": 0.112,
+          "image": ""
+         },
+         {
+          "id": "16678706160809090106",
+          "source": "marqo",
+          "title": "Bridesmaid Pajamas - Bridal Party Gift - Bridesmaid Gifts - Long Pant Sleeve Set ...",
+          "score": 0.1116,
+          "image": ""
+         },
+         {
+          "id": "17959989107683990551",
+          "source": "marqo",
+          "title": "Girls Elegant Solid Pajama Set Ruffle Shoulder Sleeveless Bow Decor Crew Neck ...",
+          "score": 0.1097,
+          "image": ""
+         },
+         {
+          "id": "4644489889134047906",
+          "source": "marqo",
+          "title": "MANBEIYA Women's Pajama Sets Button Down Soft Long Sleeve Sleepwear Pjs Two Piece ...",
+          "score": 0.1093,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "compose",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "compose",
+     "status": "done",
+     "seconds": 0.1089,
+     "payload": {
+      "harmony": {
+       "baseline": 1.0,
+       "coherent": 1.0
+      },
+      "changed": 0,
+      "pieces": 2,
+      "colours": [
+       "orange",
+       "white"
+      ],
+      "picks": [
+       "pick-1",
+       "pick-2"
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "86e7d388",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "top",
+        "piece": "yellow kurta",
+        "pick": {
+         "id": "myntra2-p1-1",
+         "source": "myntra2",
+         "title": "Myntra photos product (title not republished)",
+         "score": 0.1422,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"yellow kurta\" (score 0.142, myntra2).",
+         "Colour read from the photo: orange (approximate)."
+        ]
+       },
+       {
+        "kind": "bottom",
+        "piece": "white pyjama",
+        "pick": {
+         "id": "16239014480024441014",
+         "source": "marqo",
+         "title": "KaileysMonogramShop Bridesmaids Personalized Pajama Set, Monogrammed Pajamas ...",
+         "score": 0.1261,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"white pyjama\" (score 0.126, marqo).",
+         "Colour read from the photo: white (approximate)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "unknown"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "86e7d388"
+    }
+   ]
+  },
+  {
+   "id": "t5-p3",
+   "prompt": "Karva Chauth look, red or maroon saree with heavy border",
+   "test_set": 5,
+   "prompt_no": 3,
+   "author_rating_of_raw_search": "good",
+   "author_rating_of_plan": "okay",
+   "plain": {
+    "seconds": 0.3929,
+    "hits": [
+     {
+      "id": "myntra2-p10-1",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1423,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-2",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.142,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-3",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1395,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-4",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1369,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-5",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1361,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-6",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1334,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 3.63,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0002,
+     "payload": {
+      "query": "Karva Chauth look, red or maroon saree with heavy border",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 2.8131,
+     "payload": {
+      "plan": {
+       "main_query": "red or maroon saree with heavy border",
+       "gender": "unknown",
+       "occasion": "Karva Chauth",
+       "season": null,
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "dress",
+         "search_text": "saree with heavy border",
+         "colours": [
+          "red",
+          "maroon"
+         ]
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "usages": [],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "dress",
+        "search_text": "saree with heavy border",
+        "colours": [
+         "red",
+         "maroon"
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.3294,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 1
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 231.74,
+          "shards": 58.87,
+          "merge": 0.13,
+          "total": 290.75
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "dress",
+        "text": "saree with heavy border",
+        "seconds": 0.3294,
+        "hits": [
+         {
+          "id": "myntra2-p1-1",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1239,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-2",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1191,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-3",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.118,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-4",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1166,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-5",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.116,
+          "image": ""
+         },
+         {
+          "id": "myntra2-p1-6",
+          "source": "myntra2",
+          "title": "Myntra photos product (title not republished)",
+          "score": 0.1154,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "compose",
+     "status": "skipped",
+     "seconds": null,
+     "payload": {
+      "reason": "one piece: nothing to match it with"
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "b067156f",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "dress",
+        "piece": "saree with heavy border",
+        "pick": {
+         "id": "myntra2-p1-1",
+         "source": "myntra2",
+         "title": "Myntra photos product (title not republished)",
+         "score": 0.1239,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"saree with heavy border\" (score 0.124, myntra2)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "unknown"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "b067156f"
+    }
+   ]
+  },
+  {
+   "id": "t5-p4",
+   "prompt": "Kids ethnic wear for 5 year old boy for Diwali puja, kurta with jacket",
+   "test_set": 5,
+   "prompt_no": 4,
+   "author_rating_of_raw_search": "good",
+   "author_rating_of_plan": "okay",
+   "plain": {
+    "seconds": 0.3941,
+    "hits": [
+     {
+      "id": "myntra2-p10-1",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1223,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-2",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1223,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-3",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1139,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-4",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1054,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-5",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1014,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-6",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0982,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 5.32,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0002,
+     "payload": {
+      "query": "Kids ethnic wear for 5 year old boy for Diwali puja, kurta with jacket",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 4.0869,
+     "payload": {
+      "plan": {
+       "main_query": "kids ethnic wear for 5 year old boy",
+       "gender": "boys",
+       "occasion": "diwali puja",
+       "season": null,
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "top",
+         "search_text": "kurta for 5 year old boy",
+         "colours": []
+        },
+        {
+         "kind": "outerwear",
+         "search_text": "jacket for 5 year old boy",
+         "colours": []
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.0004,
+     "payload": {
+      "usages": [
+       "Ethnic"
+      ],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "top",
+        "search_text": "kurta for 5 year old boy",
+        "colours": []
+       },
+       {
+        "kind": "outerwear",
+        "search_text": "jacket for 5 year old boy",
+        "colours": []
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.7147,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 4
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 235.27,
+          "shards": 77.17,
+          "merge": 0.09,
+          "total": 312.53
+         },
+         "failed": []
+        },
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 3
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 233.69,
+          "shards": 67.11,
+          "merge": 0.09,
+          "total": 300.88
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "top",
+        "text": "kurta for 5 year old boy",
+        "seconds": 0.3708,
+        "hits": [
+         {
+          "id": "kaggle-p1-1",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0816,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-2",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0813,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-3",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0782,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-4",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0748,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-5",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0685,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-6",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0681,
+          "image": ""
+         }
+        ]
+       },
+       {
+        "kind": "outerwear",
+        "text": "jacket for 5 year old boy",
+        "seconds": 0.3438,
+        "hits": [
+         {
+          "id": "12228845604944406713",
+          "source": "marqo",
+          "title": "TheLittleBigStore Snug Style Alert: Winter Warmth Unleashed! Zip Into Fashion ...",
+          "score": 0.1141,
+          "image": ""
+         },
+         {
+          "id": "11151088950938777910",
+          "source": "marqo",
+          "title": "L.L.Bean Ultralight 650 Down Jacket (Toddler) Clothing Deep Sapphire : 2T",
+          "score": 0.1108,
+          "image": ""
+         },
+         {
+          "id": "3579550236350649014",
+          "source": "marqo",
+          "title": "Rydcot Boys Girls Winter Coat Down Puffer Jacket Winter Warm Coat with Faux Fur ...",
+          "score": 0.1104,
+          "image": ""
+         },
+         {
+          "id": "7448092647786262172",
+          "source": "marqo",
+          "title": "Little Girls Boys Rain Jacket Lightweight Waterproof Solid Fall Raincoat Zipper ...",
+          "score": 0.1102,
+          "image": ""
+         },
+         {
+          "id": "6283195825898067822",
+          "source": "marqo",
+          "title": "Andy & Evan Jackets & Coats | Nwt 3 in 1 Jacket/Raincoat | Color: Blue/Green ...",
+          "score": 0.1092,
+          "image": ""
+         },
+         {
+          "id": "7265254567047345088",
+          "source": "marqo",
+          "title": "1-12y Winter Kids Down Waterproof Jacket Boys Girls Solid Warm Parka Coat Cold ...",
+          "score": 0.1091,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "compose",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "compose",
+     "status": "done",
+     "seconds": 0.0441,
+     "payload": {
+      "harmony": {
+       "baseline": 1.0,
+       "coherent": 1.0
+      },
+      "changed": 0,
+      "pieces": 2,
+      "colours": [
+       "blue",
+       "grey"
+      ],
+      "picks": [
+       "pick-1",
+       "pick-2"
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "66287b2e",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "top",
+        "piece": "kurta for 5 year old boy",
+        "pick": {
+         "id": "kaggle-p1-1",
+         "source": "kaggle",
+         "title": "Kaggle product (title not republished)",
+         "score": 0.0816,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"kurta for 5 year old boy\" (score 0.082, kaggle).",
+         "Colour read from the photo: blue (approximate)."
+        ]
+       },
+       {
+        "kind": "outerwear",
+        "piece": "jacket for 5 year old boy",
+        "pick": {
+         "id": "12228845604944406713",
+         "source": "marqo",
+         "title": "TheLittleBigStore Snug Style Alert: Winter Warmth Unleashed! Zip Into Fashion ...",
+         "score": 0.1141,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"jacket for 5 year old boy\" (score 0.114, marqo).",
+         "Colour read from the photo: grey (approximate)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "boys"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "66287b2e"
+    }
+   ]
+  },
+  {
+   "id": "t5-p10",
+   "prompt": "Christmas dinner dress for women, green or red velvet, knee length",
+   "test_set": 5,
+   "prompt_no": 10,
+   "author_rating_of_raw_search": "good",
+   "author_rating_of_plan": "good",
+   "plain": {
+    "seconds": 0.3883,
+    "hits": [
+     {
+      "id": "myntra2-p10-1",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1056,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-2",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0823,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-3",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0806,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-4",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0786,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-5",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0762,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-6",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0761,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 3.68,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0001,
+     "payload": {
+      "query": "Christmas dinner dress for women, green or red velvet, knee length",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 2.9016,
+     "payload": {
+      "plan": {
+       "main_query": "women's green or red velvet knee length dress",
+       "gender": "women",
+       "occasion": "christmas dinner",
+       "season": null,
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "dress",
+         "search_text": "women's green or red velvet knee length dress",
+         "colours": [
+          "green",
+          "red"
+         ]
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.0002,
+     "payload": {
+      "usages": [
+       "Smart Casual",
+       "Formal"
+      ],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "dress",
+        "search_text": "women's green or red velvet knee length dress",
+        "colours": [
+         "green",
+         "red"
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.3117,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 2
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 231.76,
+          "shards": 43.5,
+          "merge": 0.09,
+          "total": 275.35
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "dress",
+        "text": "women's green or red velvet knee length dress",
+        "seconds": 0.3117,
+        "hits": [
+         {
+          "id": "2849812186642907490",
+          "source": "marqo",
+          "title": "Shein Girls' Solid Color Pleated Casual Dress with Round Neck,11-12Y",
+          "score": 0.0994,
+          "image": ""
+         },
+         {
+          "id": "6324710441380069552",
+          "source": "marqo",
+          "title": "redbud03 Women's Summer Casual Midi Dress with Short Sleeves, V-Neck, Button Down ...",
+          "score": 0.0976,
+          "image": ""
+         },
+         {
+          "id": "16775881711342116447",
+          "source": "marqo",
+          "title": "DB Moon Women Casual Long Sleeve Dresses Empire Waist Knee Length Loose Dress ...",
+          "score": 0.097,
+          "image": ""
+         },
+         {
+          "id": "1486708542429467535",
+          "source": "marqo",
+          "title": "Carrie Stretch Velvet Skirt Peacock Xs",
+          "score": 0.0955,
+          "image": ""
+         },
+         {
+          "id": "5320435232896082312",
+          "source": "marqo",
+          "title": "Chenault Women's Long Sleeve Short Casual Knit Dress",
+          "score": 0.0894,
+          "image": ""
+         },
+         {
+          "id": "4489430525499755535",
+          "source": "marqo",
+          "title": "Coolmee Maternity Skirts Velvet High Elastic Waisted A Line Pleated Ruffle ...",
+          "score": 0.0815,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "compose",
+     "status": "skipped",
+     "seconds": null,
+     "payload": {
+      "reason": "one piece: nothing to match it with"
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "5673a4f3",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "dress",
+        "piece": "women's green or red velvet knee length dress",
+        "pick": {
+         "id": "2849812186642907490",
+         "source": "marqo",
+         "title": "Shein Girls' Solid Color Pleated Casual Dress with Round Neck,11-12Y",
+         "score": 0.0994,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"women's green or red velvet knee length dress\" (score 0.099, marqo)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "women"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "5673a4f3"
+    }
+   ]
+  },
+  {
+   "id": "t5-p12",
+   "prompt": "Engagement ring ceremony groom, sherwani in ivory with stole",
+   "test_set": 5,
+   "prompt_no": 12,
+   "author_rating_of_raw_search": "okay",
+   "author_rating_of_plan": "okay",
+   "plain": {
+    "seconds": 0.3758,
+    "hits": [
+     {
+      "id": "myntra2-p10-1",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.1081,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-2",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1035,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-3",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0928,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-4",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.0889,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-5",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0884,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-6",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0879,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 3.71,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0002,
+     "payload": {
+      "query": "Engagement ring ceremony groom, sherwani in ivory with stole",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 2.9186,
+     "payload": {
+      "plan": {
+       "main_query": "men's sherwani in ivory with stole",
+       "gender": "men",
+       "occasion": "engagement ring ceremony",
+       "season": null,
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "dress",
+         "search_text": "men's sherwani in ivory with stole",
+         "colours": [
+          "ivory"
+         ]
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "usages": [],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "dress",
+        "search_text": "men's sherwani in ivory with stole",
+        "colours": [
+         "ivory"
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.3311,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 2
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 233.43,
+          "shards": 54.67,
+          "merge": 0.1,
+          "total": 288.2
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "dress",
+        "text": "men's sherwani in ivory with stole",
+        "seconds": 0.3311,
+        "hits": [
+         {
+          "id": "kaggle-p1-1",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1029,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-2",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0999,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-3",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0986,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-4",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0961,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-5",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0887,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-6",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0871,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "compose",
+     "status": "skipped",
+     "seconds": null,
+     "payload": {
+      "reason": "one piece: nothing to match it with"
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e72a84d3",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "dress",
+        "piece": "men's sherwani in ivory with stole",
+        "pick": {
+         "id": "kaggle-p1-1",
+         "source": "kaggle",
+         "title": "Kaggle product (title not republished)",
+         "score": 0.1029,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"men's sherwani in ivory with stole\" (score 0.103, kaggle)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "men"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "e72a84d3"
+    }
+   ]
+  },
+  {
+   "id": "t5-p17",
+   "prompt": "Winter wedding in Delhi, women's velvet suit with shawl",
+   "test_set": 5,
+   "prompt_no": 17,
+   "author_rating_of_raw_search": "bad",
+   "author_rating_of_plan": "good",
+   "plain": {
+    "seconds": 0.3788,
+    "hits": [
+     {
+      "id": "13649560929617569559",
+      "source": "marqo",
+      "title": "Velvet Women's Suits Black Peak Lapel Formal Office Ladies Outfits",
+      "score": 0.1243,
+      "image": ""
+     },
+     {
+      "id": "18296387923580681169",
+      "source": "marqo",
+      "title": "Botong Women's 2 Piece Velvet Suit Office Work Suit Notch Lapel Double Breasted ...",
+      "score": 0.1067,
+      "image": ""
+     },
+     {
+      "id": "15767911662867476141",
+      "source": "marqo",
+      "title": "Women's Designer Single Button Velvet Blazer Flare Pants Two-Piece Suit",
+      "score": 0.1011,
+      "image": ""
+     },
+     {
+      "id": "20809728762376172",
+      "source": "marqo",
+      "title": "Brown Wool or Tweed Office Suit with Collar and Tie for Ladies.",
+      "score": 0.0844,
+      "image": ""
+     },
+     {
+      "id": "15971768233335896801",
+      "source": "marqo",
+      "title": "Victorian Choice Edwardian 1910s 1920s Velvet Embroidered Women's Cocoon Vintage ...",
+      "score": 0.0828,
+      "image": ""
+     },
+     {
+      "id": "8163654275688716690",
+      "source": "marqo",
+      "title": "Women's LC Lauren Conrad Double Breasted Notch Collar Blazer, Size: XL, Med Red",
+      "score": 0.0807,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 4.73,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0001,
+     "payload": {
+      "query": "Winter wedding in Delhi, women's velvet suit with shawl",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 3.5188,
+     "payload": {
+      "plan": {
+       "main_query": "women's velvet suit with shawl",
+       "gender": "women",
+       "occasion": "winter wedding",
+       "season": "winter",
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "dress",
+         "search_text": "women's velvet suit",
+         "colours": []
+        },
+        {
+         "kind": "accessory",
+         "search_text": "women's shawl",
+         "colours": []
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.0003,
+     "payload": {
+      "usages": [
+       "Ethnic",
+       "Formal"
+      ],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "dress",
+        "search_text": "women's velvet suit",
+        "colours": []
+       },
+       {
+        "kind": "accessory",
+        "search_text": "women's shawl",
+        "colours": []
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.6812,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 3
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 236.68,
+          "shards": 66.6,
+          "merge": 0.09,
+          "total": 303.37
+         },
+         "failed": []
+        },
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 2
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 234.06,
+          "shards": 63.72,
+          "merge": 0.09,
+          "total": 297.87
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "dress",
+        "text": "women's velvet suit",
+        "seconds": 0.3443,
+        "hits": [
+         {
+          "id": "18296387923580681169",
+          "source": "marqo",
+          "title": "Botong Women's 2 Piece Velvet Suit Office Work Suit Notch Lapel Double Breasted ...",
+          "score": 0.1369,
+          "image": ""
+         },
+         {
+          "id": "15767911662867476141",
+          "source": "marqo",
+          "title": "Women's Designer Single Button Velvet Blazer Flare Pants Two-Piece Suit",
+          "score": 0.136,
+          "image": ""
+         },
+         {
+          "id": "20809728762376172",
+          "source": "marqo",
+          "title": "Brown Wool or Tweed Office Suit with Collar and Tie for Ladies.",
+          "score": 0.1319,
+          "image": ""
+         },
+         {
+          "id": "13649560929617569559",
+          "source": "marqo",
+          "title": "Velvet Women's Suits Black Peak Lapel Formal Office Ladies Outfits",
+          "score": 0.1248,
+          "image": ""
+         },
+         {
+          "id": "17496410573967456765",
+          "source": "marqo",
+          "title": "Allegra K Women's Work Shawl Collar Long Sleeve One Button Velvet Blazer, Size ...",
+          "score": 0.1154,
+          "image": ""
+         },
+         {
+          "id": "8163654275688716690",
+          "source": "marqo",
+          "title": "Women's LC Lauren Conrad Double Breasted Notch Collar Blazer, Size: XL, Med Red",
+          "score": 0.1131,
+          "image": ""
+         }
+        ]
+       },
+       {
+        "kind": "accessory",
+        "text": "women's shawl",
+        "seconds": 0.337,
+        "hits": [
+         {
+          "id": "1964176006824440043",
+          "source": "marqo",
+          "title": "uniquesshop.com Cashmere Oversized 78\" x 28\" Scarves Heather Green",
+          "score": 0.1059,
+          "image": ""
+         },
+         {
+          "id": "3457315308993058642",
+          "source": "marqo",
+          "title": "Gomust Women Shawl Wrap Scarf Pashmina Gifts Idea Wedding Christmas Birthday ...",
+          "score": 0.101,
+          "image": ""
+         },
+         {
+          "id": "7133243458228156674",
+          "source": "marqo",
+          "title": "Bagea-Ka Black White Moon and Star Pattern Scarf Long Shawl Wraps Pashmina for ...",
+          "score": 0.0964,
+          "image": ""
+         },
+         {
+          "id": "15620891091105468030",
+          "source": "marqo",
+          "title": "AROYEL Women Knit Sweater Tops Scarf Winter Scarf Winter Shawl Wrap Scarf with ...",
+          "score": 0.0949,
+          "image": ""
+         },
+         {
+          "id": "5929700098711253043",
+          "source": "marqo",
+          "title": "PremiumBrandGoods Super Soft Long Cashmere Wool Scarfs Maroon",
+          "score": 0.0946,
+          "image": ""
+         },
+         {
+          "id": "357343071652301734",
+          "source": "marqo",
+          "title": "Italeau | Womens Oversized Pure Cashmere Wrap | Beige",
+          "score": 0.0918,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "compose",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "compose",
+     "status": "done",
+     "seconds": 0.0702,
+     "payload": {
+      "harmony": {
+       "baseline": 1.0,
+       "coherent": 1.0
+      },
+      "changed": 0,
+      "pieces": 2,
+      "colours": [
+       "black",
+       "purple"
+      ],
+      "picks": [
+       "pick-1",
+       "pick-2"
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a4dea4b9",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "dress",
+        "piece": "women's velvet suit",
+        "pick": {
+         "id": "18296387923580681169",
+         "source": "marqo",
+         "title": "Botong Women's 2 Piece Velvet Suit Office Work Suit Notch Lapel Double Breasted ...",
+         "score": 0.1369,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"women's velvet suit\" (score 0.137, marqo).",
+         "Colour read from the photo: black (approximate)."
+        ]
+       },
+       {
+        "kind": "accessory",
+        "piece": "women's shawl",
+        "pick": {
+         "id": "1964176006824440043",
+         "source": "marqo",
+         "title": "uniquesshop.com Cashmere Oversized 78\" x 28\" Scarves Heather Green",
+         "score": 0.1059,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"women's shawl\" (score 0.106, marqo).",
+         "Colour read from the photo: purple (approximate)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "women"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "a4dea4b9"
+    }
+   ]
+  },
+  {
+   "id": "t5-p22",
+   "prompt": "Sangeet night for groom, indo-western jacket with kurta, royal blue",
+   "test_set": 5,
+   "prompt_no": 22,
+   "author_rating_of_raw_search": "bad",
+   "author_rating_of_plan": "good",
+   "plain": {
+    "seconds": 0.3814,
+    "hits": [
+     {
+      "id": "kaggle-p10-1",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0943,
+      "image": ""
+     },
+     {
+      "id": "myntra2-p10-2",
+      "source": "myntra2",
+      "title": "Myntra photos product (title not republished)",
+      "score": 0.0929,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-3",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0882,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-4",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0861,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-5",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0826,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-6",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.0799,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 4.8,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0002,
+     "payload": {
+      "query": "Sangeet night for groom, indo-western jacket with kurta, royal blue",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 3.6275,
+     "payload": {
+      "plan": {
+       "main_query": "men's indo-western jacket with kurta",
+       "gender": "men",
+       "occasion": "sangeet night",
+       "season": null,
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "top",
+         "search_text": "men's indo-western jacket",
+         "colours": [
+          "royal blue"
+         ]
+        },
+        {
+         "kind": "bottom",
+         "search_text": "men's kurta",
+         "colours": [
+          "royal blue"
+         ]
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.0002,
+     "payload": {
+      "usages": [
+       "Ethnic"
+      ],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "top",
+        "search_text": "men's indo-western jacket",
+        "colours": [
+         "royal blue"
+        ]
+       },
+       {
+        "kind": "bottom",
+        "search_text": "men's kurta",
+        "colours": [
+         "royal blue"
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.6748,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 3
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 236.53,
+          "shards": 64.58,
+          "merge": 0.11,
+          "total": 301.22
+         },
+         "failed": []
+        },
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 3
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 234.98,
+          "shards": 58.62,
+          "merge": 0.12,
+          "total": 293.71
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "top",
+        "text": "men's indo-western jacket",
+        "seconds": 0.3415,
+        "hits": [
+         {
+          "id": "kaggle-p1-1",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.107,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-2",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1023,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-3",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1002,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-4",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0999,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-5",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0987,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-6",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0983,
+          "image": ""
+         }
+        ]
+       },
+       {
+        "kind": "bottom",
+        "text": "men's kurta",
+        "seconds": 0.3333,
+        "hits": [
+         {
+          "id": "kaggle-p2-1",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1211,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p2-2",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1209,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p2-3",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1201,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p2-4",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1201,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p2-5",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.12,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p2-6",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1187,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "compose",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "compose",
+     "status": "done",
+     "seconds": 0.0374,
+     "payload": {
+      "harmony": {
+       "baseline": 1.0,
+       "coherent": 1.0
+      },
+      "changed": 0,
+      "pieces": 2,
+      "colours": [
+       "neutral",
+       "pink"
+      ],
+      "picks": [
+       "pick-1",
+       "pick-2"
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "a7d63040",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "top",
+        "piece": "men's indo-western jacket",
+        "pick": {
+         "id": "kaggle-p1-1",
+         "source": "kaggle",
+         "title": "Kaggle product (title not republished)",
+         "score": 0.107,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"men's indo-western jacket\" (score 0.107, kaggle).",
+         "Colour read from the photo: neutral (approximate)."
+        ]
+       },
+       {
+        "kind": "bottom",
+        "piece": "men's kurta",
+        "pick": {
+         "id": "kaggle-p2-1",
+         "source": "kaggle",
+         "title": "Kaggle product (title not republished)",
+         "score": 0.1211,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"men's kurta\" (score 0.121, kaggle).",
+         "Colour read from the photo: pink (approximate)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "men"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "a7d63040"
+    }
+   ]
+  },
+  {
+   "id": "t5-p39",
+   "prompt": "Gujarati garba dandiya men, kediyu and churidar set, colourful",
+   "test_set": 5,
+   "prompt_no": 39,
+   "author_rating_of_raw_search": "bad",
+   "author_rating_of_plan": "okay",
+   "plain": {
+    "seconds": 0.4049,
+    "hits": [
+     {
+      "id": "kaggle-p10-1",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1325,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-2",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1224,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-3",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.119,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-4",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1188,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-5",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1172,
+      "image": ""
+     },
+     {
+      "id": "kaggle-p10-6",
+      "source": "kaggle",
+      "title": "Kaggle product (title not republished)",
+      "score": 0.1155,
+      "image": ""
+     }
+    ]
+   },
+   "wall_seconds": 4.06,
+   "events": [
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "request",
+     "status": "done",
+     "seconds": 0.0001,
+     "payload": {
+      "query": "Gujarati garba dandiya men, kediyu and churidar set, colourful",
+      "guard": "allow",
+      "note": null
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "understand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "understand",
+     "status": "done",
+     "seconds": 3.232,
+     "payload": {
+      "plan": {
+       "main_query": "gujarati garba dandiya men kediyu and churidar set",
+       "gender": "men",
+       "occasion": "garba",
+       "season": null,
+       "budget_inr": null,
+       "pieces": [
+        {
+         "kind": "dress",
+         "search_text": "gujarati garba dandiya men kediyu and churidar set",
+         "colours": [
+          "colourful"
+         ]
+        }
+       ],
+       "already_has": [],
+       "notes": []
+      },
+      "model": "qwen3:4b-instruct",
+      "fell_back": false
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "expand",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "expand",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "usages": [],
+      "notes": [],
+      "pieces": [
+       {
+        "kind": "dress",
+        "search_text": "gujarati garba dandiya men kediyu and churidar set",
+        "colours": [
+         "colourful"
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "search",
+     "status": "started",
+     "seconds": null,
+     "payload": {}
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "search",
+     "status": "done",
+     "seconds": 0.3463,
+     "payload": {
+      "backend": "router",
+      "info": {
+       "requests": [
+        {
+         "shards": {
+          "total": 4,
+          "ok": 4,
+          "failed": 0,
+          "failovers": 0,
+          "hedged": 3
+         },
+         "partial": false,
+         "timings_ms": {
+          "encode": 234.03,
+          "shards": 73.57,
+          "merge": 0.11,
+          "total": 307.71
+         },
+         "failed": []
+        }
+       ]
+      },
+      "pieces": [
+       {
+        "kind": "dress",
+        "text": "gujarati garba dandiya men kediyu and churidar set",
+        "seconds": 0.3463,
+        "hits": [
+         {
+          "id": "kaggle-p1-1",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1204,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-2",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1136,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-3",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1109,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-4",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.1021,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-5",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.102,
+          "image": ""
+         },
+         {
+          "id": "kaggle-p1-6",
+          "source": "kaggle",
+          "title": "Kaggle product (title not republished)",
+          "score": 0.0966,
+          "image": ""
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "compose",
+     "status": "skipped",
+     "seconds": null,
+     "payload": {
+      "reason": "one piece: nothing to match it with"
+     }
+    },
+    {
+     "kind": "step",
+     "request_id": "e90aba86",
+     "stage": "outfit",
+     "status": "done",
+     "seconds": 0.0,
+     "payload": {
+      "items": [
+       {
+        "kind": "dress",
+        "piece": "gujarati garba dandiya men kediyu and churidar set",
+        "pick": {
+         "id": "kaggle-p1-1",
+         "source": "kaggle",
+         "title": "Kaggle product (title not republished)",
+         "score": 0.1204,
+         "image": ""
+        },
+        "rank": 1,
+        "reasons": [
+         "Closest match to \"gujarati garba dandiya men kediyu and churidar set\" (score 0.120, kaggle)."
+        ]
+       }
+      ],
+      "already_has": [],
+      "gender": "men"
+     }
+    },
+    {
+     "kind": "end",
+     "request_id": "e90aba86"
+    }
+   ]
+  }
+ ]
+}

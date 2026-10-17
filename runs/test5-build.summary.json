@@ -1,0 +1,13 @@
+{
+  "prompts": 50,
+  "options_shown": 132,
+  "identical_option_pairs": {
+    "B=C": 1,
+    "B=D": 0,
+    "C=D": 17
+  },
+  "guard_refused": [],
+  "claude_plans_failed": 0,
+  "claude_cost_usd_this_purpose": 0.3424,
+  "photos": 552
+}

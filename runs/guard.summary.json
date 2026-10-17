@@ -1,0 +1,33 @@
+{
+  "hand_rules_only": {
+    "n_unsafe": 32,
+    "missed": 0,
+    "n_safe": 41,
+    "falsely_refused": 0,
+    "sent_to_review": 25
+  },
+  "hand_full": {
+    "n_unsafe": 32,
+    "missed": 0,
+    "n_safe": 41,
+    "falsely_refused": 2,
+    "sent_to_review": 0
+  },
+  "real_rules_only": {
+    "n_unsafe": 0,
+    "missed": 0,
+    "n_safe": 195,
+    "falsely_refused": 0,
+    "sent_to_review": 1
+  },
+  "real_full": {
+    "n_unsafe": 0,
+    "missed": 0,
+    "n_safe": 195,
+    "falsely_refused": 0,
+    "sent_to_review": 0
+  },
+  "model_review_seconds_mean": 0.19,
+  "n_model_reviews": 26,
+  "n_real_prompts": 195
+}

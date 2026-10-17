@@ -1,0 +1,32 @@
+{
+  "type | text as is": {
+    "precision@10": 0.787,
+    "recall@50": 0.245,
+    "n_queries": 84
+  },
+  "type | with gender filter": {
+    "precision@10": 0.842,
+    "recall@50": 0.276,
+    "n_queries": 84
+  },
+  "type+colour | text as is": {
+    "precision@10": 0.571,
+    "recall@50": 0.478,
+    "n_queries": 428
+  },
+  "type+colour | with gender filter": {
+    "precision@10": 0.604,
+    "recall@50": 0.509,
+    "n_queries": 428
+  },
+  "type | filter minus as-is precision@10": [
+    0.055,
+    0.03,
+    0.085
+  ],
+  "type+colour | filter minus as-is precision@10": [
+    0.033,
+    0.024,
+    0.043
+  ]
+}

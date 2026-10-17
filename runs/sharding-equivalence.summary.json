@@ -1,0 +1,45 @@
+{
+  "queries": 952,
+  "genders": 3,
+  "reference_seconds": 20.8,
+  "by_shards": {
+    "2": {
+      "shard_sizes": [
+        53924,
+        54127
+      ],
+      "identical": 2856,
+      "different": 0,
+      "different_but_same_set_of_products": 0,
+      "seconds": 40.0
+    },
+    "4": {
+      "shard_sizes": [
+        26988,
+        27006,
+        26936,
+        27121
+      ],
+      "identical": 2856,
+      "different": 0,
+      "different_but_same_set_of_products": 0,
+      "seconds": 38.0
+    },
+    "8": {
+      "shard_sizes": [
+        13373,
+        13539,
+        13490,
+        13570,
+        13615,
+        13467,
+        13446,
+        13551
+      ],
+      "identical": 2856,
+      "different": 0,
+      "different_but_same_set_of_products": 0,
+      "seconds": 38.5
+    }
+  }
+}

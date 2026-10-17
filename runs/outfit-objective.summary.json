@@ -1,0 +1,14 @@
+{
+  "n_prompts": 30,
+  "coherent_equals_baseline": 28,
+  "harmony": {
+    "baseline": 0.9906,
+    "coherent": 1.0,
+    "clash": 0.7517
+  },
+  "relevance_loss": {
+    "baseline": 0.0167,
+    "coherent": 0.0228,
+    "clash": 0.402
+  }
+}

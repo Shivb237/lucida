@@ -1,0 +1,52 @@
+{
+  "setup": {
+    "method": "zooclaw-fashionsiglip2",
+    "name": "zooclaw-fashionsiglip2",
+    "seed": 0,
+    "n_queries": 64,
+    "n_products": 3128,
+    "dataset": "Marqo/marqo-GS-10M",
+    "dataset_revision": "eb013094f39e8b17f5b9c6ca05a4a1f1ae0c7309",
+    "shards": [
+      "data/in_domain-168.parquet",
+      "data/in_domain-157.parquet"
+    ],
+    "date": "2026-10-12T23:32:13",
+    "model": "srpone/zooclaw-fashionsiglip2",
+    "model_revision_at_run_time": "d2c0c98de9cd1e27c114267ddfbb584eb98b5ebf",
+    "device": "mps",
+    "torch": "2.14.1",
+    "query_encode_seconds": 0.577
+  },
+  "embed_seconds": 0.0,
+  "metrics": {
+    "ndcg10": {
+      "mean": 0.5022,
+      "ci95": [
+        0.4649,
+        0.5398
+      ]
+    },
+    "recall10": {
+      "mean": 0.2032,
+      "ci95": [
+        0.1758,
+        0.2321
+      ]
+    },
+    "recall50": {
+      "mean": 0.804,
+      "ci95": [
+        0.7465,
+        0.8583
+      ]
+    },
+    "mrr": {
+      "mean": 0.403,
+      "ci95": [
+        0.3257,
+        0.4848
+      ]
+    }
+  }
+}

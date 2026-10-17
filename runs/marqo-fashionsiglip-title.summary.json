@@ -1,0 +1,52 @@
+{
+  "setup": {
+    "method": "marqo-fashionsiglip-title",
+    "name": "marqo-fashionsiglip-title",
+    "seed": 0,
+    "n_queries": 64,
+    "n_products": 3128,
+    "dataset": "Marqo/marqo-GS-10M",
+    "dataset_revision": "eb013094f39e8b17f5b9c6ca05a4a1f1ae0c7309",
+    "shards": [
+      "data/in_domain-168.parquet",
+      "data/in_domain-157.parquet"
+    ],
+    "date": "2026-10-11T14:44:11",
+    "model": "Marqo/marqo-fashionSigLIP",
+    "model_revision_at_run_time": "c56244cc94f92419e8369fa71efdaf403b124ce8",
+    "device": "mps",
+    "torch": "2.14.1",
+    "query_encode_seconds": 0.571
+  },
+  "embed_seconds": 24.17,
+  "metrics": {
+    "ndcg10": {
+      "mean": 0.3546,
+      "ci95": [
+        0.3107,
+        0.3992
+      ]
+    },
+    "recall10": {
+      "mean": 0.1042,
+      "ci95": [
+        0.0806,
+        0.1276
+      ]
+    },
+    "recall50": {
+      "mean": 0.2658,
+      "ci95": [
+        0.2147,
+        0.321
+      ]
+    },
+    "mrr": {
+      "mean": 0.3021,
+      "ci95": [
+        0.2394,
+        0.3768
+      ]
+    }
+  }
+}

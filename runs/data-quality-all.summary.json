@@ -1,0 +1,26 @@
+{
+  "n_marqo": 40513,
+  "n_kaggle": 44419,
+  "flag_counts": {
+    "article_type_under_5_items": 46,
+    "image_nearly_blank": 48,
+    "label_gender_conflicts_title": 7,
+    "missing_articleType": 0,
+    "missing_baseColour": 15,
+    "missing_gender": 0,
+    "missing_productDisplayName": 7,
+    "missing_season": 21,
+    "missing_usage": 317,
+    "same_display_name_as_another": 18557
+  },
+  "kaggle_internal_duplicate_clusters": 1394,
+  "kaggle_products_in_them": 4783,
+  "cross_source_pairs_ge_tau": 1,
+  "clusters_with_both_sources": 1,
+  "clusters_with_copies_all": 2339,
+  "products_in_clusters_all": 6734,
+  "unique_after_merge": 80537,
+  "total_products": 84932,
+  "tau_kaggle": 0.97,
+  "tau_cross": 0.93
+}

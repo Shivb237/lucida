@@ -1,0 +1,29 @@
+{
+ "date": "2026-10-14",
+ "rater": "the project owner (single rater, not blind: row labels visible)",
+ "n_prompts": 30,
+ "n_rows": 83,
+ "raw_rows": {
+  "good": 25,
+  "okay": 3,
+  "bad": 2
+ },
+ "plan_piece_rows": {
+  "good": 45,
+  "okay": 6,
+  "bad": 2
+ },
+ "per_prompt_plan_vs_raw": {
+  "plan_better": 2,
+  "plan_worse": 4,
+  "tied": 24
+ },
+ "mean_diff_plan_minus_raw_0to2": {
+  "mean": 0.05,
+  "ci95": [
+   -0.08,
+   0.22
+  ]
+ },
+ "notes": "ratings and prompts stay in data/ (human_ratings_heldout.json); sheet: data/preview/heldout_sheet.html (local only)"
+}

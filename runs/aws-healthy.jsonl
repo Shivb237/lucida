@@ -1,0 +1,40 @@
+{"t": 0.0, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 329.92, "shards_ms": 86.33, "top": "8369582464638506756"}
+{"t": 1.0, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 304.81, "shards_ms": 60.92, "top": "14674132905800401037"}
+{"t": 2.0, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 319.35, "shards_ms": 72, "top": "211021"}
+{"t": 3.0, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 315.76, "shards_ms": 70.88, "top": "316633465854659707"}
+{"t": 4.0, "text": "women's yellow kurti set under 1500", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 308.24, "shards_ms": 65.22, "top": "213995"}
+{"t": 5.0, "text": "men's formal shoes brown", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 328.83, "shards_ms": 86.05, "top": "8187522292694633329"}
+{"t": 6.0, "text": "summer linen shirt men", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 1, "total_ms": 298.37, "shards_ms": 56.27, "top": "7085500006808481956"}
+{"t": 7.0, "text": "red lehenga for sister sangeet", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 293.6, "shards_ms": 51.07, "top": "209444"}
+{"t": 8.0, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 307.16, "shards_ms": 64.66, "top": "8369582464638506756"}
+{"t": 9.0, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 307.64, "shards_ms": 63.71, "top": "14674132905800401037"}
+{"t": 10.0, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 310.04, "shards_ms": 67.35, "top": "211021"}
+{"t": 11.0, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 321.48, "shards_ms": 75.76, "top": "316633465854659707"}
+{"t": 12.0, "text": "women's yellow kurti set under 1500", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 300.43, "shards_ms": 56.65, "top": "213995"}
+{"t": 13.0, "text": "men's formal shoes brown", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 315.13, "shards_ms": 72.16, "top": "8187522292694633329"}
+{"t": 14.0, "text": "summer linen shirt men", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 315.57, "shards_ms": 73.2, "top": "7085500006808481956"}
+{"t": 15.1, "text": "red lehenga for sister sangeet", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 312.59, "shards_ms": 66.64, "top": "209444"}
+{"t": 16.1, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 1, "total_ms": 303.09, "shards_ms": 56.48, "top": "8369582464638506756"}
+{"t": 17.1, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 317.2, "shards_ms": 74.04, "top": "14674132905800401037"}
+{"t": 18.1, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 334.49, "shards_ms": 76.48, "top": "211021"}
+{"t": 19.1, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 319.28, "shards_ms": 78.57, "top": "316633465854659707"}
+{"t": 20.1, "text": "women's yellow kurti set under 1500", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 335.31, "shards_ms": 67.13, "top": "213995"}
+{"t": 21.1, "text": "men's formal shoes brown", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 314.77, "shards_ms": 69.14, "top": "8187522292694633329"}
+{"t": 22.1, "text": "summer linen shirt men", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 332.92, "shards_ms": 88.67, "top": "7085500006808481956"}
+{"t": 23.1, "text": "red lehenga for sister sangeet", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 323, "shards_ms": 67.29, "top": "209444"}
+{"t": 24.1, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 314.62, "shards_ms": 71.56, "top": "8369582464638506756"}
+{"t": 25.1, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 1, "total_ms": 298.39, "shards_ms": 54.87, "top": "14674132905800401037"}
+{"t": 26.1, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 320.53, "shards_ms": 74.55, "top": "211021"}
+{"t": 27.1, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 330.4, "shards_ms": 84.76, "top": "316633465854659707"}
+{"t": 28.1, "text": "women's yellow kurti set under 1500", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 329.81, "shards_ms": 74.45, "top": "213995"}
+{"t": 29.1, "text": "men's formal shoes brown", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 328.59, "shards_ms": 78.57, "top": "8187522292694633329"}
+{"t": 30.1, "text": "summer linen shirt men", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 319.25, "shards_ms": 71.15, "top": "7085500006808481956"}
+{"t": 31.1, "text": "red lehenga for sister sangeet", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 335.81, "shards_ms": 81.74, "top": "209444"}
+{"t": 32.1, "text": "men's navy blazer for a winter wedding", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 316.54, "shards_ms": 75.61, "top": "8369582464638506756"}
+{"t": 33.1, "text": "white sneakers for college", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 4, "total_ms": 360.64, "shards_ms": 71.69, "top": "14674132905800401037"}
+{"t": 34.1, "text": "black saree for cocktail party", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 324.66, "shards_ms": 76.99, "top": "211021"}
+{"t": 35.1, "text": "kids kurta for diwali", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 326.55, "shards_ms": 79.74, "top": "316633465854659707"}
+{"t": 36.1, "text": "women's yellow kurti set under 1500", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 312.82, "shards_ms": 69.8, "top": "213995"}
+{"t": 37.1, "text": "men's formal shoes brown", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 314.8, "shards_ms": 65.51, "top": "8187522292694633329"}
+{"t": 38.1, "text": "summer linen shirt men", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 2, "total_ms": 324.48, "shards_ms": 80.3, "top": "7085500006808481956"}
+{"t": 39.2, "text": "red lehenga for sister sangeet", "status": 200, "partial": false, "ok": 4, "total": 4, "failovers": 0, "hedged": 3, "total_ms": 324.61, "shards_ms": 82.61, "top": "209444"}

@@ -1,0 +1,19 @@
+[Unit]
+Description=GenKart router (TypeScript)
+After=genkart-encoder.service network-online.target
+
+[Service]
+User=genkart
+WorkingDirectory=/opt/genkart/router
+EnvironmentFile=/etc/genkart/router.env
+ExecStart=/usr/bin/env node --experimental-strip-types src/index.ts
+Restart=always
+RestartSec=2
+# logs go to a FILE (CloudWatch reads plain JSON lines from files; from the journal they arrive wrapped in extra fields)
+StandardOutput=append:/var/log/genkart/router.log
+StandardError=append:/var/log/genkart/router.log
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

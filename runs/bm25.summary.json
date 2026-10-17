@@ -1,0 +1,47 @@
+{
+  "setup": {
+    "method": "bm25",
+    "name": "bm25",
+    "seed": 0,
+    "n_queries": 64,
+    "n_products": 3128,
+    "dataset": "Marqo/marqo-GS-10M",
+    "dataset_revision": "eb013094f39e8b17f5b9c6ca05a4a1f1ae0c7309",
+    "shards": [
+      "data/in_domain-168.parquet",
+      "data/in_domain-157.parquet"
+    ],
+    "date": "2026-10-11T14:38:56"
+  },
+  "embed_seconds": 0.0,
+  "metrics": {
+    "ndcg10": {
+      "mean": 0.3966,
+      "ci95": [
+        0.3454,
+        0.4461
+      ]
+    },
+    "recall10": {
+      "mean": 0.1484,
+      "ci95": [
+        0.1162,
+        0.181
+      ]
+    },
+    "recall50": {
+      "mean": 0.4714,
+      "ci95": [
+        0.4037,
+        0.5438
+      ]
+    },
+    "mrr": {
+      "mean": 0.3831,
+      "ci95": [
+        0.3,
+        0.473
+      ]
+    }
+  }
+}

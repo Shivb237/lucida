@@ -1,0 +1,122 @@
+[
+ {
+  "id": "SearchMs",
+  "group": "router",
+  "pattern": "{ $.total = * }",
+  "metric": "SearchMs",
+  "value": "$.total",
+  "unit": "Milliseconds"
+ },
+ {
+  "id": "EncodeMs",
+  "group": "router",
+  "pattern": "{ $.encode = * }",
+  "metric": "EncodeMs",
+  "value": "$.encode",
+  "unit": "Milliseconds"
+ },
+ {
+  "id": "ShardsMs",
+  "group": "router",
+  "pattern": "{ $.merge = * }",
+  "metric": "ShardsMs",
+  "value": "$.shards",
+  "unit": "Milliseconds"
+ },
+ {
+  "id": "Searches",
+  "group": "router",
+  "pattern": "{ $.req = * && $.total = * }",
+  "metric": "Searches",
+  "value": "1",
+  "unit": "Count"
+ },
+ {
+  "id": "PartialAnswers",
+  "group": "router",
+  "pattern": "{ $.partial IS TRUE }",
+  "metric": "PartialAnswers",
+  "value": "1",
+  "unit": "Count"
+ },
+ {
+  "id": "FailoverRequests",
+  "group": "router",
+  "pattern": "{ $.failovers > 0 }",
+  "metric": "FailoverRequests",
+  "value": "1",
+  "unit": "Count"
+ },
+ {
+  "id": "ServerErrors",
+  "group": "router",
+  "pattern": "{ $.status >= 500 }",
+  "metric": "ServerErrors",
+  "value": "1",
+  "unit": "Count"
+ },
+ {
+  "id": "IngestAcked",
+  "group": "ingest",
+  "pattern": "{ $.event = \"batch\" }",
+  "metric": "IngestAcked",
+  "value": "$.acked",
+  "unit": "Count"
+ },
+ {
+  "id": "IngestFailed",
+  "group": "ingest",
+  "pattern": "{ $.event = \"batch\" && $.failed > 0 }",
+  "metric": "IngestFailed",
+  "value": "$.failed",
+  "unit": "Count"
+ },
+ {
+  "id": "IngestNearDlq",
+  "group": "ingest",
+  "pattern": "{ $.event = \"batch\" && $.max_receive_count >= 6 }",
+  "metric": "IngestNearDlq",
+  "value": "1",
+  "unit": "Count"
+ },
+ {
+  "id": "IngestStepErrors",
+  "group": "ingest",
+  "pattern": "{ $.event = \"step_error\" }",
+  "metric": "IngestStepErrors",
+  "value": "1",
+  "unit": "Count"
+ },
+ {
+  "id": "ShardRequestMs",
+  "group": "shard",
+  "pattern": "{ $.svc = \"shard\" && $.path = \"/search\" }",
+  "metric": "ShardRequestMs",
+  "value": "$.ms",
+  "unit": "Milliseconds"
+ },
+ {
+  "id": "EncoderRequestMs",
+  "group": "encoder",
+  "pattern": "{ $.svc = \"encoder\" && $.path = \"/encode\" }",
+  "metric": "EncoderRequestMs",
+  "value": "$.ms",
+  "unit": "Milliseconds"
+ },
+ {
+  "id": "ShedRequests",
+  "group": "router",
+  "pattern": "{ $.status = 429 }",
+  "metric": "ShedRequests",
+  "value": "1",
+  "unit": "Count"
+ },
+ {
+  "id": "EncoderDropped",
+  "group": "encoder",
+  "pattern": "{ $.svc = \"encoder\" && $.status = 503 }",
+  "metric": "EncoderDropped",
+  "value": "1",
+  "unit": "Count"
+ }
+]

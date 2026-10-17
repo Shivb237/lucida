@@ -1,0 +1,8 @@
+{"concurrency": 1, "requests": 40, "seconds": 12.56, "req_per_s": 3.18, "p50_ms": 311.4, "p95_ms": 332.5, "p99_ms": 339.1, "max_ms": 339.1, "errors": 0, "partial": 0, "cpu_busy_pct": 69.2, "first_error": null}
+{"concurrency": 2, "requests": 40, "seconds": 9.62, "req_per_s": 4.16, "p50_ms": 472.4, "p95_ms": 519.5, "p99_ms": 535.4, "max_ms": 535.4, "errors": 0, "partial": 0, "cpu_busy_pct": 90.8, "first_error": null}
+{"concurrency": 4, "requests": 40, "seconds": 10.03, "req_per_s": 3.99, "p50_ms": 1036.4, "p95_ms": 1140.8, "p99_ms": 1170.9, "max_ms": 1170.9, "errors": 0, "partial": 0, "cpu_busy_pct": 96.7, "first_error": null}
+{"concurrency": 8, "requests": 80, "seconds": 20.08, "req_per_s": 3.98, "p50_ms": 2019.5, "p95_ms": 2243.0, "p99_ms": 2322.5, "max_ms": 2364.5, "errors": 0, "partial": 0, "cpu_busy_pct": 99.6, "first_error": null}
+{"concurrency": 16, "requests": 160, "seconds": 42.62, "req_per_s": 3.75, "p50_ms": 4170.0, "p95_ms": 4726.2, "p99_ms": 4907.4, "max_ms": 4935.2, "errors": 0, "partial": 0, "cpu_busy_pct": 99.0, "first_error": null}
+{"concurrency": 32, "requests": 320, "seconds": 50.18, "req_per_s": 6.38, "p50_ms": 5003.9, "p95_ms": 5027.5, "p99_ms": 5052.5, "max_ms": 5052.8, "errors": 320, "partial": 0, "cpu_busy_pct": 100.0, "first_error": "HTTP Error 502: Bad Gateway"}
+{"concurrency": 1, "requests": 40, "seconds": 96.23, "req_per_s": 0.42, "p50_ms": 344.6, "p95_ms": 5003.4, "p99_ms": 5018.7, "max_ms": 5018.7, "errors": 15, "partial": 0, "cpu_busy_pct": 97.5, "first_error": "HTTP Error 502: Bad Gateway"}
+

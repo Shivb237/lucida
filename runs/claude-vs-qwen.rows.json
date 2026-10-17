@@ -1,0 +1,1328 @@
+[
+ {
+  "n": 1,
+  "prompt": "Roka ceremony outfit groom side simple pastel bandhgala",
+  "kept_qwen": 0.2857142857142857,
+  "kept_claude": 0.42857142857142855,
+  "lost_qwen": [
+   "simple",
+   "ceremony",
+   "side",
+   "roka",
+   "groom"
+  ],
+  "lost_claude": [
+   "ceremony",
+   "side",
+   "roka",
+   "groom"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "men's pastel bandhgala"
+  ],
+  "claude_q": [
+   "men's simple pastel bandhgala"
+  ]
+ },
+ {
+  "n": 2,
+  "prompt": "Engagement dress for bride pastel lehenga with mirror work",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "engagement",
+   "bride",
+   "dress"
+  ],
+  "lost_claude": [
+   "engagement",
+   "bride",
+   "dress"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's pastel lehenga with mirror work"
+  ],
+  "claude_q": [
+   "women's pastel mirror work lehenga"
+  ]
+ },
+ {
+  "n": 3,
+  "prompt": "Cocktails shaadi outfit women sequin saree black",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.6666666666666666,
+  "lost_qwen": [
+   "cocktails",
+   "shaadi",
+   "black"
+  ],
+  "lost_claude": [
+   "cocktails",
+   "shaadi"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's sequin saree"
+  ],
+  "claude_q": [
+   "women's black sequin saree"
+  ]
+ },
+ {
+  "n": 4,
+  "prompt": "Haldi function men yellow chikankari kurta pyjama setup",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "function",
+   "haldi",
+   "setup"
+  ],
+  "lost_claude": [
+   "function",
+   "haldi",
+   "setup"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "men's yellow chikankari kurta",
+   "men's pyjama"
+  ],
+  "claude_q": [
+   "men's yellow chikankari kurta pyjama set"
+  ]
+ },
+ {
+  "n": 5,
+  "prompt": "Mehendi ceremony outfit bride friend olive green sharara set",
+  "kept_qwen": 0.42857142857142855,
+  "kept_claude": 0.42857142857142855,
+  "lost_qwen": [
+   "mehendi",
+   "ceremony",
+   "bride",
+   "friend"
+  ],
+  "lost_claude": [
+   "mehendi",
+   "ceremony",
+   "bride",
+   "friend"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's olive green sharara set"
+  ],
+  "claude_q": [
+   "women's olive green sharara set"
+  ]
+ },
+ {
+  "n": 6,
+  "prompt": "Sangeet dance performance lehenga lightweight flared floral",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "sangeet",
+   "performance",
+   "dance"
+  ],
+  "lost_claude": [
+   "sangeet",
+   "performance",
+   "dance"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "lightweight flared floral lehenga"
+  ],
+  "claude_q": [
+   "women's lightweight flared floral lehenga"
+  ]
+ },
+ {
+  "n": 7,
+  "prompt": "Wedding pheras guest outfit women banarasi silk saree royal blue",
+  "kept_qwen": 0.6666666666666666,
+  "kept_claude": 0.6666666666666666,
+  "lost_qwen": [
+   "wedding",
+   "guest",
+   "pheras"
+  ],
+  "lost_claude": [
+   "wedding",
+   "guest",
+   "pheras"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's royal blue banarasi silk saree"
+  ],
+  "claude_q": [
+   "women's royal blue banarasi silk saree"
+  ]
+ },
+ {
+  "n": 8,
+  "prompt": "Indian wedding reception suit men double breasted tuxedo dark green",
+  "kept_qwen": 0.3333333333333333,
+  "kept_claude": 0.4444444444444444,
+  "lost_qwen": [
+   "suit",
+   "wedding",
+   "green",
+   "dark",
+   "reception",
+   "indian"
+  ],
+  "lost_claude": [
+   "wedding",
+   "green",
+   "dark",
+   "reception",
+   "indian"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "men's double breasted tuxedo"
+  ],
+  "claude_q": [
+   "men's double breasted tuxedo suit"
+  ]
+ },
+ {
+  "n": 9,
+  "prompt": "Bidai function simple cotton suit outfit for bride sister",
+  "kept_qwen": 0.42857142857142855,
+  "kept_claude": 0.42857142857142855,
+  "lost_qwen": [
+   "function",
+   "bidai",
+   "bride",
+   "sister"
+  ],
+  "lost_claude": [
+   "function",
+   "bidai",
+   "bride",
+   "sister"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's simple cotton suit outfit"
+  ],
+  "claude_q": [
+   "women's simple cotton salwar suit"
+  ]
+ },
+ {
+  "n": 10,
+  "prompt": "Griha Pravesh pooja ethnic dress women gota patti suit",
+  "kept_qwen": 0.5555555555555556,
+  "kept_claude": 0.4444444444444444,
+  "lost_qwen": [
+   "griha",
+   "pravesh",
+   "pooja",
+   "dress"
+  ],
+  "lost_claude": [
+   "griha",
+   "pravesh",
+   "ethnic",
+   "pooja",
+   "dress"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's gota patti ethnic suit"
+  ],
+  "claude_q": [
+   "women's gota patti suit"
+  ]
+ },
+ {
+  "n": 11,
+  "prompt": "Satyanarayan pooja simple silk saree yellow contrast blouse",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.625,
+  "lost_qwen": [
+   "simple",
+   "satyanarayan",
+   "yellow",
+   "pooja"
+  ],
+  "lost_claude": [
+   "satyanarayan",
+   "yellow",
+   "pooja"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "silk saree",
+   "contrast blouse"
+  ],
+  "claude_q": [
+   "women's simple silk saree with contrast blouse"
+  ]
+ },
+ {
+  "n": 12,
+  "prompt": "Chhath Puja traditional outfit women yellow red bandhani saree",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.42857142857142855,
+  "lost_qwen": [
+   "traditional",
+   "chhath",
+   "puja"
+  ],
+  "lost_claude": [
+   "yellow",
+   "traditional",
+   "chhath",
+   "puja"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's yellow red bandhani saree"
+  ],
+  "claude_q": [
+   "women's bandhani saree"
+  ]
+ },
+ {
+  "n": 13,
+  "prompt": "Baisakhi celebration Punjabi suit full phulkari dupatta",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.7142857142857143,
+  "lost_qwen": [
+   "celebration",
+   "baisakhi",
+   "full"
+  ],
+  "lost_claude": [
+   "celebration",
+   "baisakhi"
+  ],
+  "pieces_qwen": 3,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "punjabi suit top",
+   "punjabi suit bottom",
+   "phulkari dupatta"
+  ],
+  "claude_q": [
+   "women's Punjabi suit",
+   "full phulkari dupatta"
+  ]
+ },
+ {
+  "n": 14,
+  "prompt": "Janmashtami outfit baby boy kanha getup yellow dhoti set",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.6666666666666666,
+  "lost_qwen": [
+   "kanha",
+   "janmashtami",
+   "getup"
+  ],
+  "lost_claude": [
+   "janmashtami",
+   "getup"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "baby boy yellow dhoti set"
+  ],
+  "claude_q": [
+   "baby boy kanha yellow dhoti set"
+  ]
+ },
+ {
+  "n": 15,
+  "prompt": "Raksha Bandhan gifting ethnic dress for sister under 1500",
+  "kept_qwen": 0.42857142857142855,
+  "kept_claude": 0.2857142857142857,
+  "lost_qwen": [
+   "bandhan",
+   "gifting",
+   "raksha",
+   "under"
+  ],
+  "lost_claude": [
+   "bandhan",
+   "gifting",
+   "raksha",
+   "sister",
+   "under"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's ethnic dress for sister"
+  ],
+  "claude_q": [
+   "women's ethnic dress"
+  ]
+ },
+ {
+  "n": 16,
+  "prompt": "Teej festival green leheriya saree with gota work",
+  "kept_qwen": 0.7142857142857143,
+  "kept_claude": 0.7142857142857143,
+  "lost_qwen": [
+   "teej",
+   "festival"
+  ],
+  "lost_claude": [
+   "teej",
+   "festival"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "green leheriya saree with gota work"
+  ],
+  "claude_q": [
+   "women's green leheriya saree with gota work"
+  ]
+ },
+ {
+  "n": 17,
+  "prompt": "Dhanteras shopping outfit comfortable cotton kurti pant set",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.5,
+  "lost_qwen": [
+   "comfortable",
+   "dhanteras",
+   "shopping"
+  ],
+  "lost_claude": [
+   "comfortable",
+   "dhanteras",
+   "shopping"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "cotton kurti",
+   "cotton pant"
+  ],
+  "claude_q": [
+   "women's cotton kurti pant set"
+  ]
+ },
+ {
+  "n": 18,
+  "prompt": "Govardhan pooja family matching traditional wear outfit",
+  "kept_qwen": 0.2,
+  "kept_claude": 0.2,
+  "lost_qwen": [
+   "pooja",
+   "family",
+   "govardhan",
+   "matching"
+  ],
+  "lost_claude": [
+   "pooja",
+   "family",
+   "govardhan",
+   "matching"
+  ],
+  "pieces_qwen": 3,
+  "pieces_claude": 4,
+  "gender_same": true,
+  "qwen_q": [
+   "kurtas",
+   "traditional pants",
+   "traditional footwear"
+  ],
+  "claude_q": [
+   "men's kurta",
+   "women's traditional saree",
+   "girls ethnic lehenga",
+   "boys kurta set"
+  ]
+ },
+ {
+  "n": 19,
+  "prompt": "Chhoti Diwali outfit men casual short kurta with jeans",
+  "kept_qwen": 0.6666666666666666,
+  "kept_claude": 0.6666666666666666,
+  "lost_qwen": [
+   "chhoti",
+   "diwali"
+  ],
+  "lost_claude": [
+   "chhoti",
+   "diwali"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "men's casual short kurta",
+   "men's jeans"
+  ],
+  "claude_q": [
+   "men's casual short kurta",
+   "men's jeans"
+  ]
+ },
+ {
+  "n": 20,
+  "prompt": "Tulsi Vivah ethnic look maroon kanjeevaram saree",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.5,
+  "lost_qwen": [
+   "ethnic",
+   "tulsi",
+   "vivah"
+  ],
+  "lost_claude": [
+   "ethnic",
+   "tulsi",
+   "vivah"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "maroon kanjeevaram saree"
+  ],
+  "claude_q": [
+   "women's maroon kanjeevaram saree"
+  ]
+ },
+ {
+  "n": 21,
+  "prompt": "New born naming ceremony Namakaran mother outfit pastel Anarkali",
+  "kept_qwen": 0.2857142857142857,
+  "kept_claude": 0.2857142857142857,
+  "lost_qwen": [
+   "mother",
+   "ceremony",
+   "namakaran",
+   "naming",
+   "born"
+  ],
+  "lost_claude": [
+   "mother",
+   "ceremony",
+   "namakaran",
+   "naming",
+   "born"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's pastel anarkali dress"
+  ],
+  "claude_q": [
+   "women's pastel anarkali suit"
+  ]
+ },
+ {
+  "n": 22,
+  "prompt": "Annaprashan baby girl traditional pattu pavadai dress",
+  "kept_qwen": 0.8571428571428571,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "annaprashan"
+  ],
+  "lost_claude": [
+   "annaprashan",
+   "traditional",
+   "dress"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "baby girl traditional pattu pavadai dress"
+  ],
+  "claude_q": [
+   "baby girl pattu pavadai"
+  ]
+ },
+ {
+  "n": 23,
+  "prompt": "Godh Bharai baby shower traditional silk saree light pink",
+  "kept_qwen": 0.3333333333333333,
+  "kept_claude": 0.5555555555555556,
+  "lost_qwen": [
+   "shower",
+   "godh",
+   "bharai",
+   "light",
+   "pink",
+   "baby"
+  ],
+  "lost_claude": [
+   "shower",
+   "godh",
+   "bharai",
+   "baby"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "traditional silk saree"
+  ],
+  "claude_q": [
+   "women's traditional silk saree light pink"
+  ]
+ },
+ {
+  "n": 24,
+  "prompt": "Upanayana Munj thread ceremony boy white silk dhoti dupatta",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.5,
+  "lost_qwen": [
+   "upanayana",
+   "munj",
+   "thread",
+   "ceremony"
+  ],
+  "lost_claude": [
+   "upanayana",
+   "munj",
+   "thread",
+   "ceremony"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "men's white silk dhoti",
+   "men's white silk dupatta"
+  ],
+  "claude_q": [
+   "men's white silk dhoti",
+   "men's white silk dupatta angavastram"
+  ]
+ },
+ {
+  "n": 25,
+  "prompt": "50th Wedding Anniversary parents ethnic co-ord silk set mom dad",
+  "kept_qwen": 0.4,
+  "kept_claude": 0.4,
+  "lost_qwen": [
+   "wedding",
+   "parents",
+   "anniversary"
+  ],
+  "lost_claude": [
+   "wedding",
+   "parents",
+   "anniversary"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "ethnic silk co-ord set"
+  ],
+  "claude_q": [
+   "women's ethnic silk co-ord set",
+   "men's ethnic silk co-ord set"
+  ]
+ },
+ {
+  "n": 26,
+  "prompt": "Mata ki Chowki simple salwar suit for women red dupatta",
+  "kept_qwen": 0.7142857142857143,
+  "kept_claude": 0.7142857142857143,
+  "lost_qwen": [
+   "chowki",
+   "mata"
+  ],
+  "lost_claude": [
+   "chowki",
+   "mata"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's simple salwar suit",
+   "women's red dupatta"
+  ],
+  "claude_q": [
+   "women's simple salwar suit with red dupatta"
+  ]
+ },
+ {
+  "n": 27,
+  "prompt": "Jagran night comfortable ethnic dress long kurti palazzos",
+  "kept_qwen": 0.375,
+  "kept_claude": 0.25,
+  "lost_qwen": [
+   "comfortable",
+   "jagran",
+   "ethnic",
+   "night",
+   "dress"
+  ],
+  "lost_claude": [
+   "comfortable",
+   "jagran",
+   "ethnic",
+   "night",
+   "palazzos",
+   "dress"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "long kurti",
+   "palazzos"
+  ],
+  "claude_q": [
+   "women's long kurti",
+   "women's palazzo pants"
+  ]
+ },
+ {
+  "n": 28,
+  "prompt": "Sufi night sangeet theme outfit chikankari Anarkali gown",
+  "kept_qwen": 0.42857142857142855,
+  "kept_claude": 0.42857142857142855,
+  "lost_qwen": [
+   "theme",
+   "sangeet",
+   "sufi",
+   "night"
+  ],
+  "lost_claude": [
+   "theme",
+   "sangeet",
+   "sufi",
+   "night"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "chikankari anarkali gown"
+  ],
+  "claude_q": [
+   "women's chikankari anarkali gown"
+  ]
+ },
+ {
+  "n": 29,
+  "prompt": "Bollywood theme sangeet party retro 70s Mumtaz draped saree",
+  "kept_qwen": 0.375,
+  "kept_claude": 0.5,
+  "lost_qwen": [
+   "theme",
+   "sangeet",
+   "retro",
+   "party",
+   "bollywood"
+  ],
+  "lost_claude": [
+   "theme",
+   "sangeet",
+   "mumtaz",
+   "party"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "mumtaz draped saree"
+  ],
+  "claude_q": [
+   "women's retro 70s Bollywood draped saree"
+  ]
+ },
+ {
+  "n": 30,
+  "prompt": "Royal Rajputana theme wedding guest rajputi poshak orange",
+  "kept_qwen": 0.25,
+  "kept_claude": 0.375,
+  "lost_qwen": [
+   "orange",
+   "theme",
+   "royal",
+   "wedding",
+   "guest",
+   "rajputana"
+  ],
+  "lost_claude": [
+   "theme",
+   "royal",
+   "wedding",
+   "guest",
+   "rajputana"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "rajputi poshak"
+  ],
+  "claude_q": [
+   "women's orange rajputi poshak"
+  ]
+ },
+ {
+  "n": 31,
+  "prompt": "South Indian wedding guest temple border kanjivaram saree gold",
+  "kept_qwen": 0.5555555555555556,
+  "kept_claude": 0.4444444444444444,
+  "lost_qwen": [
+   "south",
+   "wedding",
+   "guest",
+   "indian"
+  ],
+  "lost_claude": [
+   "south",
+   "wedding",
+   "guest",
+   "gold",
+   "indian"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "temple border kanjivaram saree gold"
+  ],
+  "claude_q": [
+   "women's temple border kanjivaram saree"
+  ]
+ },
+ {
+  "n": 32,
+  "prompt": "Maharashtrian wedding guest nauvari saree silk green",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "wedding",
+   "guest",
+   "maharashtrian"
+  ],
+  "lost_claude": [
+   "wedding",
+   "guest",
+   "maharashtrian"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "nauvari saree silk green"
+  ],
+  "claude_q": [
+   "women's green silk nauvari saree"
+  ]
+ },
+ {
+  "n": 33,
+  "prompt": "Bengali wedding guest Tussar silk saree beige maroon border",
+  "kept_qwen": 0.6666666666666666,
+  "kept_claude": 0.5555555555555556,
+  "lost_qwen": [
+   "bengali",
+   "wedding",
+   "guest"
+  ],
+  "lost_claude": [
+   "bengali",
+   "wedding",
+   "beige",
+   "guest"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "tussar silk saree beige maroon border"
+  ],
+  "claude_q": [
+   "women's tussar silk saree with maroon border"
+  ]
+ },
+ {
+  "n": 34,
+  "prompt": "Gujarati wedding guest bandhani gharchola saree red",
+  "kept_qwen": 1.0,
+  "kept_claude": 0.5,
+  "lost_qwen": [],
+  "lost_claude": [
+   "wedding",
+   "gujarati",
+   "guest"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "gujarati wedding guest bandhani gharchola saree"
+  ],
+  "claude_q": [
+   "women's red bandhani gharchola saree"
+  ]
+ },
+ {
+  "n": 35,
+  "prompt": "Punjabi wedding sangeet heavy Patiala suit with paranda",
+  "kept_qwen": 0.14285714285714285,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "punjabi",
+   "sangeet",
+   "heavy",
+   "patiala",
+   "suit",
+   "wedding"
+  ],
+  "lost_claude": [
+   "punjabi",
+   "sangeet",
+   "wedding"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "kurtas",
+   "paranda"
+  ],
+  "claude_q": [
+   "women's heavy Patiala suit",
+   "paranda hair accessory"
+  ]
+ },
+ {
+  "n": 36,
+  "prompt": "Indo-western jumpsuit for ladies wedding cocktail night",
+  "kept_qwen": 0.42857142857142855,
+  "kept_claude": 0.42857142857142855,
+  "lost_qwen": [
+   "wedding",
+   "night",
+   "ladies",
+   "cocktail"
+  ],
+  "lost_claude": [
+   "wedding",
+   "night",
+   "ladies",
+   "cocktail"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's indo-western jumpsuit"
+  ],
+  "claude_q": [
+   "women's indo-western jumpsuit"
+  ]
+ },
+ {
+  "n": 37,
+  "prompt": "Chikankari jacket with kurta men wedding guest look",
+  "kept_qwen": 0.6,
+  "kept_claude": 0.6,
+  "lost_qwen": [
+   "wedding",
+   "guest"
+  ],
+  "lost_claude": [
+   "wedding",
+   "guest"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "men's chikankari jacket",
+   "men's kurta"
+  ],
+  "claude_q": [
+   "men's chikankari jacket",
+   "men's chikankari kurta"
+  ]
+ },
+ {
+  "n": 38,
+  "prompt": "Printed organza floral saree for daytime outdoor Haldi",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "daytime",
+   "haldi",
+   "outdoor"
+  ],
+  "lost_claude": [
+   "daytime",
+   "haldi",
+   "outdoor"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "printed organza floral saree"
+  ],
+  "claude_q": [
+   "women's printed organza floral saree"
+  ]
+ },
+ {
+  "n": 39,
+  "prompt": "Velvet sherwani for groom father winter wedding",
+  "kept_qwen": 0.3333333333333333,
+  "kept_claude": 0.3333333333333333,
+  "lost_qwen": [
+   "wedding",
+   "father",
+   "winter",
+   "groom"
+  ],
+  "lost_claude": [
+   "wedding",
+   "father",
+   "winter",
+   "groom"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "men's velvet sherwani"
+  ],
+  "claude_q": [
+   "men's velvet sherwani"
+  ]
+ },
+ {
+  "n": 40,
+  "prompt": "Brocade lehenga skirt with plain shirt indo-western reception look",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.625,
+  "lost_qwen": [
+   "brocade",
+   "indo",
+   "western",
+   "reception"
+  ],
+  "lost_claude": [
+   "indo",
+   "western",
+   "reception"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "broad lehenga skirt",
+   "plain shirt"
+  ],
+  "claude_q": [
+   "women's brocade lehenga skirt",
+   "women's plain shirt"
+  ]
+ },
+ {
+  "n": 41,
+  "prompt": "Pearl white lehenga for bridesmaid pastel aesthetic",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.6666666666666666,
+  "lost_qwen": [
+   "pastel",
+   "bridesmaid",
+   "aesthetic"
+  ],
+  "lost_claude": [
+   "bridesmaid",
+   "aesthetic"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "pearl white lehenga"
+  ],
+  "claude_q": [
+   "women's pearl white pastel lehenga"
+  ]
+ },
+ {
+  "n": 42,
+  "prompt": "Traditional Paithani saree peacock blue for cousin wedding",
+  "kept_qwen": 0.42857142857142855,
+  "kept_claude": 0.7142857142857143,
+  "lost_qwen": [
+   "blue",
+   "cousin",
+   "peacock",
+   "wedding"
+  ],
+  "lost_claude": [
+   "cousin",
+   "wedding"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "traditional paithani saree"
+  ],
+  "claude_q": [
+   "women's traditional Paithani saree peacock blue"
+  ]
+ },
+ {
+  "n": 43,
+  "prompt": "Sharara suit set for Eid celebration lavender chikankari",
+  "kept_qwen": 0.4,
+  "kept_claude": 0.8,
+  "lost_qwen": [
+   "celebration",
+   "lavender",
+   "chikankari"
+  ],
+  "lost_claude": [
+   "celebration"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "sharara suit set"
+  ],
+  "claude_q": [
+   "women's lavender chikankari sharara suit set"
+  ]
+ },
+ {
+  "n": 44,
+  "prompt": "Garba night day 1 outfit traditional chaniya choli multi color",
+  "kept_qwen": 0.2857142857142857,
+  "kept_claude": 0.7142857142857143,
+  "lost_qwen": [
+   "multi",
+   "color",
+   "garba",
+   "night",
+   "traditional"
+  ],
+  "lost_claude": [
+   "garba",
+   "night"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "chaniya choli"
+  ],
+  "claude_q": [
+   "women's traditional multicolor chaniya choli"
+  ]
+ },
+ {
+  "n": 45,
+  "prompt": "Ugadi traditional wear women pure silk pattu saree",
+  "kept_qwen": 0.7142857142857143,
+  "kept_claude": 0.7142857142857143,
+  "lost_qwen": [
+   "ugadi",
+   "traditional"
+  ],
+  "lost_claude": [
+   "ugadi",
+   "traditional"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "women's pure silk pattu saree"
+  ],
+  "claude_q": [
+   "women's pure silk pattu saree"
+  ]
+ },
+ {
+  "n": 46,
+  "prompt": "Lohri celebration outfit Punjabi jutti with dhoti suit girl",
+  "kept_qwen": 0.42857142857142855,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "girl",
+   "celebration",
+   "suit",
+   "lohri"
+  ],
+  "lost_claude": [
+   "girl",
+   "celebration",
+   "lohri"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": false,
+  "qwen_q": [
+   "punjabi dhoti",
+   "punjabi jutti"
+  ],
+  "claude_q": [
+   "women's dhoti suit",
+   "women's Punjabi jutti"
+  ]
+ },
+ {
+  "n": 47,
+  "prompt": "Bihu traditional dress Mekhela Chador Assam silk",
+  "kept_qwen": 0.5714285714285714,
+  "kept_claude": 0.5714285714285714,
+  "lost_qwen": [
+   "traditional",
+   "dress",
+   "bihu"
+  ],
+  "lost_claude": [
+   "traditional",
+   "dress",
+   "bihu"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "Assam silk mekhela chador"
+  ],
+  "claude_q": [
+   "women's Assam silk mekhela chador"
+  ]
+ },
+ {
+  "n": 48,
+  "prompt": "Navratri dandiya outfit men Kediyu dhoti set Gujarati traditional",
+  "kept_qwen": 0.3333333333333333,
+  "kept_claude": 0.3333333333333333,
+  "lost_qwen": [
+   "navratri",
+   "gujarati",
+   "dandiya",
+   "traditional"
+  ],
+  "lost_claude": [
+   "navratri",
+   "gujarati",
+   "dandiya",
+   "traditional"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "men's kediyu dhoti set"
+  ],
+  "claude_q": [
+   "men's kediyu dhoti set"
+  ]
+ },
+ {
+  "n": 49,
+  "prompt": "Thread work Nehru jacket over white kurta pajama for cousin engagement",
+  "kept_qwen": 0.5,
+  "kept_claude": 0.7,
+  "lost_qwen": [
+   "thread",
+   "cousin",
+   "engagement",
+   "work",
+   "over"
+  ],
+  "lost_claude": [
+   "cousin",
+   "engagement",
+   "over"
+  ],
+  "pieces_qwen": 2,
+  "pieces_claude": 2,
+  "gender_same": true,
+  "qwen_q": [
+   "nehru jacket",
+   "white kurta pajama"
+  ],
+  "claude_q": [
+   "men's thread work Nehru jacket",
+   "men's white kurta pajama set"
+  ]
+ },
+ {
+  "n": 50,
+  "prompt": "Haldi function ke liye yellow kurti set budget 1000 rupees",
+  "kept_qwen": 0.2857142857142857,
+  "kept_claude": 0.2857142857142857,
+  "lost_qwen": [
+   "function",
+   "liye",
+   "haldi",
+   "rupees",
+   "budget"
+  ],
+  "lost_claude": [
+   "function",
+   "liye",
+   "haldi",
+   "rupees",
+   "budget"
+  ],
+  "pieces_qwen": 1,
+  "pieces_claude": 1,
+  "gender_same": true,
+  "qwen_q": [
+   "yellow kurti set"
+  ],
+  "claude_q": [
+   "women's yellow kurti set"
+  ]
+ }
+]

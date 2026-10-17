@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-13T12:20:16",
+  "n_prompts": 30,
+  "model": "qwen3:4b-instruct via langchain-ollama",
+  "checks_passed": {
+    "v1": {
+      "not_empty": "30/30",
+      "no_vague_piece": "27/30",
+      "budget": "30/30",
+      "gender": "30/30",
+      "gender_stated_found": "13/14",
+      "product_kept": "16/16",
+      "colour_kept": "9/9"
+    },
+    "v2": {
+      "not_empty": "28/30",
+      "no_vague_piece": "30/30",
+      "budget": "30/30",
+      "gender": "30/30",
+      "gender_stated_found": "11/14",
+      "product_kept": "16/16",
+      "colour_kept": "9/9"
+    }
+  }
+}

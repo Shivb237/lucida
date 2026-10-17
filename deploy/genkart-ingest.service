@@ -1,0 +1,22 @@
+[Unit]
+Description=GenKart ingest worker (SQS queue -> photo from S3 -> encoder -> both replicas of the shard)
+After=genkart-encoder.service network-online.target
+
+[Service]
+User=genkart
+WorkingDirectory=/opt/genkart
+Environment=PYTHONPATH=/opt/genkart/src
+# router.env gives SHARD_URLS; ingest.env gives the two SQS queue URLs (neither contains a secret)
+EnvironmentFile=/etc/genkart/router.env
+EnvironmentFile=/etc/genkart/ingest.env
+ExecStart=/opt/genkart/.venv/bin/python -m genkart.ingest_worker --sqs-queue ${SQS_QUEUE_URL} --sqs-dlq ${SQS_DLQ_URL} --region ap-south-1
+Restart=always
+RestartSec=3
+# logs go to a FILE (CloudWatch reads plain JSON lines from files; from the journal they arrive wrapped in extra fields)
+StandardOutput=append:/var/log/genkart/ingest.log
+StandardError=append:/var/log/genkart/ingest.log
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

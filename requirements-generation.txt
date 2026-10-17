@@ -1,0 +1,5 @@
+# Local image generation for the Milestone 2 experiment only (scripts/gen_images.py). Not needed for search, the web page or AWS.
+# Install with --no-deps (scripts/setup_env.sh does): diffusers 0.41.0 declares huggingface-hub<2.0, the project pins 2.2.0, and pip
+# refuses to resolve the pair (found when the environment was rebuilt from scratch on 2026-10-15). It ran fine this way in Milestone 2;
+# the other packages it needs are in requirements.txt. `pip check` will therefore always report this one mismatch: expected.
+diffusers==0.41.0

@@ -1,0 +1,35 @@
+# Secrets: never commit. Keys live in .env (copy .env.example).
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Data and caches: downloaded or generated, never committed (dataset licences differ per source)
+data/
+.cache/
+*.pkl
+*.npy
+*.parquet
+
+# Throwaway runs
+runs/smoke*
+
+# OS
+.DS_Store
+
+# Node libraries and build output (any folder): never commit
+node_modules/
+dist/
+cdk.out/
+.venv-*/
+
+# assembled Space folder (see scripts/make_space.sh)
+space-build/
+
+# editor settings
+.vscode/

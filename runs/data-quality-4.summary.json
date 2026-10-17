@@ -1,0 +1,32 @@
+{
+  "sizes": {
+    "marqo": 40513,
+    "kaggle": 44419,
+    "myntra2": 14480,
+    "mens3": 8641
+  },
+  "total": 108053,
+  "unique_after_merge": 102982,
+  "clusters_with_copies": 2890,
+  "products_in_clusters": 7961,
+  "within_new_sources": {
+    "myntra2": {
+      "clusters": 322,
+      "products": 676
+    },
+    "mens3": {
+      "clusters": 226,
+      "products": 541
+    }
+  },
+  "cross_pairs_ge_tau": {
+    "marqo-kaggle": 0,
+    "marqo-myntra2": 0,
+    "marqo-mens3": 8,
+    "kaggle-myntra2": 0,
+    "kaggle-mens3": 0,
+    "myntra2-mens3": 0
+  },
+  "tau_within": 0.97,
+  "tau_cross": 0.95
+}

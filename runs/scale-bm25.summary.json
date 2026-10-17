@@ -1,0 +1,66 @@
+{
+  "setup": {
+    "method": "bm25",
+    "name": "scale-bm25",
+    "seed": 0,
+    "n_queries": 852,
+    "n_products": 40513,
+    "dataset": "Marqo/marqo-GS-10M",
+    "dataset_revision": "eb013094f39e8b17f5b9c6ca05a4a1f1ae0c7309",
+    "shards": [
+      "data/in_domain-157.parquet",
+      "data/in_domain-168.parquet",
+      "data/in_domain-116.parquet",
+      "data/in_domain-141.parquet",
+      "data/in_domain-163.parquet",
+      "data/in_domain-20.parquet",
+      "data/in_domain-219.parquet",
+      "data/in_domain-23.parquet",
+      "data/in_domain-24.parquet",
+      "data/in_domain-265.parquet",
+      "data/in_domain-278.parquet",
+      "data/in_domain-287.parquet",
+      "data/in_domain-294.parquet",
+      "data/in_domain-32.parquet",
+      "data/in_domain-323.parquet",
+      "data/in_domain-332.parquet",
+      "data/in_domain-335.parquet",
+      "data/in_domain-369.parquet",
+      "data/in_domain-95.parquet",
+      "data/in_domain-97.parquet"
+    ],
+    "sample": "data/sample_scale",
+    "date": "2026-10-13T00:09:59"
+  },
+  "embed_seconds": 0.0,
+  "metrics": {
+    "ndcg10": {
+      "mean": 0.262,
+      "ci95": [
+        0.2485,
+        0.2765
+      ]
+    },
+    "recall10": {
+      "mean": 0.0985,
+      "ci95": [
+        0.0906,
+        0.1062
+      ]
+    },
+    "recall50": {
+      "mean": 0.2877,
+      "ci95": [
+        0.2696,
+        0.3045
+      ]
+    },
+    "mrr": {
+      "mean": 0.2721,
+      "ci95": [
+        0.249,
+        0.2952
+      ]
+    }
+  }
+}

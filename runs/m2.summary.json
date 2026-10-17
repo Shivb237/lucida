@@ -1,0 +1,234 @@
+{
+  "setup": {
+    "n_queries": 20,
+    "n_products": 3128,
+    "date": "2026-10-11T22:38:26",
+    "generator": "stable-diffusion-v1-5/stable-diffusion-v1-5",
+    "generator_revision": "451f4fe16113bff5a5d2269ed5ad43b0592e9a14",
+    "device": "mps",
+    "torch": "2.14.1",
+    "torchvision": "0.29.1",
+    "resnet_weights": "torchvision ResNet50 IMAGENET1K_V1, 2048-d avgpool, brute-force cosine",
+    "resnet_product_embed_seconds": 126.7
+  },
+  "metrics": {
+    "gen-resnet50": {
+      "ndcg10": {
+        "mean": 0.2136,
+        "ci95": [
+          0.1279,
+          0.298
+        ]
+      },
+      "recall10": {
+        "mean": 0.0683,
+        "ci95": [
+          0.0255,
+          0.119
+        ]
+      },
+      "recall50": {
+        "mean": 0.225,
+        "ci95": [
+          0.1361,
+          0.3268
+        ]
+      },
+      "mrr": {
+        "mean": 0.2078,
+        "ci95": [
+          0.0983,
+          0.3394
+        ]
+      }
+    },
+    "gen-fashionsiglip": {
+      "ndcg10": {
+        "mean": 0.3516,
+        "ci95": [
+          0.2485,
+          0.4456
+        ]
+      },
+      "recall10": {
+        "mean": 0.1559,
+        "ci95": [
+          0.1039,
+          0.2081
+        ]
+      },
+      "recall50": {
+        "mean": 0.4286,
+        "ci95": [
+          0.2866,
+          0.574
+        ]
+      },
+      "mrr": {
+        "mean": 0.3867,
+        "ci95": [
+          0.2429,
+          0.5401
+        ]
+      }
+    },
+    "text+gen-fashionsiglip": {
+      "ndcg10": {
+        "mean": 0.439,
+        "ci95": [
+          0.355,
+          0.5181
+        ]
+      },
+      "recall10": {
+        "mean": 0.1813,
+        "ci95": [
+          0.1267,
+          0.2325
+        ]
+      },
+      "recall50": {
+        "mean": 0.6708,
+        "ci95": [
+          0.5636,
+          0.772
+        ]
+      },
+      "mrr": {
+        "mean": 0.4605,
+        "ci95": [
+          0.3246,
+          0.5942
+        ]
+      }
+    },
+    "direct-text": {
+      "ndcg10": {
+        "mean": 0.5489,
+        "ci95": [
+          0.4906,
+          0.5966
+        ]
+      },
+      "recall10": {
+        "mean": 0.2485,
+        "ci95": [
+          0.209,
+          0.2844
+        ]
+      },
+      "recall50": {
+        "mean": 0.8696,
+        "ci95": [
+          0.8243,
+          0.914
+        ]
+      },
+      "mrr": {
+        "mean": 0.4474,
+        "ci95": [
+          0.2986,
+          0.6042
+        ]
+      }
+    }
+  },
+  "paired_vs_direct_text": {
+    "gen-resnet50": {
+      "ndcg10": {
+        "mean": -0.3353,
+        "ci95": [
+          -0.4211,
+          -0.2359
+        ],
+        "better": 1,
+        "tied": 0,
+        "worse": 19
+      },
+      "recall50": {
+        "mean": -0.6445,
+        "ci95": [
+          -0.74,
+          -0.5285
+        ],
+        "better": 0,
+        "tied": 1,
+        "worse": 19
+      },
+      "mrr": {
+        "mean": -0.2396,
+        "ci95": [
+          -0.4192,
+          -0.0505
+        ],
+        "better": 4,
+        "tied": 1,
+        "worse": 15
+      }
+    },
+    "gen-fashionsiglip": {
+      "ndcg10": {
+        "mean": -0.1972,
+        "ci95": [
+          -0.2906,
+          -0.1102
+        ],
+        "better": 3,
+        "tied": 0,
+        "worse": 17
+      },
+      "recall50": {
+        "mean": -0.4409,
+        "ci95": [
+          -0.5817,
+          -0.3055
+        ],
+        "better": 0,
+        "tied": 3,
+        "worse": 17
+      },
+      "mrr": {
+        "mean": -0.0607,
+        "ci95": [
+          -0.2793,
+          0.159
+        ],
+        "better": 7,
+        "tied": 3,
+        "worse": 10
+      }
+    },
+    "text+gen-fashionsiglip": {
+      "ndcg10": {
+        "mean": -0.1098,
+        "ci95": [
+          -0.1733,
+          -0.0528
+        ],
+        "better": 3,
+        "tied": 0,
+        "worse": 17
+      },
+      "recall50": {
+        "mean": -0.1988,
+        "ci95": [
+          -0.3,
+          -0.1088
+        ],
+        "better": 1,
+        "tied": 4,
+        "worse": 15
+      },
+      "mrr": {
+        "mean": 0.0131,
+        "ci95": [
+          -0.2011,
+          0.2143
+        ],
+        "better": 8,
+        "tied": 4,
+        "worse": 8
+      }
+    }
+  }
+}

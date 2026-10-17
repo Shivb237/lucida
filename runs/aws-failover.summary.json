@@ -1,0 +1,102 @@
+{
+ "run2": {
+  "before_stop": {
+   "n": 25,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 315,
+   "p95_ms": 337,
+   "max_ms": 344,
+   "mean_hedged_of_4": 2.56,
+   "requests_with_failover": 0
+  },
+  "B_shutting_down": {
+   "n": 8,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 321,
+   "p95_ms": 339,
+   "max_ms": 339,
+   "mean_hedged_of_4": 1.25,
+   "requests_with_failover": 8
+  },
+  "after": {
+   "n": 86,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 344,
+   "p95_ms": 387,
+   "max_ms": 545,
+   "mean_hedged_of_4": 3.47,
+   "requests_with_failover": 1
+  }
+ },
+ "run3": {
+  "before_stop": {
+   "n": 24,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 320,
+   "p95_ms": 357,
+   "max_ms": 360,
+   "mean_hedged_of_4": 2.88,
+   "requests_with_failover": 0
+  },
+  "B_shutting_down": {
+   "n": 7,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 309,
+   "p95_ms": 342,
+   "max_ms": 342,
+   "mean_hedged_of_4": 1.71,
+   "requests_with_failover": 7
+  },
+  "B_stopped_router_uses_A": {
+   "n": 60,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 340,
+   "p95_ms": 374,
+   "max_ms": 608,
+   "mean_hedged_of_4": 3.42,
+   "requests_with_failover": 0
+  },
+  "B_booting": {
+   "n": 5,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 328,
+   "p95_ms": 379,
+   "max_ms": 379,
+   "mean_hedged_of_4": 1.2,
+   "requests_with_failover": 5
+  },
+  "B_back": {
+   "n": 23,
+   "errors": 0,
+   "partial": 0,
+   "median_ms": 314,
+   "p95_ms": 346,
+   "max_ms": 349,
+   "mean_hedged_of_4": 2.87,
+   "requests_with_failover": 0
+  }
+ },
+ "run1_healthy_120s": {
+  "n": 120,
+  "errors": 0,
+  "partial": 0,
+  "median_ms": 316,
+  "p95_ms": 342,
+  "max_ms": 473,
+  "mean_hedged_of_4": 2.8,
+  "requests_with_failover": 0
+ },
+ "totals": {
+  "searches": 358,
+  "errors": 0,
+  "partial_answers": 0
+ },
+ "note": "stop/start times were not logged by the probe; phases are inferred from when failovers appeared. runs/aws-failover.jsonl holds 3 runs (the probe appends); run 3 is the one shown in the session"
+}

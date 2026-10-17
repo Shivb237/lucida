@@ -1,0 +1,97 @@
+{
+ "what": "router load test run ON the router host (t4g.large, 2 vCPU) against localhost, scripts/aws_loadtest.py, 2026-10-15",
+ "source": "table pasted by the user from scripts/aws_run.sh output (hand-copied; the raw JSONL stayed on the router in /tmp/loadtest.jsonl); runs/aws-loadtest.jsonl was saved with RAW=1 scripts/aws_run.sh (machine-logged, 7 records)",
+ "levels": [
+  {
+   "concurrency": 1,
+   "requests": 40,
+   "req_per_s": 3.18,
+   "p50_ms": 311.4,
+   "p95_ms": 332.5,
+   "p99_ms": 339.1,
+   "max_ms": 339.1,
+   "errors": 0,
+   "partial": 0,
+   "cpu_busy_pct": 69.2
+  },
+  {
+   "concurrency": 2,
+   "requests": 40,
+   "req_per_s": 4.16,
+   "p50_ms": 472.4,
+   "p95_ms": 519.5,
+   "p99_ms": 535.4,
+   "max_ms": 535.4,
+   "errors": 0,
+   "partial": 0,
+   "cpu_busy_pct": 90.8
+  },
+  {
+   "concurrency": 4,
+   "requests": 40,
+   "req_per_s": 3.99,
+   "p50_ms": 1036.4,
+   "p95_ms": 1140.8,
+   "p99_ms": 1170.9,
+   "max_ms": 1170.9,
+   "errors": 0,
+   "partial": 0,
+   "cpu_busy_pct": 96.7
+  },
+  {
+   "concurrency": 8,
+   "requests": 80,
+   "req_per_s": 3.98,
+   "p50_ms": 2019.5,
+   "p95_ms": 2243.0,
+   "p99_ms": 2322.5,
+   "max_ms": 2364.5,
+   "errors": 0,
+   "partial": 0,
+   "cpu_busy_pct": 99.6
+  },
+  {
+   "concurrency": 16,
+   "requests": 160,
+   "req_per_s": 3.75,
+   "p50_ms": 4170.0,
+   "p95_ms": 4726.2,
+   "p99_ms": 4907.4,
+   "max_ms": 4935.2,
+   "errors": 0,
+   "partial": 0,
+   "cpu_busy_pct": 99.0
+  },
+  {
+   "concurrency": 32,
+   "requests": 320,
+   "req_per_s": 6.38,
+   "p50_ms": 5003.9,
+   "p95_ms": 5027.5,
+   "p99_ms": 5052.5,
+   "max_ms": 5052.8,
+   "errors": 320,
+   "partial": 0,
+   "cpu_busy_pct": 100.0
+  }
+ ],
+ "reading": {
+  "saturation_req_per_s": "about 4 (3.2, 4.2, 4.0, 4.0, 3.8 for 1..16 in flight)",
+  "latency_rule": "latency is about in_flight / throughput (8 -> 2.0 s, 16 -> 4.2 s)",
+  "cliff": "32 in flight: 320 of 320 failed at the router's 5 s encoder timeout; 16 in flight was fine (max 4.94 s)",
+  "bottleneck": "encoder CPU (router host CPU 69% at 1 in flight, 97-100% from 4)"
+ },
+ "predictions": {
+  "plateau_about_4_per_s": "right",
+  "median_2s_at_8": "right (2,019 ms)",
+  "errors_between_16_and_32": "half right: none at 16, 100% at 32 (a cliff, not a slope)",
+  "shards_idle": "not confirmed yet (EC2 CPU metric lags 5 minutes)"
+ },
+ "monitoring_blind_spot": "failed searches had no timing in the router log line, so the latency chart under-reported during the overload; fixed in services/router/src/server.ts (total on every line)",
+ "second_invocation_after_overload": {
+  "observed": "a 7th record in runs/aws-loadtest.jsonl: a second run of the script started at concurrency 1 (40 requests): 15 errors, 0.42 req/s, p50 344.6 ms; it stopped itself (>20% errors)",
+  "circumstances": "time and reason NOT logged; the user was asked whether they re-ran the command",
+  "hypothesis_unconfirmed": "the encoder kept working through the roughly 320 requests the router had already given up on (no cancellation), so it was still saturated; a metastable failure. To be checked with Logs Insights on /genkart/encoder (requests per minute and slowest ms after the load stopped)",
+  "possible_fix": "router sends a deadline, the encoder drops requests nobody waits for; router limits in-flight searches and answers 'busy' quickly; then repeat the load test"
+ }
+}

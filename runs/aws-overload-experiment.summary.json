@@ -1,0 +1,164 @@
+{
+ "source": "runs/aws-overload-experiment.jsonl (machine-logged by scripts/aws_loadtest.py, pulled from the router host with RAW=1 scripts/aws_run.sh)",
+ "setting": "router host t4g.large (2 vCPU); levels 1,4,8,16,32 in flight, then a recovery check (20 sequential searches right away and 20 s later); one run per variant",
+ "variants": {
+  "baseline": {
+   "hardest_level": {
+    "concurrency": 32,
+    "requests": 320,
+    "ok": 0,
+    "shed": 0,
+    "errors": 320,
+    "goodput_per_s": 0.0,
+    "ok_p50_ms": null,
+    "ok_p95_ms": null,
+    "shed_p50_ms": null
+   },
+   "recovery_0s": {
+    "ok": 14,
+    "errors": 6,
+    "goodput_per_s": 0.39
+   },
+   "recovery_late": {
+    "phase": "recovery_20s",
+    "ok": 20,
+    "errors": 0,
+    "goodput_per_s": 3.14
+   },
+   "goodput_at_4_8_16": [
+    3.91,
+    3.91,
+    3.85
+   ]
+  },
+  "v1": {
+   "hardest_level": {
+    "concurrency": 32,
+    "requests": 320,
+    "ok": 100,
+    "shed": 0,
+    "errors": 220,
+    "goodput_per_s": 2.0,
+    "ok_p50_ms": 5011.5,
+    "ok_p95_ms": 5068.8,
+    "shed_p50_ms": null
+   },
+   "recovery_0s": {
+    "ok": 20,
+    "errors": 0,
+    "goodput_per_s": 3.09
+   },
+   "recovery_late": {
+    "phase": "recovery_20s",
+    "ok": 20,
+    "errors": 0,
+    "goodput_per_s": 3.12
+   },
+   "goodput_at_4_8_16": [
+    4.43,
+    4.31,
+    4.39
+   ]
+  },
+  "v2": {
+   "hardest_level": {
+    "concurrency": 32,
+    "requests": 320,
+    "ok": 12,
+    "shed": 308,
+    "errors": 0,
+    "goodput_per_s": 4.07,
+    "ok_p50_ms": 1968.1,
+    "ok_p95_ms": 2917.4,
+    "shed_p50_ms": 9.9
+   },
+   "recovery_0s": {
+    "ok": 20,
+    "errors": 0,
+    "goodput_per_s": 3.12
+   },
+   "recovery_late": {
+    "phase": "recovery_20s",
+    "ok": 20,
+    "errors": 0,
+    "goodput_per_s": 3.19
+   },
+   "goodput_at_4_8_16": [
+    4.42,
+    4.34,
+    4.12
+   ]
+  }
+ },
+ "rebuilt_control": {
+  "file": "runs/aws-rebuilt-loadtest.jsonl",
+  "levels": [
+   {
+    "phase": "level",
+    "concurrency": 1,
+    "ok": 40,
+    "shed": 0,
+    "errors": 0,
+    "goodput_per_s": 3.16,
+    "ok_p50_ms": 312.8,
+    "ok_p95_ms": 348.2,
+    "shed_p50_ms": null
+   },
+   {
+    "phase": "level",
+    "concurrency": 4,
+    "ok": 40,
+    "shed": 0,
+    "errors": 0,
+    "goodput_per_s": 4.48,
+    "ok_p50_ms": 880.1,
+    "ok_p95_ms": 941.1,
+    "shed_p50_ms": null
+   },
+   {
+    "phase": "level",
+    "concurrency": 16,
+    "ok": 12,
+    "shed": 148,
+    "errors": 0,
+    "goodput_per_s": 4.29,
+    "ok_p50_ms": 1910.0,
+    "ok_p95_ms": 2782.5,
+    "shed_p50_ms": 3.0
+   },
+   {
+    "phase": "level",
+    "concurrency": 32,
+    "ok": 12,
+    "shed": 308,
+    "errors": 0,
+    "goodput_per_s": 4.13,
+    "ok_p50_ms": 1954.3,
+    "ok_p95_ms": 2860.6,
+    "shed_p50_ms": 14.2
+   },
+   {
+    "phase": "recovery_0s",
+    "concurrency": 1,
+    "ok": 20,
+    "shed": 0,
+    "errors": 0,
+    "goodput_per_s": 3.18,
+    "ok_p50_ms": 312.4,
+    "ok_p95_ms": 327.9,
+    "shed_p50_ms": null
+   },
+   {
+    "phase": "recovery_20s",
+    "concurrency": 1,
+    "ok": 20,
+    "shed": 0,
+    "errors": 0,
+    "goodput_per_s": 3.18,
+    "ok_p50_ms": 314.9,
+    "ok_p95_ms": 331.6,
+    "shed_p50_ms": null
+   }
+  ]
+ }
+}
