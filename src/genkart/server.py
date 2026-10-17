@@ -33,9 +33,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from genkart import guard
-from genkart import resources
-from genkart.brain import Brain, BrainError, parse as parse_brain, scrub
+from genkart import guard, resources, study
+from genkart.brain import Brain, BrainError, list_models, parse as parse_brain, scrub
 from genkart.catalogue import ALLOWED, Hit
 from genkart.understand import Piece, Plan
 
@@ -70,6 +69,7 @@ class Services:
     health: Callable[[], dict]
     guard: Callable[[str], guard.Verdict] | None = None            # safety check; without one only the plain-pattern rules run (no model)
     understand_byo: Callable[[str, Brain], tuple] | None = None   # the same step with the visitor's own model (genkart.brain): (plan, seconds) or (plan, seconds, usage); raises on failure
+    refine: Callable[[str, list[int], str | None, int], SearchOut] | None = None   # search again, moved toward the products the visitor liked (genkart.feedback); None where unsupported
 
 
 def _get_json(url: str, timeout: float = 1.0):
@@ -195,6 +195,18 @@ def default_services() -> Services:
             info["load_seconds"] = state.pop("load_seconds")
         return SearchOut("in-process", out, secs, info)
 
+    def refine(text: str, liked: list[int], gender: str | None, k: int) -> SearchOut:
+        import numpy as np
+
+        from genkart.feedback import refine as move_query
+
+        cat, encode = local()
+        vecs = [v for v in (cat.vector_of(i) for i in liked) if v is not None]
+        t0 = time.perf_counter()
+        q = move_query(encode([text])[0], np.stack(vecs) if vecs else None, None)      # likes only: every dislike weight made results worse (runs/feedback-sim.summary.json)
+        hits = [h for h in cat.search_all(q, k=k + len(liked), gender=gender if gender in ALLOWED else None) if h.product_id not in set(liked)][:k]      # "more like these": not the ones already liked
+        return SearchOut("in-process", [hits], [time.perf_counter() - t0], {"liked_found": len(vecs), "liked_sent": len(liked)})
+
     def colour(hit: Hit, kind: str):
         from genkart.catalogue import image_path
         from genkart.colour import dominant_colour
@@ -216,7 +228,7 @@ def default_services() -> Services:
         return {"ollama": ollama_up(), "router": r, "backend": "router" if r else "in-process",
                 "catalogue_loaded": "catalogue" in state, "graph_ready": "graph" in state}
 
-    return Services(ollama_up, understand, expand, search, colour, health, check_request, understand_byo)
+    return Services(ollama_up, understand, expand, search, colour, health, check_request, understand_byo, refine=refine)
 
 
 # ---------------------------------------------------------------------------------------------------------------- the safety check
@@ -301,7 +313,7 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
             yield step("understand", "done", secs, plan=plan.model_dump(), model=brain.label() if brain else MODEL, fell_back=fell_back, **({"usage": usage} if usage else {}))
         except Exception as e:
             plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
-            msg = f"{type(e).__name__}: {e}"
+            msg = str(e) if isinstance(e, BrainError) else f"{type(e).__name__}: {e}"      # a brain error is already plain words; the class name is noise to a visitor
             yield step("understand", "failed", error=(scrub(msg, brain.key) if brain else msg) + (". The whole sentence is searched as it is." if brain else ""), plan=plan.model_dump(), fell_back=True)
 
     # 3. expand with the knowledge graph
@@ -406,6 +418,18 @@ class SearchIn(BaseModel):
     brain: BrainIn | None = None
 
 
+class ModelsIn(BaseModel):
+    kind: str = Field(max_length=20)
+    key: str = Field(max_length=500)
+    base_url: str | None = Field(default=None, max_length=300)
+
+
+class RefineIn(BaseModel):
+    q: str = Field(min_length=1, max_length=300)
+    liked: list[str] = Field(min_length=1, max_length=20, description="product ids as text (they are larger than JavaScript numbers can hold)")
+    gender: str | None = Field(default=None, max_length=10)
+
+
 class RateLimit:
     """At most `per_minute` searches per visitor per minute (0 = off). Visitors are told apart by address; behind a proxy (GENKART_BEHIND_PROXY=1)
     the address is the first one in X-Forwarded-For, which the host's own proxy sets. Memory stays small: old entries are dropped as they expire."""
@@ -442,10 +466,11 @@ def create_app(services: Callable[[], Services] = default_services, root: pathli
 
     limiter = RateLimit(int(os.environ.get("GENKART_RATE_PER_MIN", "0")))
     behind_proxy = os.environ.get("GENKART_BEHIND_PROXY") == "1"
+    study_on = study.add_routes(app, root=root, results=lambda texts: [[_hit_json(h) for h in hs] for hs in svc().search(texts, None, PER_PIECE).pieces])
 
     @app.middleware("http")
     async def _rate_limit(request: Request, call_next):
-        if request.url.path in ("/api/search", "/api/plain"):
+        if request.url.path in ("/api/search", "/api/plain", "/api/refine", "/api/models", "/api/study/answer", "/api/study/consent"):
             who = request.client.host if request.client else "?"
             if behind_proxy and request.headers.get("x-forwarded-for"):
                 # the LAST entry: the host's proxy appends the real client address to whatever the client sent, so the first entry is the visitor's to fake
@@ -465,7 +490,7 @@ def create_app(services: Callable[[], Services] = default_services, root: pathli
 
     @app.get("/api/health")
     def health():
-        return {"ok": True, "byo": svc().understand_byo is not None, "hosted": os.environ.get("GENKART_HOSTED") == "1", **svc().health()}
+        return {"ok": True, "byo": svc().understand_byo is not None, "hosted": os.environ.get("GENKART_HOSTED") == "1", "study": study_on, **svc().health()}
 
     @app.get("/api/resources")
     def resources_now():
@@ -507,6 +532,30 @@ def create_app(services: Callable[[], Services] = default_services, root: pathli
         t = time.perf_counter()
         out = svc().search([text], None, PER_PIECE)
         return {"seconds": round(time.perf_counter() - t, 4), "backend": out.backend, "hits": [_hit_json(h) for h in out.pieces[0]]}
+
+    @app.post("/api/refine")
+    def refine_search(body: RefineIn):
+        """Search again, moved toward the products the visitor liked. Same safety check as every search; nothing is stored."""
+        s = svc()
+        if s.refine is None:
+            raise HTTPException(status_code=501, detail="this server cannot refine a search")
+        verdict = s.guard(body.q) if s.guard else screen(body.q)
+        if verdict.action != "allow":
+            raise HTTPException(status_code=422, detail=guard.REFUSAL_MESSAGE)
+        try:
+            liked = [int(i) for i in body.liked]
+        except ValueError:
+            raise HTTPException(status_code=422, detail="liked must be product ids") from None
+        out = s.refine(guard.redact_pii(body.q).strip(), liked, body.gender, PER_PIECE)
+        return {"seconds": round(out.seconds[0], 4), "backend": out.backend, "info": out.info, "hits": [_hit_json(h) for h in out.pieces[0]]}
+
+    @app.post("/api/models")
+    def models(body: ModelsIn):
+        """The model names a visitor's key can use, asked of the provider (same address allow-list as a search; the key is used for this one call and never kept)."""
+        try:
+            return {"models": list_models(parse_brain(body.model_dump()))}
+        except BrainError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
 
     @app.get("/api/search")
     def search(q: str = Query(..., min_length=1, max_length=300)):

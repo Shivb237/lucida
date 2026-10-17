@@ -565,3 +565,48 @@ h2.step-h { margin: 0; }
 
 /* a drawing that could not load: says which address failed */
 .drawing-fail { display: flex; flex-direction: column; justify-content: center; gap: 6px; aspect-ratio: 1 / 1; padding: 12px; background: var(--z2); color: var(--paper); font-size: 12px; line-height: 16px; word-break: break-all; text-decoration: none; }
+
+/* photo credits at the bottom of every page */
+.photo-credits { border-top: 1px solid var(--z6); margin-top: 72px; padding: 24px 0 40px; font-size: 13px; line-height: 20px; color: var(--z4); }
+.photo-credits p { margin: 0; max-width: 90ch; }
+
+/* likes and the "more like what you liked" panel */
+.like-btn { margin-top: 6px; background: transparent; border: 1px solid var(--z6); padding: 4px 10px; font-size: 15px; line-height: 20px; cursor: pointer; color: inherit; }
+.like-btn[aria-pressed='true'] { background: var(--mag-film); border-color: var(--mag-film); color: var(--ink); }
+.like-btn:focus-visible { outline: 2px solid var(--mag-film); outline-offset: 2px; }
+.refine { margin-top: 56px; }
+.refine-lead { margin: 0 0 12px; max-width: 70ch; font-size: 15px; line-height: 22px; }
+.refine-go[disabled] { opacity: 0.5; cursor: not-allowed; }
+.refine-err { color: #a50e5d; margin: 12px 0 0; }
+.refine-note { margin: 20px 0 0; max-width: 80ch; font-size: 13px; line-height: 20px; color: var(--z4); }
+.refine-frames { margin-top: 8px; }
+
+/* the study page */
+.study-card { max-width: 980px; padding: 24px 26px; border: 1px solid var(--z6); background: var(--paper); margin-bottom: 40px; }
+.study-card ul { padding-left: 20px; line-height: 24px; }
+.study-check { display: flex; gap: 10px; align-items: center; margin: 18px 0; font-size: 16px; }
+.study-err { color: #a50e5d; }
+.study-progress { margin: 0; font-size: 14px; color: var(--z4); }
+.study-query { margin: 4px 0 18px; font-size: 24px; line-height: 30px; }
+.study-grid { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.study-grid:not(:has(.study-drawing)) { grid-template-columns: minmax(0, 1fr); }
+.study-drawing { margin: 0; } .study-drawing img { width: 100%; height: auto; display: block; background: var(--z2); }
+.study-drawing figcaption { font-size: 12px; color: var(--z4); margin-top: 6px; }
+.study-rate { margin: 22px 0 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.study-rate legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
+.study-rate .btn-line { min-width: 56px; font-size: 18px; }
+.study-ends { display: flex; gap: 18px; width: 100%; font-size: 12px; color: var(--z4); }
+.study-code code { font-size: 15px; word-break: break-all; background: var(--z2); color: var(--paper); padding: 8px 10px; display: inline-block; }
+.study-withdraw { margin-top: 20px; } .study-withdraw input { width: min(100%, 420px); }
+@media (max-width: 700px) { .study-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* "Load my models" in the mode menu */
+.mp-models { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.mp-err { margin: 0; color: #a50e5d; font-size: 14px; line-height: 20px; }
+
+/* the key-safety reassurance in the mode menu */
+.mp-assure { display: flex; gap: 8px; align-items: center; margin: -4px 0 0; font-size: 13px; line-height: 19px; color: var(--z4); }
+.mp-safe { font-size: 14px; line-height: 21px; }
+.mp-safe summary { cursor: pointer; font-weight: 700; }
+.mp-safe ul { margin: 8px 0 0; padding-left: 20px; }
+.mp-safe li { margin-bottom: 6px; }

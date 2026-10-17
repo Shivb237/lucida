@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react'
 import evidence, { type Strip } from 'virtual:evidence'
 import { Findings } from '../components/Findings'
 import { Exact, Plain } from '../components/Plain'
+import { PHOTO_BASE } from '../recorded'
 
 const MAX = 0.6
 
@@ -168,6 +169,7 @@ export function EvidencePage() {
           </p>
         </div>
         <Plain>{plainDrawing(drawing)}</Plain>
+        {PHOTO_BASE && <p style={{ margin: '16px 0 0' }}><a className="btn-line" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} href={`${PHOTO_BASE}/#/study`}>Take part in a 5-minute study: does a drawing help you?</a></p>}
         <Exact label="Show the 20 drawings and the exact numbers">
         <div className="film" style={{ marginTop: 28, padding: '24px 26px 22px' }}>
           <div className="edge" style={{ justifyContent: 'space-between' }}><span style={{ color: 'var(--paper)' }}>LUCIDA 400 · STABLE DIFFUSION 1.5 · 20 STEPS</span><span>runs/gen_sd15.jsonl · runs/m2-gen-resnet50.jsonl · runs/m2-direct-text.jsonl</span></div>

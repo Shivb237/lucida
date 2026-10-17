@@ -42,6 +42,7 @@ declare module 'virtual:evidence' {
     blind5: { n_prompts: number; n_ratings: number; mean: Record<'B' | 'C' | 'D', number>; share_good: Record<'B' | 'C' | 'D', number>; share_bad: Record<'B' | 'C' | 'D', number>;
               C_minus_B: Paired3; D_minus_B: Paired3; D_minus_C: Paired3 } | null
     guard: { hand_rules_only: GuardRow; hand_full: GuardRow; real_rules_only: GuardRow; real_full: GuardRow; model_review_seconds_mean: number; n_model_reviews: number; n_real_prompts: number } | null
+    feedback: { setup: { test_queries: number; shown_before_feedback: number }; metrics: { likes_only: { alpha: number; paired_difference: { mean: number; ci95: [number, number]; better: number; worse: number; equal: number } } } } | null
     claudeVsQwen: { n: number; word_kept_qwen: number; word_kept_claude: number; diff_claude_minus_qwen: number; diff_ci95: [number, number]; claude_cost_usd: number } | null
     pilot: Record<'random' | 'bm25' | 'siglipBase' | 'marqo' | 'siglip2' | 'zooclaw' | 'siglip2Bug' | 'zooclawBug', Strip>
     drawing: { text: Strip | null; textGen: Strip | null; genFashion: Strip | null; genResnet: Strip | null; frames: Frame[] }

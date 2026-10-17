@@ -253,3 +253,55 @@ def test_the_pipeline_puts_token_usage_in_the_understand_step_but_never_the_key(
 def test_extra_hosts_can_be_added_by_the_server_owner(monkeypatch):
     monkeypatch.setenv("GENKART_BYO_HOSTS", "llm.internal.example")
     assert parse({"kind": "openai", "key": KEY, "base_url": "https://llm.internal.example/v1"}).base_url == "https://llm.internal.example/v1"
+
+
+def _mock(handler):
+    import httpx
+
+    return httpx.Client(transport=httpx.MockTransport(handler))
+
+
+def test_list_models_asks_the_provider_filters_to_chat_models_and_strips_the_gemini_prefix():
+    import httpx
+
+    from genkart.brain import list_models
+
+    seen = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        seen.append((str(req.url), req.headers.get("authorization")))
+        return httpx.Response(200, json={"data": [{"id": "models/gemini-2.5-flash"}, {"id": "models/text-embedding-004"}, {"id": "gemini-2.5-pro"}, {"id": "models/imagen-4"}, {"id": "models/gemini-2.5-flash"}]})
+
+    names = list_models(Brain("openai", "x", KEY, "https://generativelanguage.googleapis.com/v1beta/openai"), _mock(handler))
+    assert names == ["gemini-2.5-flash", "gemini-2.5-pro"]                       # embeddings and image models left out, duplicates merged, prefix gone
+    assert seen == [("https://generativelanguage.googleapis.com/v1beta/openai/models", f"Bearer {KEY}")]
+
+
+def test_list_models_says_plainly_what_went_wrong_and_never_the_key():
+    import httpx
+
+    from genkart.brain import list_models
+
+    for status, words in ((401, "refused the key"), (403, "may not use"), (404, "no model list"), (429, "too many requests"), (503, "problem on its side")):
+        with pytest.raises(BrainError, match=words) as e:
+            list_models(Brain("openai", "x", KEY, "https://api.example.com/v1"), _mock(lambda req, s=status: httpx.Response(s)))
+        assert KEY not in str(e.value)
+
+    def boom(req):
+        raise httpx.ConnectError(f"cannot connect {KEY}")
+
+    with pytest.raises(BrainError, match="could not get the model list") as e:
+        list_models(Brain("openai", "x", KEY, "https://api.example.com/v1"), _mock(boom))
+    assert KEY not in str(e.value)
+    with pytest.raises(BrainError, match="no chat models"):
+        list_models(Brain("openai", "x", KEY, "https://api.example.com/v1"), _mock(lambda req: httpx.Response(200, json={"data": [{"id": "text-embedding-3"}]})))
+
+
+def test_a_wrong_model_name_is_explained_in_plain_words_not_with_library_text():
+    import httpx
+
+    with pytest.raises(BrainError) as e:
+        BrainChain(Brain("openai", "3.5", KEY, "https://generativelanguage.googleapis.com/v1beta/openai"), _mock(lambda req: httpx.Response(404))).invoke({"system": "s", "request": "r"})
+    msg = str(e.value)
+    assert "does not know the model" in msg and "3.5" in msg and "Load my models" in msg
+    assert "http" not in msg and KEY not in msg                                 # no addresses or links from the library's own text

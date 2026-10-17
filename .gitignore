@@ -29,7 +29,7 @@ cdk.out/
 .venv-*/
 
 # assembled Space folder (see scripts/make_space.sh)
-space-build/
+space-build*/
 
 # editor settings
 .vscode/

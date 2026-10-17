@@ -1,0 +1,205 @@
+{
+  "setup": {
+    "what": "SIMULATED shopper using the dataset's labels, residual evaluation (the 10 shown products removed from both rankings)",
+    "model": "Marqo/marqo-fashionSigLIP",
+    "model_revision": "c56244cc94f92419e8369fa71efdaf403b124ce8",
+    "dataset_revision": "eb013094f39e8b17f5b9c6ca05a4a1f1ae0c7309",
+    "n_queries_total": 852,
+    "tune_queries": 426,
+    "test_queries": 426,
+    "shown_before_feedback": 10,
+    "seed": 0,
+    "grid": [
+      [
+        0.25,
+        0.0
+      ],
+      [
+        0.25,
+        0.25
+      ],
+      [
+        0.25,
+        0.5
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        0.25
+      ],
+      [
+        0.5,
+        0.5
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.25
+      ],
+      [
+        1.0,
+        0.5
+      ],
+      [
+        2.0,
+        0.0
+      ],
+      [
+        2.0,
+        0.25
+      ],
+      [
+        2.0,
+        0.5
+      ]
+    ],
+    "date": "2026-10-17T20:38:55"
+  },
+  "tuning_half_grid": [
+    {
+      "alpha": 0.25,
+      "beta": 0.0,
+      "tune_gain_likes_only": 0.019736666929142263,
+      "tune_gain_likes_and_dislikes": 0.019736666929142263
+    },
+    {
+      "alpha": 0.25,
+      "beta": 0.25,
+      "tune_gain_likes_only": 0.019736666929142263,
+      "tune_gain_likes_and_dislikes": -0.010814039066108456
+    },
+    {
+      "alpha": 0.25,
+      "beta": 0.5,
+      "tune_gain_likes_only": 0.019736666929142263,
+      "tune_gain_likes_and_dislikes": -0.10950387528826203
+    },
+    {
+      "alpha": 0.5,
+      "beta": 0.0,
+      "tune_gain_likes_only": 0.015355811698033744,
+      "tune_gain_likes_and_dislikes": 0.015355811698033744
+    },
+    {
+      "alpha": 0.5,
+      "beta": 0.25,
+      "tune_gain_likes_only": 0.015355811698033744,
+      "tune_gain_likes_and_dislikes": -0.012699426160058463
+    },
+    {
+      "alpha": 0.5,
+      "beta": 0.5,
+      "tune_gain_likes_only": 0.015355811698033744,
+      "tune_gain_likes_and_dislikes": -0.045107563371983676
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.0,
+      "tune_gain_likes_only": 0.009346377849223358,
+      "tune_gain_likes_and_dislikes": 0.009346377849223358
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.25,
+      "tune_gain_likes_only": 0.009346377849223358,
+      "tune_gain_likes_and_dislikes": -0.021710193102901818
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.5,
+      "tune_gain_likes_only": 0.009346377849223358,
+      "tune_gain_likes_and_dislikes": -0.04365733786199764
+    },
+    {
+      "alpha": 2.0,
+      "beta": 0.0,
+      "tune_gain_likes_only": -0.0015263919133847595,
+      "tune_gain_likes_and_dislikes": -0.0015263919133847595
+    },
+    {
+      "alpha": 2.0,
+      "beta": 0.25,
+      "tune_gain_likes_only": -0.0015263919133847595,
+      "tune_gain_likes_and_dislikes": -0.029623427666320517
+    },
+    {
+      "alpha": 2.0,
+      "beta": 0.5,
+      "tune_gain_likes_only": -0.0015263919133847595,
+      "tune_gain_likes_and_dislikes": -0.05189512537764867
+    }
+  ],
+  "metrics": {
+    "likes_only": {
+      "alpha": 0.25,
+      "beta": 0.0,
+      "n_test_queries": 426,
+      "ndcg10_residual_without_feedback": {
+        "mean": 0.2805,
+        "ci95": [
+          0.262,
+          0.298
+        ]
+      },
+      "ndcg10_residual_with_feedback": {
+        "mean": 0.2975,
+        "ci95": [
+          0.2801,
+          0.3169
+        ]
+      },
+      "paired_difference": {
+        "mean": 0.017,
+        "ci95": [
+          0.0055,
+          0.0277
+        ],
+        "better": 171,
+        "worse": 140,
+        "equal": 115
+      },
+      "queries_with_at_least_one_like": 313
+    },
+    "likes_and_dislikes": {
+      "alpha": 0.25,
+      "beta": 0.0,
+      "n_test_queries": 426,
+      "ndcg10_residual_without_feedback": {
+        "mean": 0.2805,
+        "ci95": [
+          0.262,
+          0.298
+        ]
+      },
+      "ndcg10_residual_with_feedback": {
+        "mean": 0.2975,
+        "ci95": [
+          0.2801,
+          0.3169
+        ]
+      },
+      "paired_difference": {
+        "mean": 0.017,
+        "ci95": [
+          0.0055,
+          0.0277
+        ],
+        "better": 171,
+        "worse": 140,
+        "equal": 115
+      },
+      "queries_with_at_least_one_like": 313
+    }
+  },
+  "caveats": [
+    "a simulated shopper is not a person",
+    "'disliked' means 'not listed for the query' and the labels are incomplete",
+    "one round of feedback on 10 shown products only"
+  ]
+}

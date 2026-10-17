@@ -97,6 +97,7 @@ function evidence() {
     understanding: (() => { const m = readJson('m4.summary.json')?.results?.valid_rewrites
       return m && { n: readJson('m4.summary.json').setup.n_valid as number, original: m['embed-original'].ndcg10.mean as number, raw: m['embed-raw'].ndcg10.mean as number, understood: m['embed-understood'].ndcg10.mean as number } })(),
     blind5: readJson('blind-test5.summary.json'), guard: readJson('guard.summary.json'), claudeVsQwen: readJson('claude-vs-qwen.summary.json'),
+    feedback: readJson('feedback-sim.summary.json'),
     // the distributed system (Milestone 6): router, shards, replicas, failures, ingestion
     system: {
       e2e: readJson('router-e2e.summary.json'), chaos: readJson('chaos.summary.json'), replicas: readJson('chaos-replicas.summary.json'),
@@ -117,5 +118,5 @@ function genkartLocal(): Plugin {
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',   // GitHub Pages serves a project at /<repo-name>/: the workflow sets VITE_BASE
   plugins: [react(), genkartLocal()],
-  server: { proxy: { '/api': 'http://localhost:8000' } },
+  server: { proxy: { '/api': process.env.GENKART_API ?? 'http://localhost:8000' } },   // GENKART_API points the dev page at a server on another port
 })

@@ -67,6 +67,50 @@ def _check_url(url: str) -> str:
     return url.rstrip("/")
 
 
+def explain_status(code: int, model: str = "") -> str:
+    """A provider's HTTP status in plain words for the visitor (never the raw library message, which carries addresses and links)."""
+    if code == 401:
+        return "the provider refused the key (401)"
+    if code == 403:
+        return "the provider says this key may not use that model or service (403)"
+    if code == 404:
+        return f"the provider does not know the model \u201c{model}\u201d (404): press \u201cLoad my models\u201d in the mode menu and pick one from the list"
+    if code == 429:
+        return "the provider says too many requests (429): wait a moment or check your plan"
+    if code >= 500:
+        return f"the provider had a problem on its side ({code}): try again in a moment"
+    return f"the provider did not accept the request ({code})"
+
+
+_NOT_CHAT = re.compile(r"embed|tts|whisper|moderation|image|imagen|veo|audio|transcri|dall-e|rerank|guard|aqa|robotics|live", re.IGNORECASE)
+
+
+def list_models(brain: Brain, client: httpx.Client | None = None) -> list[str]:
+    """The model names this key can use, asked of the provider itself (so a visitor never has to guess a name). Chat-capable names only, best guess by
+    name; Gemini lists names as 'models/<name>', which the chat address does not want. Raises BrainError with a plain message (never the key)."""
+    own = client is None
+    http = client or httpx.Client(timeout=httpx.Timeout(15.0, connect=5.0))
+    try:
+        if brain.kind == "anthropic":
+            r = http.get("https://api.anthropic.com/v1/models", params={"limit": 100}, headers={"x-api-key": brain.key, "anthropic-version": "2023-06-01"})
+        else:
+            r = http.get(f"{brain.base_url}/models", headers={"authorization": f"Bearer {brain.key}"})
+        if r.status_code >= 400:
+            raise BrainError("the provider has no model list at that address (404): check the provider you chose" if r.status_code == 404 else explain_status(r.status_code))
+        ids = [str(m.get("id", "")).removeprefix("models/") for m in (r.json().get("data") or []) if isinstance(m, dict)]
+    except BrainError:
+        raise
+    except Exception as e:  # noqa: BLE001  a network failure or a reply that is not JSON: say so, without the key
+        raise BrainError(scrub(f"could not get the model list ({type(e).__name__})", brain.key)) from None
+    finally:
+        if own:
+            http.close()
+    names = sorted({i for i in ids if i and not _NOT_CHAT.search(i)})
+    if not names:
+        raise BrainError("the provider returned no chat models for this key: check the key and the provider you chose")
+    return names
+
+
 def parse(raw: dict) -> Brain:
     """Validate what the page sent. Raises BrainError with a plain message (never containing the key)."""
     kind = str(raw.get("kind", ""))
@@ -124,6 +168,9 @@ class BrainChain:
         except BrainError:
             raise
         except Exception as e:  # noqa: BLE001  whatever the provider or network did, the key must not leave inside the message
+            code = getattr(e, "status_code", None)         # the Anthropic library's HTTP errors carry the status
+            if isinstance(code, int):
+                raise BrainError(explain_status(code, self.brain.model)) from None
             raise BrainError(scrub(f"{type(e).__name__}: {e}", self.brain.key)[:400]) from None
         finally:
             if self._own_http:
@@ -152,11 +199,8 @@ class BrainChain:
         if r.status_code == 400:           # some providers do not know JSON mode: the prompt already demands JSON only, so ask again without it
             body.pop("response_format")
             r = self.http.post(url, json=body, headers=headers)
-        if r.status_code == 401:
-            raise BrainError("the provider refused the key (401)")
-        if r.status_code == 429:
-            raise BrainError("the provider says too many requests (429): wait a moment or check your plan")
-        r.raise_for_status()
+        if r.status_code >= 400:
+            raise BrainError(explain_status(r.status_code, self.brain.model))
         data = r.json()
         u = data.get("usage") or {}
         self.usage = {"input_tokens": u["prompt_tokens"], "output_tokens": u["completion_tokens"]} if "prompt_tokens" in u else None

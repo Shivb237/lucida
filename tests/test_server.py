@@ -317,3 +317,47 @@ def test_hosted_page_is_never_cached_but_hashed_assets_are(tmp_path, monkeypatch
     c = TestClient(create_app(lambda: make_services(), root=tmp_path))
     assert c.get("/").headers["cache-control"] == "no-cache"
     assert "immutable" in c.get("/assets/index-abc.js").headers["cache-control"]
+
+
+def test_refine_route_uses_the_liked_products_and_obeys_the_safety_check_and_the_cap():
+    calls = []
+
+    def refine(text, liked, gender, k):
+        calls.append((text, liked, gender))
+        from genkart.catalogue import Hit
+
+        return SearchOut("in-process", [[Hit("marqo", 7, "Linen shirt", 0.3)]], [0.01], {"liked_found": len(liked), "liked_sent": len(liked)})
+
+    base = make_services()
+    svc = Services(base.ollama_up, base.understand, base.expand, base.search, base.colour, base.health, base.guard, base.understand_byo, refine=refine)
+    c = TestClient(create_app(lambda: svc))
+    r = c.post("/api/refine", json={"q": "linen shirt", "liked": ["7", "9"], "gender": "men"})
+    assert r.status_code == 200 and r.json()["hits"][0]["id"] == "7" and calls == [("linen shirt", [7, 9], "men")]
+    assert c.post("/api/refine", json={"q": "linen shirt", "liked": []}).status_code == 422            # nothing liked: nothing to refine
+    assert c.post("/api/refine", json={"q": "linen shirt", "liked": [str(i) for i in range(21)]}).status_code == 422    # at most 20
+    assert c.post("/api/refine", json={"q": "linen shirt", "liked": ["x"]}).status_code == 422          # ids only
+    no = TestClient(create_app(lambda: make_services()))
+    assert no.post("/api/refine", json={"q": "linen shirt", "liked": ["7"]}).status_code == 501        # a server without the feature says so
+
+
+def test_models_route_lists_names_and_refuses_unknown_providers_and_bad_keys(monkeypatch):
+    import genkart.server as srv
+    from genkart.brain import BrainError
+
+    seen = []
+
+    def fake(brain):
+        seen.append((brain.kind, brain.base_url))
+        if brain.key == "badkey1234":
+            raise BrainError("the provider refused the key (401)")
+        return ["gemini-2.5-flash", "gemini-2.5-pro"]
+
+    monkeypatch.setattr(srv, "list_models", fake)
+    c = TestClient(create_app(lambda: make_services()))
+    good = {"kind": "openai", "key": "k" * 20, "base_url": "https://generativelanguage.googleapis.com/v1beta/openai"}
+    assert c.post("/api/models", json=good).json() == {"models": ["gemini-2.5-flash", "gemini-2.5-pro"]}
+    assert seen == [("openai", "https://generativelanguage.googleapis.com/v1beta/openai")]
+    assert c.post("/api/models", json={**good, "base_url": "https://internal.example.com/v1"}).status_code == 422     # not on the provider list: the server will not call it (SSRF)
+    assert c.post("/api/models", json={**good, "base_url": "http://169.254.169.254/latest"}).status_code == 422
+    r = c.post("/api/models", json={**good, "key": "badkey1234"})
+    assert r.status_code == 422 and "refused the key" in r.json()["detail"] and "badkey1234" not in r.text

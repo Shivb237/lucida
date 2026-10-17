@@ -1,11 +1,12 @@
 // The page's calls to the local server: health, example prompts, and the live step stream (EventSource).
 import { toBody, type BrainSetting } from './brain'
-import type { TraceEvent } from './trace'
+import type { Hit, TraceEvent } from './trace'
 
 export type RouterHealth = { ok: boolean; encoder: boolean; shards: boolean[]; replicas: boolean[][] }
 export type Health = {
   ok: boolean
   byo?: boolean            // this server can use the visitor's own model key
+  study?: boolean          // the consented study is running on this server
   hosted?: boolean         // a public host: no built-in model, Marqo catalogue only (the visitor's own key is the only way to read the sentence)
   ollama: boolean
   router: RouterHealth | null
@@ -88,4 +89,24 @@ function streamPost(q: string, brain: BrainSetting, onEvent: (e: TraceEvent) => 
     }
   })()
   return () => ac.abort()
+}
+
+/** The model names a key can use, asked of the provider through our server. Throws a plain message on any failure. */
+export async function loadModels(b: { kind: string; key: string; baseUrl: string }): Promise<string[]> {
+  const r = await fetch('/api/models', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: b.kind, key: b.key, base_url: b.baseUrl || undefined }) })
+  const d = await r.json().catch(() => null)
+  if (!r.ok) throw new Error(typeof d?.detail === 'string' ? d.detail : `the server answered ${r.status}`)
+  return d.models as string[]
+}
+
+export type Refined = { hits: Hit[]; seconds: number; info: { liked_found: number; liked_sent: number } }
+
+/** Search again, moved toward the products the visitor liked. Throws a plain message on any failure. */
+export async function refineSearch(q: string, liked: string[], gender?: string | null): Promise<Refined> {
+  const r = await fetch('/api/refine', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, liked, gender: gender ?? null }) })
+  if (!r.ok) {
+    const d = await r.json().catch(() => null)
+    throw new Error(typeof d?.detail === 'string' ? d.detail : `the server answered ${r.status}`)
+  }
+  return r.json()
 }

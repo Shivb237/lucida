@@ -1,6 +1,7 @@
 // The mode control at the top right of the navigation: says which mode you are in, explains both, and is where your own model key is entered.
 // A disclosure (a button that opens a panel), not a menu: the panel holds a form, so Escape closes it and Tab moves through it normally.
 import { useEffect, useRef, useState } from 'react'
+import { loadModels } from '../api'
 import { PHOTO_BASE } from '../recorded'
 import { describe, LOCAL, PROVIDERS, providerOf, usable, withProvider, type BrainSetting } from '../brain'
 
@@ -32,6 +33,9 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
   onMode: (m: 'viewer' | 'lab') => void
 }) {
   const [open, setOpen] = useState(false)
+  const [models, setModels] = useState<string[] | null>(null)       // the names the provider says this key can use (null: not asked yet)
+  const [modelState, setModelState] = useState<{ loading: boolean; error: string | null }>({ loading: false, error: null })
+  const [typing, setTyping] = useState(false)                         // chose "Other": type a name by hand
   const [draft, setDraft] = useState<BrainSetting>(() => (hosted && brain.kind === 'local' ? withProvider({ ...LOCAL, provider: 'anthropic' }, 'anthropic') : brain))
   const root = useRef<HTMLDivElement>(null)
   const btn = useRef<HTMLButtonElement>(null)
@@ -69,6 +73,15 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
   const host = (() => { try { return new URL(draft.baseUrl).host } catch { return '' } })()
   const using = brain.kind !== 'local'
   const set = (patch: Partial<BrainSetting>) => setDraft((d) => ({ ...d, ...patch }))
+  const forgetModels = () => { setModels(null); setTyping(false); setModelState({ loading: false, error: null }) }      // a new key or provider: the old list no longer applies
+  const fetchModels = () => {
+    setModelState({ loading: true, error: null })
+    loadModels({ kind: draft.kind, key: draft.key.trim(), baseUrl: draft.baseUrl }).then((names) => {
+      setModels(names); setTyping(false); setModelState({ loading: false, error: null })
+      if (!names.includes(draft.model)) set({ model: names.find((n) => /flash|haiku|mini|chat|small|instruct/i.test(n)) ?? names[0] })       // a sensible first pick; the visitor can change it
+    }).catch((e: Error) => setModelState({ loading: false, error: e.message }))
+  }
+  const canLoad = draft.key.trim().length >= 8 && (draft.provider !== 'custom' || /^https?:\/\//.test(draft.baseUrl.trim())) && !modelState.loading
 
   return (
     <div className="mode-wrap" ref={root}>
@@ -103,7 +116,7 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
             <section className="mp-card" aria-current={lab ? 'true' : undefined}>
               <h3>Lab {lab && <span className="mp-here">you are here</span>}</h3>
               {hosted && serverFound
-                ? <p>Search your own words live on this hosted Lab. It has no built-in AI model: the whole sentence is searched as typed, or read first by the AI you choose with your own API key (below). Only the Marqo catalogue is hosted.</p>
+                ? <p>Search your own words live on this hosted Lab. It has no built-in AI model: the whole sentence is searched as typed, or read first by the AI you choose with your own API key (below). All four catalogues are searched.</p>
                 : <p>Search your own words, live, on your own computer, with the model on it or with your own API key. Lab is for people who can run the project themselves. If that is not you, stay in Viewer: you miss nothing needed to judge the work.</p>}
               {serverFound && <p className="mp-note">{hosted ? 'The hosted Lab is running' : 'Your own server is running'} ({detail}).</p>}
               {serverFound
@@ -112,7 +125,7 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                   <>
                     {viewerOnly && PHOTO_BASE ? (
                       <>
-                        <p className="mp-note">Try the hosted Lab: search your own words live (Marqo catalogue only; add your own API key to use the AI step). It sleeps when nobody is using it, so the first visit takes about 45 seconds.</p>
+                        <p className="mp-note">Try the hosted Lab: search your own words live (all four catalogues; add your own API key to use the AI step). It sleeps when nobody is using it, so the first visit takes about 45 seconds.</p>
                         <a className="btn-live" href="#/wake" onClick={close}>
                           <span className="btn-live-main"><i className="live-dot" aria-hidden="true" />Open the live Lab<svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h11M10 4.5 14.5 9 10 13.5" /></svg></span>
                           <span className="btn-live-sub">Wakes a sleeping server · about 45 s</span>
@@ -155,16 +168,40 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                 {needsKey && (
                   <div className="mp-fields">
                     <label>Provider
-                      <select value={draft.provider} onChange={(e) => setDraft(withProvider(draft, e.target.value))}>
+                      <select value={draft.provider} onChange={(e) => { setDraft(withProvider(draft, e.target.value)); forgetModels() }}>
                         {PROVIDERS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
                       </select>
                     </label>
                     <label>API key
-                      <input type="password" value={draft.key} onChange={(e) => set({ key: e.target.value })} autoComplete="off" spellCheck={false} placeholder="paste your key" />
+                      <input type="password" value={draft.key} onChange={(e) => { set({ key: e.target.value }); forgetModels() }} autoComplete="off" spellCheck={false} placeholder="paste your key" />
                     </label>
-                    <label>Model name{kind === 'anthropic' ? ' (optional)' : ''}
-                      <input type="text" value={draft.model} onChange={(e) => set({ model: e.target.value })} autoComplete="off" spellCheck={false} placeholder={prov.modelHint} />
-                    </label>
+                    <p className="mp-assure"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="6" width="9" height="6.5" rx="1" /><path d="M4.5 6V4.2a2.5 2.5 0 0 1 5 0V6" /></svg> Not saved anywhere. Your key lives in this tab until you close or reload it.</p>
+                    <details className="mp-safe">
+                      <summary>Is my key safe? What happens to it</summary>
+                      <ul>
+                        <li><strong>In your browser:</strong> held in this tab's memory only. No cookie, no browser storage, never in the address. Reload or close the tab and it is gone.</li>
+                        <li><strong>At {hosted ? 'this hosted server' : 'the server'}:</strong> it arrives over HTTPS in the body of the request, is used for that one call (or for loading the model list), then dropped. It is never written to a file or a database, and it is kept out of logs and error messages. The code that does this is public in the repository; you cannot check the copy that is running from here.</li>
+                        <li><strong>At your provider:</strong> it is forwarded only to the provider you chose, and only to that provider's fixed address from a short list. Your provider bills you for what it runs.</li>
+                        <li><strong>What I cannot promise:</strong> the key does pass through this server on its way. So use a key you can revoke, ideally with a spend limit, and revoke it afterwards if you feel unsure.</li>
+                      </ul>
+                    </details>
+                    <div className="mp-models">
+                      <button type="button" className="btn-line" disabled={!canLoad} onClick={fetchModels}>{modelState.loading ? 'Asking your provider…' : models ? 'Reload my models' : 'Load my models'}</button>
+                      <span className="mp-note">{models ? `${models.length} models your key can use` : draft.key.trim().length < 8 ? 'Paste your key first, then load the names it can use.' : 'Asks your provider which model names your key can use, so you do not have to guess one.'}</span>
+                    </div>
+                    {modelState.error && <p role="alert" className="mp-err">{modelState.error}</p>}
+                    {models && !typing ? (
+                      <label>Model
+                        <select value={models.includes(draft.model) ? draft.model : ''} onChange={(e) => (e.target.value === '__other' ? (setTyping(true), set({ model: '' })) : set({ model: e.target.value }))}>
+                          {models.map((m) => <option key={m} value={m}>{m}</option>)}
+                          <option value="__other">Other: type a name…</option>
+                        </select>
+                      </label>
+                    ) : (
+                      <label>Model name{kind === 'anthropic' ? ' (optional)' : ''}
+                        <input type="text" value={draft.model} onChange={(e) => set({ model: e.target.value })} autoComplete="off" spellCheck={false} placeholder={prov.modelHint} />
+                      </label>
+                    )}
                     {draft.provider === 'custom' && (
                       <label>Server address
                         <input type="text" value={draft.baseUrl} onChange={(e) => set({ baseUrl: e.target.value })} autoComplete="off" spellCheck={false} placeholder="https://your-server.example/v1" />

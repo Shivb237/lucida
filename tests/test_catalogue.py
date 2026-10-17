@@ -67,3 +67,19 @@ def test_marqo_clean_falls_back_when_the_clean_files_are_missing(tmp_path):
     (tmp_path / "manual_flags.json").write_text('{"no_garment_visible": ["12"]}')
     labels, skip = marqo_clean([10, 11, 12], folder=str(tmp_path))          # the Marqo-only clusters from scripts/data_quality.py
     assert labels[0] == labels[1] != labels[2] and skip == {"12"}
+
+
+def test_search_all_merges_every_catalogue_even_when_the_general_one_scores_above_the_threshold():
+    from genkart.catalogue import Catalogue, Clusters, Source
+    from genkart.index import VectorIndex
+
+    def src(name, ids, vecs):
+        idx = VectorIndex(ids, np.array(vecs, dtype=np.float32), {})
+        return Source(name, idx, [f"{name} {i}" for i in ids], np.array([""] * len(ids)), Clusters(ids, np.arange(len(ids))))
+
+    general = src("marqo", [1_000_001], [[0.6, 0.8]])            # scores 0.6 against the query below: above THETA, so search() would stop here
+    other = src("kaggle", [5], [[1.0, 0.0]])                      # the better match
+    cat = Catalogue(general, [other])
+    q = np.array([1.0, 0.0], dtype=np.float32)
+    assert [h.source for h in cat.search(q, k=2)] == ["marqo"]    # the old routing never looks at the other catalogue
+    assert [h.source for h in cat.search_all(q, k=2)] == ["kaggle", "marqo"]

@@ -13,7 +13,7 @@ COPY --chown=user . .
 RUN PYTHONPATH=src python -c "from genkart import embed; embed.load('marqo-fashionsiglip')"
 # the product photos are fetched once, at build time, from Marqo's dataset (small copies) and live inside the image: no download at start-up, and nothing in git
 RUN PYTHONPATH=src python scripts/space_fetch_photos.py && ! grep -q 'missing [1-9]' data/images/.done
-# one address for page and server; Marqo catalogue only; per-visitor limits; the host's proxy appends the real client address to X-Forwarded-For
-ENV PYTHONPATH=src GENKART_SERVE_WEB=1 GENKART_CATALOGUES=marqo GENKART_BEHIND_PROXY=1 GENKART_RATE_PER_MIN=20 GENKART_MAX_RUNS=4 GENKART_BYO_MAX_CALLS=0 GENKART_HOSTED=1 HF_HUB_OFFLINE=1
+# one address for page and server; all four catalogues (the Marqo photos are baked in above, the other catalogues' thumbnails were copied in); per-visitor limits; the host's proxy appends the real client address to X-Forwarded-For
+ENV PYTHONPATH=src GENKART_SERVE_WEB=1 GENKART_IMAGES_FLAT=1 GENKART_STUDY=firestore GENKART_BEHIND_PROXY=1 GENKART_RATE_PER_MIN=20 GENKART_MAX_RUNS=4 GENKART_BYO_MAX_CALLS=0 GENKART_HOSTED=1 HF_HUB_OFFLINE=1
 EXPOSE 7860
 CMD ["sh", "start.sh"]

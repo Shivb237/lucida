@@ -7,6 +7,7 @@ import { ComposePanel, GraphSheet, LiveStrip, PlanCard, RecordTable, SearchPanel
 import { CostPanel, type Resources } from '../components/CostPanel'
 import { CompareCard, type Plain } from '../components/CompareCard'
 import { FrontDoor } from '../components/FrontDoor'
+import { RefinePanel } from '../components/Refine'
 import { ContactSheet, Glance, Print, type Mode } from '../components/Sheet'
 import { Sentence } from '../components/Sentence'
 import { DEMO_QUERY, playDemo } from '../demo'
@@ -37,6 +38,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const [mode, setMode] = useState<Mode>('idle')
   const [steps, setSteps] = useState<Record<StageId, StepState>>(emptySteps)
   const [running, setRunning] = useState(false)
+  const [liked, setLiked] = useState<Set<string>>(new Set())   // products the visitor tapped 👍 on in a live run; forgotten with the next run
   const [slow, setSlow] = useState(false)               // a live run has taken more than 2 seconds: say why (a sleeping host loading its model)
   const [photoWait, setPhotoWait] = useState(false)     // the Viewer asked the hosted Lab for photos and none has arrived yet
   const [error, setError] = useState<string | null>(null)
@@ -126,7 +128,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       window.setTimeout(() => document.getElementById('step1')?.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }), 120)
     }
-    setPlainLive(null); setSlow(false)
+    setPlainLive(null); setSlow(false); setLiked(new Set())
     setMode(m); setShown(q); setSteps(emptySteps()); setRunning(true); setError(null); setT0(t); setNow(t); setEndAt(null); setStartedAt({})
   }
   const runLive = (q: string) => {
@@ -175,9 +177,9 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
           <span className="lg">Viewer</span>
           <span style={{ marginLeft: 10 }}>Real runs recorded on {RECORDED.recorded_at}, replayed. Nothing is searched now. To search your own words, open the mode menu at the top right.</span>
           {PHOTO_BASE ? (
-            <span style={{ display: 'block', marginTop: 8 }}>Photos: the Marqo products load live from the author's hosted Lab; A sketch means the photo is kept local to respect that dataset's licence; the product shown is still the real search result. The hosted Lab sleeps when nobody uses it, so the first photos can take about 50 seconds (measured once: 47.5 s) and then arrive quickly. Each photo costs the author a small amount of cloud money (not measured), so please do not reload in a loop.</span>
+            <span style={{ display: 'block', marginTop: 8 }}>Photos load live from the author's hosted Lab (credits and how to ask for a removal are at the bottom of the page). A sketch means a photo could not be loaded; the product shown is still the real search result. The hosted Lab sleeps when nobody uses it, so the first photos can take about 50 seconds (measured once: 47.5 s) and then arrive quickly. Each photo costs the author a small amount of cloud money (not measured), so please do not reload in a loop.</span>
           ) : (
-            <span style={{ display: 'block', marginTop: 8 }}>Photos are never published here: those tiles stay as sketches.</span>
+            <span style={{ display: 'block', marginTop: 8 }}>This copy of the site has no hosted Lab linked, so product photos are not shown: those tiles stay as sketches.</span>
           )}
         </Notice>
       )}
@@ -282,7 +284,8 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
             </div>
           </section>
 
-          {search && search.pieces.length > 0 && <ContactSheet pieces={search.pieces} picked={picked} mode={mode} />}
+          {search && search.pieces.length > 0 && <ContactSheet pieces={search.pieces} picked={picked} mode={mode} liked={liked} onLike={mode === 'live' && !running ? (id) => setLiked((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n }) : undefined} />}
+          {mode === 'live' && !running && search && search.pieces.length > 0 && <RefinePanel query={shown} liked={liked} gender={((steps.understand.payload as { plan?: { gender?: string } } | undefined)?.plan?.gender) ?? null} />}
           <ComposePanel step={steps.compose} />
           {outfit?.items && outfit.items.length > 0 && <Print items={outfit.items} alreadyHas={outfit.already_has ?? []} mode={mode} />}
           {(live || recorded) && !running && outfit?.items && outfit.items.length > 0 && (

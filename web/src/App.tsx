@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { getHealth, type Health } from './api'
 import { LOCAL, type BrainSetting } from './brain'
 import { LabHint } from './components/LabHint'
+import { PhotoCredits } from './components/PhotoCredits'
 import { ModeMenu } from './components/ModeMenu'
 import { BackToTop, ErrorNet } from './components/Safety'
 import { NAME } from './brand'
@@ -10,12 +11,13 @@ import { PHOTO_BASE } from './recorded'
 import { DocsPage } from './pages/Docs'
 import { EvidencePage } from './pages/Evidence'
 import { SearchPage } from './pages/Search'
+import { StudyPage } from './pages/Study'
 import { SystemPage } from './pages/System'
 import { WakePage } from './pages/Wake'
 
-type Route = 'search' | 'evidence' | 'system' | 'docs' | 'words' | 'wake'
+type Route = 'search' | 'evidence' | 'system' | 'docs' | 'words' | 'wake' | 'study'
 const routeOf = (hash: string): Route =>
-  hash.startsWith('#/evidence') ? 'evidence' : hash.startsWith('#/system') ? 'system' : hash.startsWith('#/docs') ? 'docs' : hash.startsWith('#/words') ? 'words' : hash.startsWith('#/wake') ? 'wake' : 'search'
+  hash.startsWith('#/evidence') ? 'evidence' : hash.startsWith('#/system') ? 'system' : hash.startsWith('#/docs') ? 'docs' : hash.startsWith('#/words') ? 'words' : hash.startsWith('#/wake') ? 'wake' : hash.startsWith('#/study') ? 'study' : 'search'
 // A static build (VITE_VIEWER=1) or ?mode=viewer never looks for a server: it shows recorded evidence only.
 const VIEWER_ONLY = import.meta.env.VITE_VIEWER === '1' || new URLSearchParams(window.location.search).get('mode') === 'viewer'
 
@@ -61,6 +63,7 @@ export default function App() {
               <a href="#/system" className="lg" aria-current={route === 'system' ? 'page' : undefined}>System</a>
               <a href="#/docs" className="lg" aria-current={route === 'docs' ? 'page' : undefined}>Docs</a>
               <a href="#/words" className="lg" aria-current={route === 'words' ? 'page' : undefined}>Words</a>
+              {health?.study && <a href="#/study" className="lg" aria-current={route === 'study' ? 'page' : undefined}>Study</a>}
             </nav>
           </div>
           <ModeMenu key={health?.hosted ? 'hosted' : 'own'} lab={!viewer && !!health} serverFound={!!health} detail={detail} canByo={!!health?.byo} hosted={!!health?.hosted} viewerOnly={VIEWER_ONLY} brain={brain} onBrain={setBrain}
@@ -69,8 +72,9 @@ export default function App() {
       </header>
       {viewer && PHOTO_BASE && route !== 'wake' && <LabHint />}
       <ErrorNet key={route}>
-      {route === 'wake' ? <WakePage /> : route === 'search' ? <SearchPage health={health} viewer={viewer} brain={brain} /> : route === 'system' ? <SystemPage health={health} viewer={viewer} /> : route === 'docs' ? <DocsPage /> : <EvidencePage />}
+      {route === 'wake' ? <WakePage /> : route === 'study' ? <StudyPage /> : route === 'search' ? <SearchPage health={health} viewer={viewer} brain={brain} /> : route === 'system' ? <SystemPage health={health} viewer={viewer} /> : route === 'docs' ? <DocsPage /> : <EvidencePage />}
       </ErrorNet>
+      <PhotoCredits />
       <BackToTop />
     </div>
   )

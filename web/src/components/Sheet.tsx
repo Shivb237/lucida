@@ -24,7 +24,7 @@ export function SourceChip({ source }: { source: string }) {
   return <span className="src" title={SOURCE_NOTE[source] ?? ''}>{SOURCE_LABEL[source] ?? source}</span>
 }
 
-export function ContactSheet({ pieces, picked, mode }: { pieces: PieceResult[]; picked: Set<string>; mode: Mode }) {
+export function ContactSheet({ pieces, picked, mode, liked, onLike }: { pieces: PieceResult[]; picked: Set<string>; mode: Mode; liked?: Set<string>; onLike?: (id: string) => void }) {
   const sources = [...new Set(pieces.flatMap((p) => p.hits.map((h) => h.source)))]
   return (
     <section aria-label="Search results" className="film contact dev" style={{ marginTop: 72 }}>
@@ -58,6 +58,9 @@ export function ContactSheet({ pieces, picked, mode }: { pieces: PieceResult[]; 
                 <figcaption><span style={{ color: 'var(--z7)' }}>#{i + 1}</span><span>{h.score.toFixed(3)}</span></figcaption>
                 <div className="frame-title">{h.title || <span style={{ fontStyle: 'italic' }}>no title in this collection</span>}</div>
                 <SourceChip source={h.source} />
+                {onLike && (
+                  <button type="button" className="like-btn" aria-pressed={liked?.has(h.id) ?? false} aria-label={`Like: ${h.title || 'this product'}`} onClick={() => onLike(h.id)}>👍</button>
+                )}
               </figure>
             ))}
           </div>

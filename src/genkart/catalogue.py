@@ -57,6 +57,11 @@ class Source:
 
     def __post_init__(self):
         self._ids_u64 = np.array(self.index.ids, dtype=np.uint64)   # tie-break key: exact copies score equally, the smaller id wins
+        self._row = {pid: i for i, pid in enumerate(self.index.ids)}
+
+    def vector_of(self, pid: int) -> np.ndarray | None:
+        i = self._row.get(pid)
+        return None if i is None else self.index.vecs[i]
 
     def search(self, vec: np.ndarray, k: int, gender: str | None, types: list[str] | None = None) -> list[Hit]:
         scores = self.index.vecs @ vec
@@ -96,6 +101,14 @@ class Catalogue:
     def __init__(self, general: Source, specialists: list[Source]):
         self.general, self.specialists = general, specialists
 
+    def vector_of(self, pid: int) -> np.ndarray | None:
+        """The photo vector of a product in any catalogue (None for an id nobody here has)."""
+        for s in (self.general, *self.specialists):
+            v = s.vector_of(pid)
+            if v is not None:
+                return v
+        return None
+
     def search(self, vec: np.ndarray, k: int = 4, gender: str | None = None, article_types: list[str] | None = None, theta: float = THETA) -> list[Hit]:
         first = self.general.search(vec, k, gender)
         if first and first[0].score >= theta:
@@ -112,6 +125,22 @@ class Catalogue:
             if len(out) == k:
                 break
         return out or first
+
+    def search_all(self, vec: np.ndarray, k: int = 4, gender: str | None = None) -> list[Hit]:
+        """Every catalogue, best k overall. For a refined query (partly made of liked photos): search() tries the general catalogue first and only falls back when
+        its best score is below a threshold tuned for TEXT queries, and a query that contains photo vectors scores above it, which would hide the other catalogues."""
+        pool: list[Hit] = []
+        for s in (self.general, *self.specialists):
+            pool.extend(s.search(vec, k, gender))
+        pool.sort(key=lambda h: (-h.score, h.product_id))
+        seen, out = set(), []
+        for h in pool:
+            if h.product_id not in seen:
+                seen.add(h.product_id)
+                out.append(h)
+            if len(out) == k:
+                break
+        return out
 
     @classmethod
     def load_marqo_only(cls) -> "Catalogue":
@@ -168,7 +197,9 @@ class Catalogue:
 
 def image_path(pid: int) -> str:
     """Local photo of a product id (ids are disjoint by range: Marqo >= 1e6, Kaggle < 1e5, sharp Myntra 200000+, men's 300000+)."""
-    if pid >= 10**6:
+    import os
+
+    if pid >= 10**6 or os.environ.get("GENKART_IMAGES_FLAT") == "1":      # the hosted Lab keeps every catalogue's thumbnails in one folder (ids never clash)
         return f"data/images/{pid}.jpg"
     if pid < 100000:
         return f"data/kaggle/raw/images/{pid}.jpg"
