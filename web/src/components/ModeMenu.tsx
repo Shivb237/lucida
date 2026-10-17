@@ -110,8 +110,17 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                 ? (!lab && <button type="button" className="btn-line" onClick={() => { onMode('lab'); close() }}>Switch to Lab</button>)
                 : (
                   <>
-                    <p className="mp-note">{viewerOnly ? 'This public page cannot start Lab for you.' : 'No Lab server answers at this address.'} Lab runs on <strong>your</strong> computer. With the built-in model, nothing leaves it. With your own key, your sentence goes to the provider you chose.</p>
-                    {viewerOnly && PHOTO_BASE && <p><a className="btn-line" href="#/wake" onClick={close}>Open the live Lab (wakes the server, about 45 s)</a></p>}
+                    {viewerOnly && PHOTO_BASE ? (
+                      <>
+                        <p className="mp-note">Try the hosted Lab: search your own words live (Marqo catalogue only; add your own API key to use the AI step). It sleeps when nobody is using it, so the first visit takes about 45 seconds.</p>
+                        <a className="btn-live" href="#/wake" onClick={close}>
+                          <span className="btn-live-main"><i className="live-dot" aria-hidden="true" />Open the live Lab<svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h11M10 4.5 14.5 9 10 13.5" /></svg></span>
+                          <span className="btn-live-sub">Wakes a sleeping server · about 45 s</span>
+                        </a>
+                      </>
+                    ) : (
+                      <p className="mp-note">{viewerOnly ? 'This public page cannot start Lab for you.' : 'No Lab server answers at this address.'} Lab runs on <strong>your</strong> computer. With the built-in model, nothing leaves it. With your own key, your sentence goes to the provider you chose.</p>
+                    )}
                     <details className="mp-start">
                       <summary>How to start Lab</summary>
                       <ol>
