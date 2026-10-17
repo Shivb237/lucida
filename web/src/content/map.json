@@ -1,7 +1,7 @@
 {
  "graph": {
-  "nodes": 1554,
-  "links": 3317
+  "nodes": 1557,
+  "links": 3324
  },
  "areas": [
   {
@@ -149,7 +149,7 @@
     {
      "path": "src/genkart/server.py",
      "does": "Web backend for the UI: one request runs the whole pipeline, and every step is streamed to the page as a small \"trace\" event.",
-     "lines": 561,
+     "lines": 568,
      "uses": [
       "src/genkart/__init__.py",
       "src/genkart/brain.py",
@@ -1011,7 +1011,7 @@
     {
      "path": "web/src/pages/Evidence.tsx",
      "does": "The Evidence page: the short version in six lines, then each question with its plain answer and the exact bars and tables folded below.",
-     "lines": 266,
+     "lines": 278,
      "uses": [
       "web/package.json",
       "web/src/components/Findings.tsx",
@@ -1252,7 +1252,7 @@
     {
      "path": "tests/test_server.py",
      "does": "The pipeline streams one event per step, in order, with exact product ids as text. Everything outside is replaced by fakes: no model,",
-     "lines": 309,
+     "lines": 319,
      "uses": [
       "src/genkart/catalogue.py",
       "src/genkart/colour.py",

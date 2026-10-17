@@ -554,7 +554,14 @@ def create_app(services: Callable[[], Services] = default_services, root: pathli
     if os.environ.get("GENKART_SERVE_WEB") == "1" and dist.is_dir():      # one address for page and server (the hosted Lab); last, so every /api route wins
         from fastapi.staticfiles import StaticFiles
 
-        app.mount("/", StaticFiles(directory=dist, html=True), name="web")
+        class Site(StaticFiles):
+            async def get_response(self, path, scope):
+                r = await super().get_response(path, scope)
+                # the page itself is always re-checked (an old cached copy would load old script and image addresses); /assets files are named by content
+                r.headers["Cache-Control"] = "public, max-age=31536000, immutable" if path.startswith("assets/") else "no-cache"
+                return r
+
+        app.mount("/", Site(directory=dist, html=True), name="web")
     return app
 
 

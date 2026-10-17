@@ -1,10 +1,22 @@
 // The Evidence page: the short version in six lines, then each question with its plain answer and the exact bars and tables folded below.
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import evidence, { type Strip } from 'virtual:evidence'
 import { Findings } from '../components/Findings'
 import { Exact, Plain } from '../components/Plain'
 
 const MAX = 0.6
+
+/** One Stable Diffusion drawing. If it fails to load it is asked for once more (past any bad cached answer); if that fails too, a labelled tile says
+ *  which address failed, so the problem can be named instead of showing a bare broken-image icon. */
+function Drawing({ src, query }: { src: string; query: string }) {
+  const [tries, setTries] = useState(0)
+  if (tries >= 2) return <a className="drawing-fail" href={src} target="_blank" rel="noreferrer"><span className="lg">Drawing did not load</span><span>{src}</span></a>
+  return (
+    <img src={tries ? `${src}?retry=${tries}` : src} alt={`Stable Diffusion drawing for: ${query}`} width={512} height={512} loading="lazy" decoding="async"
+      onError={() => window.setTimeout(() => setTries((n) => n + 1), tries ? 0 : 1200)}
+      style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', background: 'var(--z2)' }} />
+  )
+}
 const pct = (v: number) => `${(Math.max(0, Math.min(MAX, v)) / MAX) * 100}%`
 
 // What is visibly missing from a drawing, noted by eye on 2026-10-13 (an observation, not a measurement).
@@ -165,7 +177,7 @@ export function EvidencePage() {
               return (
                 <figure key={f.queryId} style={{ margin: 0, position: 'relative' }}>
                   <div style={{ position: 'relative' }}>
-                    <img src={`${import.meta.env.BASE_URL}${f.image}`} alt={`Stable Diffusion drawing for: ${f.query}`} loading="lazy" style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', background: 'var(--z2)' }} />
+                    <Drawing src={`${import.meta.env.BASE_URL}${f.image}`} query={f.query} />
                     {SEEN[f.queryId] && <div className="tagnote lg">{SEEN[f.queryId]}</div>}
                     {won && <svg className="grease" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ left: '-8%', top: '-8%', width: '116%', height: '116%' }}><path pathLength={100} d="M52 3 C82 2 98 22 97 51 C96 81 74 98 46 97 C18 96 2 76 4 47 C6 20 27 5 60 6" fill="none" stroke="var(--mag-film)" strokeWidth="3.4" strokeLinecap="round" vectorEffect="non-scaling-stroke" /></svg>}
                   </div>

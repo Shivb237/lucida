@@ -562,3 +562,6 @@ h2.step-h { margin: 0; }
 .lab-hint-x:hover { color: var(--ink); }
 @media (max-width: 700px) { .lab-hint-arrow { display: none; } .lab-hint-x { margin-left: auto; } }
 @media (prefers-reduced-motion: reduce) { .lab-hint-arrow { animation: none; } }
+
+/* a drawing that could not load: says which address failed */
+.drawing-fail { display: flex; flex-direction: column; justify-content: center; gap: 6px; aspect-ratio: 1 / 1; padding: 12px; background: var(--z2); color: var(--paper); font-size: 12px; line-height: 16px; word-break: break-all; text-decoration: none; }

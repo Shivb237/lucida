@@ -307,3 +307,13 @@ def test_expand_says_no_graph_data_before_importing_pandas(tmp_path, monkeypatch
     plan = Plan(main_query="x", gender="unknown", pieces=[Piece(kind="other", search_text="x")])
     with pytest.raises(LookupError):
         server.default_services().expand(plan, "x")
+
+
+def test_hosted_page_is_never_cached_but_hashed_assets_are(tmp_path, monkeypatch):
+    (tmp_path / "web" / "dist" / "assets").mkdir(parents=True)
+    (tmp_path / "web" / "dist" / "index.html").write_text("<p>page</p>")
+    (tmp_path / "web" / "dist" / "assets" / "index-abc.js").write_text("1")
+    monkeypatch.setenv("GENKART_SERVE_WEB", "1")
+    c = TestClient(create_app(lambda: make_services(), root=tmp_path))
+    assert c.get("/").headers["cache-control"] == "no-cache"
+    assert "immutable" in c.get("/assets/index-abc.js").headers["cache-control"]
