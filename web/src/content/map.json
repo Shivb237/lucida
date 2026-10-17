@@ -1,7 +1,7 @@
 {
  "graph": {
-  "nodes": 1551,
-  "links": 3308
+  "nodes": 1554,
+  "links": 3317
  },
  "areas": [
   {
@@ -836,19 +836,21 @@
     {
      "path": "web/src/App.tsx",
      "does": "The page frame: routes (Search, Evidence, System, Docs, Words), the server health check, and the Viewer-only switch.",
-     "lines": 74,
+     "lines": 77,
      "uses": [
       "web/package.json",
       "web/src/api.ts",
       "web/src/brain.ts",
       "web/src/brand.ts",
+      "web/src/components/LabHint.tsx",
       "web/src/components/ModeMenu.tsx",
       "web/src/components/Safety.tsx",
       "web/src/pages/Docs.tsx",
       "web/src/pages/Evidence.tsx",
       "web/src/pages/Search.tsx",
       "web/src/pages/System.tsx",
-      "web/src/pages/Wake.tsx"
+      "web/src/pages/Wake.tsx",
+      "web/src/recorded.ts"
      ]
     },
     {
@@ -909,9 +911,17 @@
      ]
     },
     {
+     "path": "web/src/components/LabHint.tsx",
+     "does": "A slim strip under the header of the public Viewer: tells a visitor there is a live Lab to try with their own API key, without opening the mode menu.",
+     "lines": 28,
+     "uses": [
+      "web/package.json"
+     ]
+    },
+    {
      "path": "web/src/components/ModeMenu.tsx",
      "does": "The mode control at the top right of the navigation: says which mode you are in, explains both, and is where your own model key is entered.",
-     "lines": 193,
+     "lines": 202,
      "uses": [
       "web/package.json",
       "web/src/brain.ts",

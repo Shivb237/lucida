@@ -2,9 +2,11 @@
 import { useEffect, useState } from 'react'
 import { getHealth, type Health } from './api'
 import { LOCAL, type BrainSetting } from './brain'
+import { LabHint } from './components/LabHint'
 import { ModeMenu } from './components/ModeMenu'
 import { BackToTop, ErrorNet } from './components/Safety'
 import { NAME } from './brand'
+import { PHOTO_BASE } from './recorded'
 import { DocsPage } from './pages/Docs'
 import { EvidencePage } from './pages/Evidence'
 import { SearchPage } from './pages/Search'
@@ -65,6 +67,7 @@ export default function App() {
             onMode={(m) => setWantViewer(m === 'viewer')} />
         </div>
       </header>
+      {viewer && PHOTO_BASE && route !== 'wake' && <LabHint />}
       <ErrorNet key={route}>
       {route === 'wake' ? <WakePage /> : route === 'search' ? <SearchPage health={health} viewer={viewer} brain={brain} /> : route === 'system' ? <SystemPage health={health} viewer={viewer} /> : route === 'docs' ? <DocsPage /> : <EvidencePage />}
       </ErrorNet>
