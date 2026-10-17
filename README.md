@@ -1,8 +1,8 @@
-# GenKart v2
+# Lucida
 
-Fashion search that understands what you ask for, rebuilt on a measured foundation.
+Fashion search that understands what you ask for, built on a measured foundation. (Formerly called GenKart v2; the Python package and some settings keep the name `genkart`.)
 
-GenKart v1 (Flipkart GRiD 5.0, Level 2, 2023) turned a request into an AI-generated outfit picture and then found real catalogue products that looked like it. It had no real evaluation. v2 starts by measuring: how well can a text query find the right products, and does the generated-image step help at all? Context (season, occasion, profile) and a user study come next.
+GenKart v1 (Flipkart GRiD 5.0, Level 2, 2023) turned a request into an AI-generated outfit picture and then found real catalogue products that looked like it. It had no real evaluation. Lucida starts by measuring: how well can a text query find the right products, and does the generated-image step help at all? Context (season, occasion, profile) and a user study come next.
 
 ## What this project found (every number is from a logged run in `runs/`)
 
