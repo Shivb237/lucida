@@ -116,10 +116,14 @@ def _singular(w: str) -> str:
     return w
 
 
+_NOT_DISTINCTIVE = {"men", "mens", "women", "womens", "boys", "girls", "kids", "unisex", "s", "for", "and", "with", "the", "a",
+                    "black", "white", "red", "blue", "green", "yellow", "beige", "brown", "grey", "gray", "pink", "purple", "orange", "navy", "cream", "gold", "silver", "maroon", "olive", "khaki"}
+
+
 def expand_plan(g: nx.DiGraph, plan, text: str, strength: float = 0.5):
     """Use the graph to replace pieces the model invented, never pieces the shopper named.
 
-    A piece is the shopper's own when its last word appears in the request. Other pieces are replaced by the graph's top garment type
+    A piece is the shopper's own when any of its distinctive words (not a gender or a colour) appears in the request. Other pieces are replaced by the graph's top garment type
     for the same outfit role when that type is clearly characteristic of the context (score >= strength). For an outfit request
     with no named garment, missing top/bottom-or-dress/footwear roles are filled from the graph. Changes are listed in plan.notes.
     """
@@ -131,8 +135,9 @@ def expand_plan(g: nx.DiGraph, plan, text: str, strength: float = 0.5):
     prefix = _PEOPLE_PREFIX.get(plan.gender, "")
 
     def own(piece) -> bool:
-        words = re.findall(r"[a-z]+", piece.search_text.lower())
-        return bool(words) and _singular(words[-1]) in typed
+        # any distinctive word the shopper typed makes the piece theirs ("black tuxedo shirt" for "a black tuxedo": the graph once swapped it for kurtas)
+        words = [_singular(w) for w in re.findall(r"[a-z]+", piece.search_text.lower()) if w not in _NOT_DISTINCTIVE and not occasions_in(w)]   # an occasion ("diwali") is not a garment
+        return any(w in typed for w in words)
 
     def strong(role):
         top = sugg.get(role, [])

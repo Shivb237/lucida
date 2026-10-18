@@ -27,17 +27,18 @@ export function CostPanel({ steps, mode, brain, live, recorded }: { steps: Recor
 
   // reading the sentence
   const usage = (steps.understand.payload as { usage?: { input_tokens: number; output_tokens: number } }).usage
-  const byKey = mode === 'live' && brain.kind !== 'local'
+  const onDevice = mode === 'live' && brain.kind === 'device'
+  const byKey = mode === 'live' && brain.kind !== 'local' && !onDevice
   const known = KNOWN_PRICES[brain.model || (brain.kind === 'anthropic' ? 'claude-haiku-5-5' : '')]
   const pIn = (brain.priceIn ?? '').trim() !== '' ? Number(brain.priceIn) : known?.[0]
   const pOut = (brain.priceOut ?? '').trim() !== '' ? Number(brain.priceOut) : known?.[1]
-  const understandMoney = byKey
+  const understandMoney = onDevice ? { text: '$0', note: 'the model runs on your own device' } : byKey
     ? usage && pIn != null && pOut != null && Number.isFinite(pIn) && Number.isFinite(pOut)
       ? { text: usd((usage.input_tokens * pIn + usage.output_tokens * pOut) / 1e6), note: `${usage.input_tokens} in + ${usage.output_tokens} out tokens` }
-      : usage ? { text: 'give a price', note: `${usage.input_tokens} in + ${usage.output_tokens} out tokens; enter your provider's price per million tokens in the mode menu` } : { text: '—', note: 'the provider sent no token counts' }
+      : usage ? { text: 'give a price', note: `${usage.input_tokens} in + ${usage.output_tokens} out tokens; enter your provider's price per million tokens in Settings` } : { text: '—', note: 'the provider sent no token counts' }
     : { text: '$0', note: 'the model runs on this computer' }
   const model = res?.ollama[0]
-  const understandMem = byKey ? { text: 'none here', note: 'it runs at your provider' } : model ? { text: mem(model.size_mb), note: `${model.name}, kept in memory by Ollama` } : { text: '—', note: 'Ollama reported no loaded model' }
+  const understandMem = onDevice ? { text: 'none here', note: 'it runs on your own device' } : byKey ? { text: 'none here', note: 'it runs at your provider' } : model ? { text: mem(model.size_mb), note: `${model.name}, kept in memory by Ollama` } : { text: '—', note: 'Ollama reported no loaded model' }
 
   // searching
   const cluster = res?.cluster ?? []
@@ -82,7 +83,7 @@ export function CostPanel({ steps, mode, brain, live, recorded }: { steps: Recor
       <details className="cmp-exact">
         <summary>How these numbers are worked out</summary>
       {aws && <p className="cost-note"><strong>AWS, at one search per second:</strong> about ${Math.round(aws.one * 1e6)} per million searches. This is an estimate: three machines at about $0.10 an hour, from the project's notes. The real bill has not been read yet. The machines have been deleted, so nothing is billing now.</p>}
-      <p className="cost-note">{byKey ? 'Money for your key = tokens your provider reported × its price per million tokens. Known Claude models fill the price in; for others, enter yours in the mode menu. Your provider\'s invoice is the truth.' : 'Electricity, wear on your computer and network use are not counted.'}</p>
+      <p className="cost-note">{byKey ? 'Money for your key = tokens your provider reported × its price per million tokens. Known Claude models fill the price in; for others, enter yours in Settings. Your provider\'s invoice is the truth.' : 'Electricity, wear on your computer and network use are not counted.'}</p>
       </details>
     </section>
   )

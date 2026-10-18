@@ -32,7 +32,7 @@ export function recordedUnderstandMedian(): number {
 
 export function buildSteps(ev: Ev = evidence): StepDoc[] {
   const g = ev.guard, b3 = ev.findings.blind3, b4 = ev.findings.blind4, b5 = ev.blind5, gr = ev.findings.graph, oc = ev.findings.outfit, u = ev.understanding
-  const sc = ev.scale, dr = ev.drawing, cq = ev.claudeVsQwen
+  const sc = ev.scale, dr = ev.drawing, cq = ev.claudeVsQwen, ck = ev.checksEval
   return [
     {
       id: 'request', title: 'Your request',
@@ -78,6 +78,7 @@ export function buildSteps(ev: Ev = evidence): StepDoc[] {
       measured: [
         { text: `On ${sc.marqo.nQueries} searches over ${(sc.marqo.nProducts ?? 0).toLocaleString('en')} products, the match score (0 to 1) was ${n3(sc.marqo.ndcg10?.mean ?? 0)} for the fashion model, ${n3(sc.siglipBase.ndcg10?.mean ?? 0)} for a general model and ${n3(sc.bm25.ndcg10?.mean ?? 0)} for plain keyword search.`, source: sourceFile('scale-marqo-fashionsiglip.summary.json') },
         ...(b4 ? [{ text: `Adding three specialist collections raised a person's rating from ${n2(b4.methods.A.mean)} to ${n2(b4.methods.B.mean)} (out of 2) on ${b4.methods.A.n_prompts} Indian-occasion requests. It is the biggest effect we measured.`, source: sourceFile('blind-test4.summary.json') }] : []),
+        ...(ck ? [{ text: `Checks after the search (slot fit, children's items, one gender, the named colour first) cut rule breaks in the first pick on ${ck.setup.prompts} requests: a garment in the wrong slot ${ck.before.wrong_slot} to ${ck.after.wrong_slot}, a named colour missing from the photo ${ck.before.colour_missing} to ${ck.after.colour_missing} (of ${ck.after.colour_named}). Counted with the same rules the checks use: how often the rules hold, not a quality rating.`, source: sourceFile('checks-eval.summary.json') }] : []),
         ...(dr.genResnet && dr.text ? [{ text: `The original idea, drawing the outfit first and matching the drawing, scored ${n2(dr.genResnet.ndcg10?.mean ?? 0)} against ${n2(dr.text.ndcg10?.mean ?? 0)} for matching the words (${dr.text.nQueries ?? 20} searches). It was dropped.`, source: sourceFile('m2.summary.json') }] : []),
       ],
       fails: ["Children's ethnic wear and men's kurta and dhoti sets are thin in every collection.", 'Kaggle photos are tiny (60 by 80 pixels). The Myntra set has photos but no titles.'],

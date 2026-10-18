@@ -20,13 +20,24 @@ from genkart.dedup import Clusters
 from genkart.index import VectorIndex
 
 THETA = 0.098
-_MEN = re.compile(r"\b(men|mens|men's|man|male|boys?|boy's)\b", re.IGNORECASE)
-_WOMEN = re.compile(r"\b(women|womens|women's|woman|ladies|lady|female|girls?|girl's|maternity)\b", re.IGNORECASE)
-ALLOWED = {"men": {"Men", "Unisex", ""}, "women": {"Women", "Unisex", ""}, "boys": {"Boys", "Unisex", ""}, "girls": {"Girls", "Unisex", ""}, "unisex": {"Unisex", ""}}
+_MEN = re.compile(r"\b(men|mens|men's|man|male)\b", re.IGNORECASE)
+_WOMEN = re.compile(r"\b(women|womens|women's|woman|ladies|lady|female|maternity)\b", re.IGNORECASE)
+_BOY = re.compile(r"\b(boys?|boy's|boys')\b", re.IGNORECASE)
+_GIRL = re.compile(r"\b(girls?|girl's|girls')\b", re.IGNORECASE)
+_KID = re.compile(r"\b(kids?|kid's|child|children|children's|childs|toddlers?|infants?|baby|babies|junior|youth|little)\b", re.IGNORECASE)
+# a children's item is its own group: "Little Boy's ... Shoes (Child)" must not pass for men's (seen live 2026-10-18)
+ALLOWED = {"men": {"Men", "Unisex", ""}, "women": {"Women", "Unisex", ""}, "boys": {"Boys", "Kids", "Unisex", ""}, "girls": {"Girls", "Kids", "Unisex", ""}, "unisex": {"Unisex", ""}}
 
 
 def title_gender(title: str) -> str:
-    """Gender a title names ('Men', 'Women', or '' when it names neither or both)."""
+    """Who a title is for: 'Men', 'Women', a child ('Boys', 'Girls', 'Kids'), or '' when it names nobody or both sexes."""
+    b, gl = bool(_BOY.search(title)), bool(_GIRL.search(title))
+    if b and not gl:
+        return "Boys"
+    if gl and not b:
+        return "Girls"
+    if b or gl or _KID.search(title):
+        return "Kids"
     m, w = bool(_MEN.search(title)), bool(_WOMEN.search(title))
     return "Men" if m and not w else "Women" if w and not m else ""
 

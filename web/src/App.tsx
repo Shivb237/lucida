@@ -13,6 +13,8 @@ import { EvidencePage } from './pages/Evidence'
 import { SearchPage } from './pages/Search'
 import { StudyPage } from './pages/Study'
 import { SystemPage } from './pages/System'
+import { GlossaryPage } from './pages/Glossary'
+import { ModeSwitch } from './components/ModeSwitch'
 import { WakePage } from './pages/Wake'
 
 type Route = 'search' | 'evidence' | 'system' | 'docs' | 'words' | 'wake' | 'study'
@@ -43,8 +45,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (route === 'words') requestAnimationFrame(() => document.getElementById('words')?.scrollIntoView())
-    else window.scrollTo(0, 0)
+    window.scrollTo(0, 0)
   }, [route])
 
   const viewer = VIEWER_ONLY || wantViewer || health === null     // Viewer unless a Lab server answers and nobody chose otherwise
@@ -62,17 +63,20 @@ export default function App() {
               <a href="#/evidence" className="lg" aria-current={route === 'evidence' ? 'page' : undefined}>Evidence</a>
               <a href="#/system" className="lg" aria-current={route === 'system' ? 'page' : undefined}>System</a>
               <a href="#/docs" className="lg" aria-current={route === 'docs' ? 'page' : undefined}>Docs</a>
-              <a href="#/words" className="lg" aria-current={route === 'words' ? 'page' : undefined}>Words</a>
+              <a href="#/words" className="lg" aria-current={route === 'words' ? 'page' : undefined}>Glossary</a>
               {health?.study && <a href="#/study" className="lg" aria-current={route === 'study' ? 'page' : undefined}>Study</a>}
             </nav>
           </div>
+          <div className="mode-row">
+          <ModeSwitch viewer={viewer} canLab={!VIEWER_ONLY && !!health} onMode={(m) => setWantViewer(m === 'viewer')} />
           <ModeMenu key={health?.hosted ? 'hosted' : 'own'} lab={!viewer && !!health} serverFound={!!health} detail={detail} canByo={!!health?.byo} hosted={!!health?.hosted} viewerOnly={VIEWER_ONLY} brain={brain} onBrain={setBrain}
             onMode={(m) => setWantViewer(m === 'viewer')} />
+          </div>
         </div>
       </header>
       {viewer && PHOTO_BASE && route !== 'wake' && <LabHint />}
       <ErrorNet key={route}>
-      {route === 'wake' ? <WakePage /> : route === 'study' ? <StudyPage /> : route === 'search' ? <SearchPage health={health} viewer={viewer} brain={brain} /> : route === 'system' ? <SystemPage health={health} viewer={viewer} /> : route === 'docs' ? <DocsPage /> : <EvidencePage />}
+      {route === 'wake' ? <WakePage /> : route === 'words' ? <GlossaryPage /> : route === 'study' ? <StudyPage /> : route === 'search' ? <SearchPage health={health} viewer={viewer} brain={brain} /> : route === 'system' ? <SystemPage health={health} viewer={viewer} /> : route === 'docs' ? <DocsPage /> : <EvidencePage />}
       </ErrorNet>
       <PhotoCredits />
       <BackToTop />

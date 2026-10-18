@@ -63,7 +63,7 @@ class Services:
     """Everything the pipeline needs from outside. Tests pass fakes; `default_services` wires the real ones."""
     ollama_up: Callable[[], bool]
     understand: Callable[[str], tuple[Plan, float]]
-    expand: Callable[[Plan, str], tuple[Plan, list[str]]]          # (plan with graph changes, occasion labels found); raises LookupError if no graph data
+    expand: Callable[[Plan, str], tuple]          # (plan with graph changes, occasion labels found[, extra facts to show, e.g. what the first use cost]); raises LookupError if no graph data
     search: Callable[[list[str], str | None, int], SearchOut]
     colour: Callable[[Hit, str], object | None]                    # dominant colour of a hit's photo (None if unreadable)
     health: Callable[[], dict]
@@ -122,11 +122,17 @@ def default_services() -> Services:
                 csv = ROOT / "data" / "kaggle" / "styles.csv"
                 if not csv.exists():                     # checked first: the hosted Lab has neither this file nor pandas, and must say "not here", not crash
                     raise LookupError("the knowledge-graph data (data/kaggle/styles.csv) is not on this server")
+                t0 = time.perf_counter()
                 import pandas as pd
 
-                from genkart.graph import build_graph
+                from genkart.graph import build_graph      # the libraries load from the image on first use (slow on a freshly woken host)
 
-                state["graph"] = build_graph(pd.read_csv(csv, on_bad_lines="skip").drop_duplicates("id"))
+                t1 = time.perf_counter()
+                frame = pd.read_csv(csv, on_bad_lines="skip").drop_duplicates("id")
+                t2 = time.perf_counter()
+                state["graph"] = build_graph(frame)
+                t3 = time.perf_counter()
+                state["graph_first_use"] = {"import_seconds": round(t1 - t0, 2), "read_seconds": round(t2 - t1, 2), "build_seconds": round(t3 - t2, 2)}
             return state["graph"]
 
     def understand_byo(text: str, brain: Brain):
@@ -139,10 +145,15 @@ def default_services() -> Services:
         return finish(plan, text), time.time() - t, chain.usage
 
     def expand(plan: Plan, text: str):
+        t0 = time.perf_counter()
         g = graph()      # first: it says "no graph data here" (LookupError) before anything needing pandas is imported
+        waited = time.perf_counter() - t0
         from genkart.graph import expand_plan, occasions_in
 
-        return expand_plan(g, plan, text), occasions_in(text)
+        extra = {"graph_first_use": state.pop("graph_first_use")} if "graph_first_use" in state else {}      # only the request that built the graph reports it
+        if not extra and waited > 1.0:      # the graph was ready, but this request queued behind the start-up work (model, catalogues) holding the same lock
+            extra = {"waited_for_startup_seconds": round(waited, 2)}
+        return expand_plan(g, plan, text), occasions_in(text), extra
 
     def router_up() -> dict | None:
         with router_lock:
@@ -269,7 +280,16 @@ def _reason(piece: Piece, pick: Hit, best: Hit, colour_name: str | None, notes: 
     return out
 
 
-def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None = None) -> Iterator[dict]:
+@dataclass
+class DevicePlan:
+    """A plan the visitor's own model made on their device (the page asked it directly; this server cannot reach a visitor's computer)."""
+    plan: Plan | None
+    label: str
+    seconds: float
+    error: str | None = None
+
+
+def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None = None, device: DevicePlan | None = None) -> Iterator[dict]:
     rid = uuid.uuid4().hex[:8]
 
     def step(stage: str, status: str, seconds: float | None = None, **payload) -> dict:
@@ -296,7 +316,22 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
     # 2. understand
     yield step("understand", "started")
     fallback_reason = None
-    if brain is not None and svc.understand_byo is None:
+    if device is not None:
+        if device.error or device.plan is None:
+            plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
+            yield step("understand", "failed", device.seconds, error=f"your device model ({device.label}) gave no usable plan: {device.error or 'no answer'}. The whole sentence is searched as it is.",
+                       plan=plan.model_dump(), fell_back=True)
+        else:
+            from genkart.understand import finish
+
+            plan = finish(device.plan, q)            # the same checks every model's answer goes through: keep only what the shopper wrote
+            safe = [p for p in plan.pieces if guard.rules(p.search_text).action != "refuse"]     # and the same safety rules on every piece the device model wrote
+            if len(safe) < len(plan.pieces):
+                plan.notes.append(f"safety: {len(plan.pieces) - len(safe)} piece(s) from your device model were left out")
+            plan.pieces = safe or [Piece(kind="other", search_text=q)]
+            fell_back = len(plan.pieces) == 1 and plan.pieces[0].kind == "other" and plan.pieces[0].search_text == q and not plan.notes
+            yield step("understand", "done", device.seconds, plan=plan.model_dump(), model=f"{device.label} (on your device)", fell_back=fell_back)
+    elif brain is not None and svc.understand_byo is None:
         fallback_reason = "this server cannot use your own model"
         plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
         yield step("understand", "failed", error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True)
@@ -306,6 +341,7 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
         plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
         yield step("understand", "failed", error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True)
     else:
+        t_understand = time.perf_counter()
         try:
             res = svc.understand_byo(q, brain) if brain else svc.understand(q)
             plan, secs, usage = res[0], res[1], (res[2] if len(res) > 2 else None)
@@ -314,15 +350,16 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
         except Exception as e:
             plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
             msg = str(e) if isinstance(e, BrainError) else f"{type(e).__name__}: {e}"      # a brain error is already plain words; the class name is noise to a visitor
-            yield step("understand", "failed", error=(scrub(msg, brain.key) if brain else msg) + (". The whole sentence is searched as it is." if brain else ""), plan=plan.model_dump(), fell_back=True)
+            yield step("understand", "failed", time.perf_counter() - t_understand, error=(scrub(msg, brain.key) if brain else msg) + (". The whole sentence is searched as it is." if brain else ""), plan=plan.model_dump(), fell_back=True)
 
     # 3. expand with the knowledge graph
     yield step("expand", "started")
     before = len(plan.notes)
     t0 = time.perf_counter()
     try:
-        plan, usages = svc.expand(plan, q)
-        yield step("expand", "done", time.perf_counter() - t0, usages=usages, notes=plan.notes[before:], pieces=[p.model_dump() for p in plan.pieces])
+        res = svc.expand(plan, q)
+        plan, usages, extra = res[0], res[1], (res[2] if len(res) > 2 else {})
+        yield step("expand", "done", time.perf_counter() - t0, usages=usages, notes=plan.notes[before:], pieces=[p.model_dump() for p in plan.pieces], **extra)
     except LookupError as e:
         yield step("expand", "skipped", reason=str(e))
     except Exception as e:
@@ -332,7 +369,7 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
     yield step("search", "started")
     pieces = [p for p in plan.pieces if p.search_text.strip()] or [Piece(kind="other", search_text=q)]
     try:
-        found = svc.search([p.search_text for p in pieces], plan.gender if plan.gender != "unknown" else None, k)
+        found = svc.search([p.search_text for p in pieces], plan.gender if plan.gender != "unknown" else None, 2 * k)     # twice as many, so the checks below have room
         if len(found.pieces) != len(pieces) or len(found.seconds) != len(pieces):
             raise ValueError(f"search answered {len(found.pieces)} pieces for {len(pieces)} asked")
     except Exception as e:
@@ -341,11 +378,12 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
         yield step("outfit", "skipped", reason="nothing was found")
         yield {"kind": "end", "request_id": rid}
         return
-    yield step("search", "done", sum(found.seconds), backend=found.backend, info=found.info,
-               pieces=[{"kind": p.kind, "text": p.search_text, "seconds": round(s, 4), "hits": [_hit_json(h) for h in hs]}
-                       for p, hs, s in zip(pieces, found.pieces, found.seconds, strict=True)])
+    from genkart import checks
 
-    candidates = found.pieces
+    candidates, check_notes = checks.apply([p.kind for p in pieces], [p.colours for p in pieces], found.pieces, plan.gender, q, svc.colour, k)
+    yield step("search", "done", sum(found.seconds), backend=found.backend, info=found.info, checks=check_notes,
+               pieces=[{"kind": p.kind, "text": p.search_text, "seconds": round(s, 4), "hits": [_hit_json(h) for h in hs]}
+                       for p, hs, s in zip(pieces, candidates, found.seconds, strict=True)])
     if any(not c for c in candidates):
         yield step("compose", "skipped", reason="a piece found no products")
         yield step("outfit", "skipped", reason="a piece found no products")
@@ -413,9 +451,17 @@ class BrainIn(BaseModel):
     base_url: str | None = Field(default=None, max_length=300)
 
 
+class DeviceIn(BaseModel):
+    plan: dict | None = None
+    model: str = Field(default="your model", max_length=120)
+    seconds: float = Field(default=0.0, ge=0, le=600)
+    error: str | None = Field(default=None, max_length=300)
+
+
 class SearchIn(BaseModel):
     q: str = Field(min_length=1, max_length=300)
     brain: BrainIn | None = None
+    device: DeviceIn | None = None
 
 
 class ModelsIn(BaseModel):
@@ -509,13 +555,13 @@ def create_app(services: Callable[[], Services] = default_services, root: pathli
                 return {"examples": lines[:8], "source": "data/human_prompts_practice.txt"}
         return {"examples": EXAMPLES, "source": "built in"}
 
-    def _stream(q: str, brain: Brain | None = None) -> StreamingResponse:
+    def _stream(q: str, brain: Brain | None = None, device: DevicePlan | None = None) -> StreamingResponse:
         if not runs.acquire(blocking=False):      # each run can start the local model: past the cap say "busy" at once instead of queueing without end
             raise HTTPException(status_code=429, detail="busy: too many searches are running, try again in a few seconds", headers={"Retry-After": "5"})
 
         def stream() -> Iterator[str]:
             try:
-                for e in run_pipeline(q.strip(), svc(), brain=brain):
+                for e in run_pipeline(q.strip(), svc(), brain=brain, device=device):
                     yield f"data: {json.dumps(e)}\n\n"
             finally:
                 runs.release()
@@ -561,9 +607,26 @@ def create_app(services: Callable[[], Services] = default_services, root: pathli
     def search(q: str = Query(..., min_length=1, max_length=300)):
         return _stream(q)
 
+    @app.get("/api/understand-prompt")
+    def understand_prompt():
+        """What the visitor's on-device model is asked: the same instructions and answer shape the server's own models get, so the page can ask it directly."""
+        from genkart.understand import SYSTEMS
+
+        return {"system": SYSTEMS["v2"], "schema": Plan.model_json_schema()}
+
     @app.post("/api/search")
     def search_with_key(body: SearchIn):
-        """The same stream, with the visitor's own model. A POST body, not a URL: a key must never sit in an address, a history entry or a log line."""
+        """The same stream, with the visitor's own model: a key (POST body, never a URL), or a plan their on-device model already made."""
+        if body.device is not None:
+            d = body.device
+            plan = None
+            if d.plan is not None and not d.error:
+                try:
+                    plan = Plan.model_validate(d.plan)
+                except Exception as e:
+                    raise HTTPException(status_code=422, detail="the plan from your device model was not in the expected shape") from e
+                plan.pieces = [p.model_copy(update={"search_text": p.search_text[:200]}) for p in plan.pieces[:8]]     # bounded: at most 8 pieces of 200 characters
+            return _stream(body.q, device=DevicePlan(plan, d.model.strip() or "your model", d.seconds, d.error))
         try:
             brain = parse_brain(body.brain.model_dump()) if body.brain else None
         except BrainError as e:

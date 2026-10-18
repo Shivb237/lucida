@@ -180,7 +180,7 @@ export function DocsPage() {
       <RefSection id="run" title="Run it yourself" summary="Five commands. Your key, if you add one, stays on your computer." label="Show the commands">
         <p className="doc-lead">The data, photos and indexes are not in the repository because of their licences. Commands that need them say so.</p>
         <div>{RUN_IT.map((r) => <div key={r.cmd} className="cmd-row"><code className="mono">{r.cmd}</code><p className="doc-p" style={{ margin: 0 }}>{r.what}</p></div>)}</div>
-        <p className="doc-p" style={{ marginTop: 14 }}>Then open the mode menu at the top right to switch to Lab and enter your own model key.</p>
+        <p className="doc-p" style={{ marginTop: 14 }}>Then open Settings at the top right to switch to Lab and enter your own model key.</p>
       </RefSection>
     </main>
   )

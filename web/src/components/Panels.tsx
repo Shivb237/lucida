@@ -1,4 +1,5 @@
 // The step panels: plan card, graph sheet, exposure record, time strip, search and compose panels.
+import { WhyBlock, whyNotes } from './Explain'
 import type { ReactNode } from 'react'
 import {
   STEPS, type ComposePayload, type ExpandPayload, type LocalInfo, type RouterInfo, type SearchPayload, type StageId, type StepState, type UnderstandPayload,
@@ -175,6 +176,14 @@ export function TimeStrip({ steps, mode, clock }: { steps: Steps; mode: string; 
           Too thin to label: {bands.filter((b) => b.seconds / total < 0.06).map((b) => `${b.label} = ${fmt(b.seconds, 2)} s`).join(' · ')}
         </p>
       )}
+      {(() => {
+        const notes = mode === 'live' ? whyNotes(steps) : []
+        if (notes.length === 0) return null
+        const label = String(STEPS.findIndex((x) => x.id === notes[0].stage) + 1)       // the band of the slowest step
+        let before = 0, at: number | null = null
+        for (const b of bands) { if (b.label === label) { at = ((before + b.seconds / 2) / total) * 100; break } before += b.seconds }
+        return <WhyBlock notes={notes} at={at} />
+      })()}
       {load ? <p style={{ margin: '10px 0 0', fontSize: 14, lineHeight: '21px', color: 'var(--z4)' }}>"load" is the one-off loading of the model and the four collections on this server's first search. Later searches skip it.</p> : null}
     </div>
   )
@@ -211,6 +220,12 @@ export function SearchPanel({ step }: { step: StepState }) {
           All four collections were searched inside this one program. Turning the pieces into numbers took <span className="mono">{fmt(local.encode_seconds, 3)} s</span>; comparing with every photo took <span className="mono">{fmt(step.seconds, 3)} s</span>.
           <span style={{ display: 'block', marginTop: 6, color: 'var(--z4)' }}>To see the split system at work, start it with <code className="mono" style={{ fontSize: 12 }}>scripts/cluster.sh start</code>; this page uses it automatically.</span>
         </p>
+      )}
+      {p.checks && p.checks.length > 0 && (
+        <div className="checks-note">
+          <strong>Checks on what was found</strong> (the search compares words with photos, so these keep the results to what you asked for):
+          <ul>{p.checks.map((c) => <li key={c}>{c}</li>)}</ul>
+        </div>
       )}
     </div>
   )

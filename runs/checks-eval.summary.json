@@ -1,0 +1,29 @@
+{
+  "setup": {
+    "what": "rule breaks in the FIRST pick of every piece, before vs after the candidate checks; a count, not a quality rating",
+    "prompts": 100,
+    "sources": [
+      "data/human_prompts_test4.txt",
+      "data/human_prompts_test5.txt"
+    ],
+    "understand": "local Qwen3 4B (Ollama)",
+    "k": 6,
+    "date": "2026-10-18T02:48:52"
+  },
+  "pieces": 146,
+  "before": {
+    "wrong_slot": 29,
+    "child_for_adult": 1,
+    "mixed_gender_outfit": 2,
+    "colour_missing": 29,
+    "colour_named": 49
+  },
+  "after": {
+    "wrong_slot": 12,
+    "child_for_adult": 0,
+    "mixed_gender_outfit": 1,
+    "colour_missing": 11,
+    "colour_named": 49
+  },
+  "requests_changed": 57
+}

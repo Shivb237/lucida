@@ -1,0 +1,20 @@
+// The plain-language definitions used across the site: the Glossary page lists and filters them; the Evidence page links to it.
+export const GLOSSARY: [string, string][] = [
+  ['Match score (NDCG@10)', 'A 0 to 1 score for how high the right products sit in the top 10. 1 is perfect.'],
+  ['Found in the top 50 (Recall@50)', 'Of the products people rated as right, the share that appear in the first 50 results.'],
+  ['95% range', 'The span where the true score probably lies, found by re-running the test on shuffled samples 1,000 times.'],
+  ['Labelled search', 'A search where people already rated the products, so its score can be worked out.'],
+  ['Embedding', 'A list of numbers standing for a picture or a sentence, so the two can be compared.'],
+  ['Similarity score (cosine)', 'How closely two lists of numbers point the same way: the number under each photo.'],
+  ['Keyword search (BM25)', 'The classic way: count how many of your words appear in a product title.'],
+  ['SigLIP', 'An AI model that reads pictures and words together. Fashion versions are trained further on clothes.'],
+  ['Slice (shard)', 'One part of the product list, searched by its own worker at the same time as the others.'],
+  ['Clothes map (knowledge graph)', 'A map of how clothes, colours and occasions relate. It adds ideas you did not type.'],
+  ['Ollama', 'Software that runs an AI model on your own computer, so no paid key is needed.'],
+  ['Stable Diffusion', 'An AI tool that draws pictures from words. Version 1 of this project drew outfits first.'],
+  ['p50 / p95 / p99', 'The time half of the searches beat (p50), 95 in 100 beat (p95), and 99 in 100 beat (p99). The higher ones show the slow cases.'],
+  ['Replica (backup copy)', 'A second worker holding the same slice of products, so a search still gets a full answer when one copy fails.'],
+  ['Dead-letter queue', 'Where a job goes after failing too many times, so it is kept for a person to look at instead of being retried for ever.'],
+  ['Cold start', 'The first request after the hosted Lab has been asleep: it waits while the server wakes up and loads the model and products.'],
+  ['Viewer and Lab', 'Viewer replays searches that were recorded earlier; nothing is searched. Lab searches your own words, live.'],
+]

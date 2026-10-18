@@ -1,7 +1,7 @@
 {
  "graph": {
-  "nodes": 1704,
-  "links": 3705
+  "nodes": 1776,
+  "links": 3878
  },
  "areas": [
   {
@@ -18,7 +18,7 @@
     {
      "path": "src/genkart/brain.py",
      "does": "Bring your own model: understand the request with the visitor's own API key instead of the local model.",
-     "lines": 207,
+     "lines": 219,
      "uses": [
       "src/genkart/understand.py"
      ]
@@ -26,10 +26,18 @@
     {
      "path": "src/genkart/catalogue.py",
      "does": "One search over several catalogues: a general one and specialists.",
-     "lines": 214,
+     "lines": 225,
      "uses": [
       "src/genkart/dedup.py",
       "src/genkart/index.py"
+     ]
+    },
+    {
+     "path": "src/genkart/checks.py",
+     "does": "Checks on the search candidates before an outfit is built, each one reported in plain words (nothing is changed silently).",
+     "lines": 87,
+     "uses": [
+      "src/genkart/catalogue.py"
      ]
     },
     {
@@ -81,7 +89,7 @@
     {
      "path": "src/genkart/graph.py",
      "does": "A small knowledge graph: occasion -> usage -> (gender, usage) -> garment types, by outfit role.",
-     "lines": 164,
+     "lines": 169,
      "uses": [
       "src/genkart/understand.py"
      ]
@@ -155,11 +163,12 @@
     {
      "path": "src/genkart/server.py",
      "does": "Web backend for the UI: one request runs the whole pipeline, and every step is streamed to the page as a small \"trace\" event.",
-     "lines": 617,
+     "lines": 680,
      "uses": [
       "src/genkart/__init__.py",
       "src/genkart/brain.py",
       "src/genkart/catalogue.py",
+      "src/genkart/checks.py",
       "src/genkart/colour.py",
       "src/genkart/embed.py",
       "src/genkart/feedback.py",
@@ -439,6 +448,16 @@
       "src/genkart/catalogue.py",
       "src/genkart/dedup.py",
       "src/genkart/index.py"
+     ]
+    },
+    {
+     "path": "scripts/eval_checks.py",
+     "does": "How often the top picks break a plain rule, before and after the candidate checks (src/genkart/checks.py). A COUNT of rule breaks, not a quality rating.",
+     "lines": 64,
+     "uses": [
+      "src/genkart/__init__.py",
+      "src/genkart/catalogue.py",
+      "src/genkart/server.py"
      ]
     },
     {
@@ -892,7 +911,7 @@
     {
      "path": "web/src/App.tsx",
      "does": "The page frame: routes (Search, Evidence, System, Docs, Words), the server health check, and the Viewer-only switch.",
-     "lines": 81,
+     "lines": 85,
      "uses": [
       "web/package.json",
       "web/src/api.ts",
@@ -900,10 +919,12 @@
       "web/src/brand.ts",
       "web/src/components/LabHint.tsx",
       "web/src/components/ModeMenu.tsx",
+      "web/src/components/ModeSwitch.tsx",
       "web/src/components/PhotoCredits.tsx",
       "web/src/components/Safety.tsx",
       "web/src/pages/Docs.tsx",
       "web/src/pages/Evidence.tsx",
+      "web/src/pages/Glossary.tsx",
       "web/src/pages/Search.tsx",
       "web/src/pages/Study.tsx",
       "web/src/pages/System.tsx",
@@ -914,7 +935,7 @@
     {
      "path": "web/src/api.ts",
      "does": "The page's calls to the local server: health, example prompts, and the live step stream (EventSource).",
-     "lines": 112,
+     "lines": 185,
      "uses": [
       "web/src/brain.ts",
       "web/src/trace.ts"
@@ -923,7 +944,7 @@
     {
      "path": "web/src/brain.ts",
      "does": "The visitor's own model for the understand step. Held in memory only (never localStorage, never a cookie, never the URL): reloading the page forgets it.",
-     "lines": 37,
+     "lines": 43,
      "uses": []
     },
     {
@@ -945,18 +966,35 @@
     {
      "path": "web/src/components/CostPanel.tsx",
      "does": "What a run costs, in one short table: time, memory held and money, per part of the run. Every number is measured or read from a logged file; where a number",
-     "lines": 89,
+     "lines": 90,
      "uses": [
       "web/src/brain.ts",
       "web/src/trace.ts"
      ]
     },
     {
+     "path": "web/src/components/EvidenceKit.tsx",
+     "does": "The building blocks of the Evidence page: one card per research question (title, sample sizes, the answer, what it means), a small visible bar",
+     "lines": 97,
+     "uses": [
+      "web/package.json"
+     ]
+    },
+    {
+     "path": "web/src/components/Explain.tsx",
+     "does": "Plain-language notes about time. While a step is slow: what is happening right now. After a run: why a step took long, with a dashed arrow at its band.",
+     "lines": 79,
+     "uses": [
+      "web/src/trace.ts"
+     ]
+    },
+    {
      "path": "web/src/components/Findings.tsx",
-     "does": "The human-rated test results on the Evidence page: rated methods, paired differences, bars with 95% ranges.",
-     "lines": 193,
+     "does": "The human-rated test results on the Evidence page, one card per question: the answer and a small bar chart up front, the rated methods, paired",
+     "lines": 217,
      "uses": [
       "web/package.json",
+      "web/src/components/EvidenceKit.tsx",
       "web/src/components/Plain.tsx"
      ]
     },
@@ -970,7 +1008,7 @@
     },
     {
      "path": "web/src/components/LabHint.tsx",
-     "does": "A slim strip under the header of the public Viewer: tells a visitor there is a live Lab to try with their own API key, without opening the mode menu.",
+     "does": "A slim strip under the header of the public Viewer: tells a visitor there is a live Lab to try with their own API key, without opening Settings.",
      "lines": 28,
      "uses": [
       "web/package.json"
@@ -979,7 +1017,7 @@
     {
      "path": "web/src/components/ModeMenu.tsx",
      "does": "The mode control at the top right of the navigation: says which mode you are in, explains both, and is where your own model key is entered.",
-     "lines": 239,
+     "lines": 272,
      "uses": [
       "web/package.json",
       "web/src/api.ts",
@@ -988,11 +1026,20 @@
      ]
     },
     {
+     "path": "web/src/components/ModeSwitch.tsx",
+     "does": "The two ways to use the site, always visible in the header: Viewer (recorded runs, nothing is searched) and Lab (search your own words, live).",
+     "lines": 16,
+     "uses": [
+      "web/src/recorded.ts"
+     ]
+    },
+    {
      "path": "web/src/components/Panels.tsx",
      "does": "The step panels: plan card, graph sheet, exposure record, time strip, search and compose panels.",
-     "lines": 241,
+     "lines": 256,
      "uses": [
       "web/package.json",
+      "web/src/components/Explain.tsx",
       "web/src/trace.ts"
      ]
     },
@@ -1085,19 +1132,30 @@
     },
     {
      "path": "web/src/pages/Evidence.tsx",
-     "does": "The Evidence page: the short version in six lines, then each question with its plain answer and the exact bars and tables folded below.",
-     "lines": 280,
+     "does": "The Evidence page: the clearest finding first, then one card per research question (the answer, a small chart on that question's own scale, and the",
+     "lines": 236,
      "uses": [
       "web/package.json",
+      "web/src/components/EvidenceKit.tsx",
       "web/src/components/Findings.tsx",
       "web/src/components/Plain.tsx",
+      "web/src/content/glossary.ts",
       "web/src/recorded.ts"
+     ]
+    },
+    {
+     "path": "web/src/pages/Glossary.tsx",
+     "does": "The Glossary page: every plain-language definition the site uses, with a filter box. Works without any server.",
+     "lines": 26,
+     "uses": [
+      "web/package.json",
+      "web/src/content/glossary.ts"
      ]
     },
     {
      "path": "web/src/pages/Search.tsx",
      "does": "The Search page: live runs, the demo replay, and in the Viewer the recorded runs.",
-     "lines": 306,
+     "lines": 304,
      "uses": [
       "web/package.json",
       "web/src/api.ts",
@@ -1105,6 +1163,7 @@
       "web/src/brand.ts",
       "web/src/components/CompareCard.tsx",
       "web/src/components/CostPanel.tsx",
+      "web/src/components/Explain.tsx",
       "web/src/components/FrontDoor.tsx",
       "web/src/components/Panels.tsx",
       "web/src/components/Refine.tsx",
@@ -1178,7 +1237,7 @@
     {
      "path": "tests/test_brain.py",
      "does": "Bring your own model: the visitor's key is validated, used for one request, and must never appear in an event, an error, a repr or a response.",
-     "lines": 307,
+     "lines": 325,
      "uses": [
       "src/genkart/__init__.py",
       "src/genkart/brain.py",
@@ -1190,11 +1249,20 @@
     {
      "path": "tests/test_catalogue.py",
      "does": "Searching several catalogues: general first, specialists when the match is weak, gender respected.",
-     "lines": 85,
+     "lines": 93,
      "uses": [
       "src/genkart/catalogue.py",
       "src/genkart/dedup.py",
       "src/genkart/index.py"
+     ]
+    },
+    {
+     "path": "tests/test_checks.py",
+     "does": "The candidate checks: slot fit, no children's items unless asked, one gender per outfit, the named colour first, and never an empty slot.",
+     "lines": 49,
+     "uses": [
+      "src/genkart/catalogue.py",
+      "src/genkart/checks.py"
      ]
     },
     {
@@ -1260,7 +1328,7 @@
     {
      "path": "tests/test_graph.py",
      "does": "The knowledge graph: occasion words, garment suggestions, replacing generic pieces, adding missing roles.",
-     "lines": 62,
+     "lines": 69,
      "uses": [
       "src/genkart/graph.py",
       "src/genkart/understand.py"
@@ -1353,7 +1421,7 @@
     {
      "path": "tests/test_server.py",
      "does": "The pipeline streams one event per step, in order, with exact product ids as text. Everything outside is replaced by fakes: no model,",
-     "lines": 363,
+     "lines": 410,
      "uses": [
       "src/genkart/catalogue.py",
       "src/genkart/colour.py",

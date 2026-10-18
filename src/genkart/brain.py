@@ -67,6 +67,17 @@ def _check_url(url: str) -> str:
     return url.rstrip("/")
 
 
+def provider_reason(r: httpx.Response, key: str) -> str:
+    """The provider's own explanation from an error reply ("model not found", "API key not valid"...), short and with the key removed; "" when there is none."""
+    try:
+        body = r.json()
+        err = (body[0] if isinstance(body, list) and body else body).get("error", {})
+        msg = err.get("message") if isinstance(err, dict) else err
+    except Exception:  # noqa: BLE001  not JSON, or not the shape we know: no reason to show
+        return ""
+    return scrub(" ".join(str(msg).split()), key)[:200] if msg else ""
+
+
 def explain_status(code: int, model: str = "") -> str:
     """A provider's HTTP status in plain words for the visitor (never the raw library message, which carries addresses and links)."""
     if code == 401:
@@ -200,7 +211,8 @@ class BrainChain:
             body.pop("response_format")
             r = self.http.post(url, json=body, headers=headers)
         if r.status_code >= 400:
-            raise BrainError(explain_status(r.status_code, self.brain.model))
+            why = provider_reason(r, self.brain.key)
+            raise BrainError(explain_status(r.status_code, self.brain.model) + (f" The provider says: \u201c{why}\u201d" if why else ""))
         data = r.json()
         u = data.get("usage") or {}
         self.usage = {"input_tokens": u["prompt_tokens"], "output_tokens": u["completion_tokens"]} if "prompt_tokens" in u else None

@@ -1,6 +1,8 @@
-// The human-rated test results on the Evidence page: rated methods, paired differences, bars with 95% ranges.
+// The human-rated test results on the Evidence page, one card per question: the answer and a small bar chart up front, the rated methods, paired
+// differences and 95% ranges in the exact-numbers panel. Plus the simulated feedback test (Milestone 8).
 import type { ReactNode } from 'react'
-import { Exact, Plain } from './Plain'
+import { Exact } from './Plain'
+import { Bars, Card, MiniStats } from './EvidenceKit'
 import evidence, { type Paired, type Rated } from 'virtual:evidence'
 
 const pct = (v: number, max: number) => `${(Math.max(0, Math.min(max, v)) / max) * 100}%`
@@ -58,17 +60,6 @@ function Diff({ label, p, hint }: { label: string; p: Paired | undefined; hint: 
   )
 }
 
-function SectionHead({ title, lead }: { title: string; lead: ReactNode }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap' }}>
-      <div>
-        <h2 className="voice" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 64px)', lineHeight: 1.06, maxWidth: '22ch' }}>{title}</h2>
-      </div>
-      {lead ? <p style={{ margin: 0, fontSize: 16, lineHeight: '24px', color: '#33333A', maxWidth: '54ch' }}>{lead}</p> : null}
-    </div>
-  )
-}
-
 const Limit = ({ children }: { children: ReactNode }) => <p style={{ margin: '14px 0 0', fontSize: 14, lineHeight: '21px', color: 'var(--z4)', maxWidth: '84ch' }}>{children}</p>
 const Reading = ({ children }: { children: ReactNode }) => <p style={{ margin: '18px 0 0', fontSize: 16, lineHeight: '24px', maxWidth: '78ch' }}>{children}</p>
 const RATE = 'Ratings: good = 2, okay = 1, bad = 0. One rater, who also wrote the prompts, so treat these as strong hints and not final proof.'
@@ -76,16 +67,20 @@ const TICKS = [0, 0.5, 1, 1.5, 2]
 
 export function Findings() {
   const { blind4, blind3, heldout, graph, outfit, outfitObjective } = evidence.findings
+  const { blind5, understanding, claudeVsQwen, feedback } = evidence
   const g = graph
+  const fb = feedback?.metrics.likes_only
   return (
     <>
       {blind4 && (
-        <section id="sec-catalogues" style={{ marginTop: 96, scrollMarginTop: 24 }}>
-          <SectionHead title="Did adding product collections help?"
-            lead="" />
-          <Plain>A person rated results from 0 to 2 without knowing which method made them. With one product collection the rating was <strong>{blind4.methods.A.mean.toFixed(2)}</strong>. Adding three more collections raised it to <strong>{blind4.methods.B.mean.toFixed(2)}</strong>. Using AI to read the request on top gave {blind4.methods.C.mean.toFixed(2)}: a little higher, but not clearly.</Plain>
-          <Exact>
-          <div style={{ marginTop: 28, borderTop: '2px solid var(--ink)' }}>
+        <Card id="sec-catalogues" num="03" title="Did adding product collections help?" meta={['Blind human ratings', `${blind4.methods.A.n_prompts} Indian-occasion prompts`, 'One rater', 'Test set 4 · fresh then, now used']}
+          answer={<>Yes: the biggest improvement came from more collections. A person's rating rose from <strong>{blind4.methods.A.mean.toFixed(2)}</strong> with one collection to <strong>{blind4.methods.B.mean.toFixed(2)}</strong> with four (out of 2). Adding the AI request plan on top gave {blind4.methods.C.mean.toFixed(2)}: a little higher, but not clearly.</>}
+          means={<>The first collection had almost no Indian ethnic wear. A better-worded request cannot find a garment that is not in the product list.</>} meansLabel="Why it matters">
+          <Bars title="Average outfit rating" scale="0 = bad · 1 = okay · 2 = good" max={2} ticks={TICKS} digits={2}
+            rows={[{ name: 'A · Raw request', sub: 'one collection (Marqo)', value: blind4.methods.A.mean }, { name: 'B · Raw request', sub: 'four collections', value: blind4.methods.B.mean, primary: true }, { name: 'C · AI plan', sub: 'four collections', value: blind4.methods.C.mean }]}
+            caption={RATE} />
+          <Exact label="Show the exact differences and limits">
+          <div style={{ marginTop: 22, borderTop: '2px solid var(--ink)' }}>
             <Head last="What it is" max={2} ticks={TICKS} />
             <RatedRow name="A · raw sentence, one collection" sub="the sentence as typed, searched in Marqo only" m={blind4.methods.A} max={2} note="the old setup" />
             <RatedRow name="B · raw sentence, four collections" sub="the sentence as typed, searched in all four" m={blind4.methods.B} max={2} note="adds Kaggle, Myntra photos, men's set" />
@@ -98,25 +93,43 @@ export function Findings() {
           </div>
           <Reading>Adding the collections was the big win: Marqo has almost no Indian wear (the build log counted zero kurtas, lehengas or sherwanis in the titles of its 40,513 products). Understanding the request added a little more, but not clearly. Where nothing scored above okay, the cause was data: no children's Indian wear, almost no men's kurtas, no indo-western mixes.</Reading>
           <Limit>{RATE} Source: runs/blind-test4.summary.json, recomputed by scripts/summarise_blind.py from the raw ratings and the answer key.</Limit>
-                  </Exact>
-        </section>
+          </Exact>
+        </Card>
       )}
 
       {(blind3 || heldout) && (
-        <section id="sec-understanding" style={{ marginTop: 96, scrollMarginTop: 24 }}>
-          <SectionHead title="Does the AI step help?"
-            lead="" />
-          <Plain>The AI step splits a request into pieces before searching. On 30 new requests, searching your plain words scored <strong>{blind3 ? blind3.methods.raw?.mean.toFixed(2) : '—'}</strong> and searching the AI's pieces <strong>{blind3 ? blind3.methods.plan?.mean.toFixed(2) : '—'}</strong>. No clear gain, and it can hurt when it drops words like a colour or a fabric. We expect it to help when a request needs several pieces, but we did not measure that.</Plain>
-          <Exact>
+        <Card id="sec-understanding" num="04" title="Does the AI request plan help?" meta={['Human-rated comparisons', 'Test sets 3 and 5 · fresh then, now used', 'Separate experiments']}
+          answer={<>Not reliably, so far. The plan splits a request into pieces before searching. On {blind3 ? blind3.methods.raw?.n_prompts : '—'} new requests, the plain words scored <strong>{blind3 ? blind3.methods.raw?.mean.toFixed(2) : '—'}</strong> and the AI's pieces <strong>{blind3 ? blind3.methods.plan?.mean.toFixed(2) : '—'}</strong>{blind5 ? <>; on {blind5.n_prompts} more, plain words {blind5.mean.B.toFixed(2)}, a local model's plan {blind5.mean.C.toFixed(2)} and a Claude plan {blind5.mean.D.toFixed(2)}</> : null}. It can drop words like a colour or a fabric.</>}
+          means={<>Keep the free local model: a paid one did no better. The next version must never drop a product word, and splitting multi-piece requests needs its own fair test.</>} meansLabel="What we learned">
+          {blind3 && (
+            <Bars title={`Blind test 3 · ${blind3.methods.raw?.n_prompts ?? '—'} fresh prompts`} scale="human rating · 0–2" max={2} ticks={TICKS} digits={2}
+              rows={[{ name: 'Raw sentence', value: blind3.methods.raw?.mean, primary: true }, { name: 'Understood plan', value: blind3.methods.plan?.mean }]}
+              caption="Different tests and different measures stay apart: the extra tests are inside, each with its own scale." />
+          )}
+          <Exact label="Compare the related prompt experiments">
           {blind3 && (
             <>
-              <div style={{ marginTop: 28, borderTop: '2px solid var(--ink)' }}>
+              <div style={{ marginTop: 22, borderTop: '2px solid var(--ink)' }}>
                 <Head last="Test" max={2} ticks={TICKS} />
-                <RatedRow name="Raw sentence" sub="blind test, 30 fresh prompts" m={blind3.methods.raw} max={2} note="runs/blind-test3.summary.json" />
-                <RatedRow name="Understood plan" sub="blind test, same 30 prompts" m={blind3.methods.plan} max={2} note="" />
+                <RatedRow name="Raw sentence" sub={`blind test, ${blind3.methods.raw?.n_prompts ?? '—'} fresh prompts`} m={blind3.methods.raw} max={2} note="runs/blind-test3.summary.json" />
+                <RatedRow name="Understood plan" sub="blind test, same prompts" m={blind3.methods.plan} max={2} note="" />
               </div>
               <Diff label="Plan minus raw" p={blind3.paired['plan-raw']} hint="one collection (Marqo), so only the plan differs" />
             </>
+          )}
+          {blind5 && (
+            <div style={{ marginTop: 26 }}>
+              <Bars title={`Blind test 5 · ${blind5.n_prompts} fresh prompts, ${blind5.n_ratings} ratings`} scale="human rating · 0–2" max={2} ticks={TICKS} digits={2}
+                rows={[{ name: 'Raw request', value: blind5.mean.B, primary: true }, { name: 'Local model plan', sub: 'Qwen3 4B', value: blind5.mean.C }, { name: 'Claude plan', value: blind5.mean.D }]}
+                caption={<>Claude minus local plan: {sign(blind5.D_minus_C.mean)} [{sign(blind5.D_minus_C.ci95[0])}, {sign(blind5.D_minus_C.ci95[1])}], not clearly different{claudeVsQwen ? <>; those Claude calls cost ${claudeVsQwen.claude_cost_usd.toFixed(2)}</> : null}. Source: runs/blind-test5.summary.json.</>} />
+            </div>
+          )}
+          {understanding && (
+            <div style={{ marginTop: 26 }}>
+              <Bars title={`Retrieval test · ${understanding.n} messy rewrites of labelled searches`} scale="match score NDCG@10 · 0–1" max={0.6} ticks={[0, 0.2, 0.4, 0.6]}
+                rows={[{ name: 'Original labelled query', value: understanding.original }, { name: 'Messy rewrite', value: understanding.raw }, { name: 'AI-understood rewrite', value: understanding.understood, primary: true }]}
+                caption="A different scale from the human ratings above (0–1, not 0–2): do not rank them together. Source: runs/m4.summary.json." />
+            </div>
           )}
           {heldout && (
             <div style={{ marginTop: 18 }}>
@@ -131,24 +144,23 @@ export function Findings() {
               </div>
             </div>
           )}
-          <Reading>No clear gain from the plan on its own, and a small dip on the fresh blind set. It helps when a request must be split into garments (a men's kurta plus pyjama) and keeps gender. It hurts when it shortens a request and drops words that carry meaning, such as colour or fabric; the build log lists those cases, and the next version must never drop a product word.</Reading>
+          <Reading>It helps when a request must be split into garments (a men's kurta plus pyjama) and keeps gender. It hurts when it shortens a request and drops words that carry meaning, such as colour or fabric; the build log lists those cases, and the next version must never drop a product word.</Reading>
           <Limit>{RATE}</Limit>
-                  </Exact>
-        </section>
+          </Exact>
+        </Card>
       )}
 
       {g && (
-        <section id="sec-graph" style={{ marginTop: 96, scrollMarginTop: 24 }}>
-          <SectionHead title="Does the clothes map help?"
-            lead="" />
-          <Plain>We hid {g.n_test.toLocaleString('en')} products and asked the map of clothes and occasions to guess their type. It was right <strong>{(g.overall.graph_hit_at_3 * 100).toFixed(0)}%</strong> of the time; without the occasion, <strong>{(g.overall.baseline_hit_at_3 * 100).toFixed(0)}%</strong>. It helps most for formal and ethnic wear. But it changed the plan on only {blind3 ? blind3.methods.plan_graph?.n_prompts : '—'} of {blind3 ? blind3.methods.raw?.n_prompts : '—'} fresh requests, so what people saw barely moved.</Plain>
-          <Exact>
-          <div style={{ marginTop: 28, display: 'flex', gap: 48, flexWrap: 'wrap', alignItems: 'baseline' }}>
-            <div><span className="mono" style={{ fontSize: 64, letterSpacing: '-.04em' }}>{g.overall.graph_hit_at_3.toFixed(3)}</span> <span className="lg dim">with the clothes map</span></div>
-            <div><span className="mono" style={{ fontSize: 64, letterSpacing: '-.04em', color: 'var(--z4)' }}>{g.overall.baseline_hit_at_3.toFixed(3)}</span> <span className="lg dim">without it</span></div>
-            <div><span className="mono" style={{ fontSize: 28 }}>{sign(g.overall.difference, 3)}</span> <span className="mono dim" style={{ fontSize: 14 }}>[{sign(g.overall.ci95[0], 3)}, {sign(g.overall.ci95[1], 3)}]</span> <span className="lg dim">clear</span></div>
+        <Card id="sec-graph" num="05" title="Does the clothes map help?" meta={['Held-out product test', `${g.n_test.toLocaleString('en')} hidden products`, 'Separate from outfit ratings']}
+          answer={<>It guessed product types better: with hidden products, the map of clothes and occasions was right <strong>{(g.overall.graph_hit_at_3 * 100).toFixed(1)}%</strong> of the time, against <strong>{(g.overall.baseline_hit_at_3 * 100).toFixed(1)}%</strong> without it. But it changed the plan on only {blind3 ? blind3.methods.plan_graph?.n_prompts : '—'} of {blind3 ? blind3.methods.raw?.n_prompts : '—'} fresh requests, so what people saw barely moved.</>}
+          means={<>The map links an occasion to likely clothing types. Useful under the hood; no broad visible gain in the whole search yet.</>}>
+          <MiniStats items={[{ value: g.overall.graph_hit_at_3.toFixed(3), label: 'type guessed in the top 3, with the clothes map' }, { value: g.overall.baseline_hit_at_3.toFixed(3), label: 'without the occasion links' },
+            { value: blind3 ? `${blind3.methods.plan_graph?.n_prompts ?? '—'} / ${blind3.methods.raw?.n_prompts ?? '—'}` : '—', label: 'fresh requests whose plan it changed' }]} />
+          <Exact label="Show the graph test, by occasion">
+          <div style={{ marginTop: 22, display: 'flex', gap: 32, flexWrap: 'wrap', alignItems: 'baseline' }}>
+            <div><span className="mono" style={{ fontSize: 28 }}>{sign(g.overall.difference, 3)}</span> <span className="mono dim" style={{ fontSize: 14 }}>[{sign(g.overall.ci95[0], 3)}, {sign(g.overall.ci95[1], 3)}]</span> <span className="lg dim">difference, clear</span></div>
           </div>
-          <div style={{ marginTop: 22, borderTop: '2px solid var(--ink)' }}>
+          <div style={{ marginTop: 16, borderTop: '2px solid var(--ink)' }}>
             {Object.entries(g.by_usage).filter(([, v]) => v.n_test >= 20).map(([u, v]) => (
               <div key={u} className="usage-row">
                 <span style={{ fontWeight: 700 }}>{u}</span>
@@ -161,32 +173,44 @@ export function Findings() {
           </div>
           <Reading>The clothes map helps most where occasions have a clear dress code (formal and ethnic wear) and barely for everyday casual wear. Occasions with fewer than 20 test items (party, travel, smart casual) are left out: too few to judge. The graph is a lookup of label counts, not full GraphRAG: no model extracts relations from text.</Reading>
           <Limit>Source: runs/graph-holdout.summary.json. Column order: with graph, without, difference with its 95% range.</Limit>
-                  </Exact>
-        </section>
+          </Exact>
+        </Card>
       )}
 
       {outfit && (
-        <section id="sec-colour" style={{ marginTop: 96, scrollMarginTop: 24 }}>
-          <SectionHead title="Do matching colours make better outfits?"
-            lead="" />
-          <Plain>Choosing pieces for matching colours did not change how people rated whole outfits (<strong>{outfit.methods.coherent.mean.toFixed(2)}</strong> against <strong>{outfit.methods.baseline.mean.toFixed(2)}</strong>). Even outfits made to clash scored {outfit.methods.clash.mean.toFixed(2)}: many are festive Indian wear, where strong contrasts are normal.</Plain>
-          <Exact>
-          <div style={{ marginTop: 28, borderTop: '2px solid var(--ink)' }}>
+        <Card id="sec-colour" num="06" title="Do matching colours make better outfits?" meta={['Blind outfit ratings', `${outfit.methods.baseline.n_prompts} prompts`, 'One rater']}
+          answer={<>No visible change: choosing pieces for matching colours rated <strong>{outfit.methods.coherent.mean.toFixed(2)}</strong>, the same as the best match per piece at <strong>{outfit.methods.baseline.mean.toFixed(2)}</strong>. Even outfits made to clash scored {outfit.methods.clash.mean.toFixed(2)}.</>}
+          means={<>Most pieces were neutral colours, and strong contrasts such as red with green are normal in Indian festive wear. Western colour rules may be the wrong rules here.</>} meansLabel="Why it surprised us">
+          <Bars title="Average rating per outfit" scale="human rating · 0–2" max={2} ticks={TICKS} digits={2}
+            rows={[{ name: 'Best match per piece', sub: 'baseline', value: outfit.methods.baseline.mean }, { name: 'Chosen for harmony', value: outfit.methods.coherent.mean, primary: true }, { name: 'Made to clash', value: outfit.methods.clash.mean }]}
+            caption={outfitObjective ? `The harmony and baseline boards were identical on ${outfitObjective.coherent_equals_baseline} of ${outfitObjective.n_prompts} prompts.` : undefined} />
+          <Exact label="Show paired ratings and the colour scores">
+          <div style={{ marginTop: 22, borderTop: '2px solid var(--ink)' }}>
             <Head last="What it is" max={2} ticks={TICKS} />
             <RatedRow name="Best match per piece" sub="independent picks" m={outfit.methods.baseline} max={2} note="baseline" />
             <RatedRow name="Chosen for harmony" sub="joint pick, rules fixed before rating" m={outfit.methods.coherent} max={2} inUse note="what 'Pick an outfit' runs" />
             <RatedRow name="Made to clash" sub="worst harmony in the top 6 per piece" m={outfit.methods.clash} max={2} note="a check that harmony is visible" />
           </div>
           <div style={{ marginTop: 18 }}>
-            <Diff label="Harmony minus best match" p={outfit.paired['coherent-baseline']} hint="the two boards were identical on 28 of 30 prompts" />
+            <Diff label="Harmony minus best match" p={outfit.paired['coherent-baseline']} hint="the two boards were often identical" />
             <Diff label="Clash minus best match" p={outfit.paired['clash-baseline']} hint="deliberate clashes, by Western colour rules" />
           </div>
           {outfitObjective && (
             <Reading>By the rules, harmony rose from {outfitObjective.harmony.baseline.toFixed(2)} (best match) to {outfitObjective.harmony.coherent.toFixed(2)} (chosen), and the clash boards sat at {outfitObjective.harmony.clash.toFixed(2)}. Yet the ratings did not move: independent best matches were already almost always neutral colours that go together, and the deliberate clashes did not rate worse. The harmony step stays in as a check; it has not been shown to improve outfits.</Reading>
           )}
-          <Limit>{RATE} Many prompts were festive Indian wear, where strong contrasting colours are traditional, so Western harmony rules may be the wrong rules. Sources: runs/outfit-ratings.summary.json, runs/outfit-objective.summary.json.</Limit>
-                  </Exact>
-        </section>
+          <Limit>{RATE} Sources: runs/outfit-ratings.summary.json, runs/outfit-objective.summary.json.</Limit>
+          </Exact>
+        </Card>
+      )}
+
+      {fb && feedback && (
+        <Card id="sec-feedback" num="07" title="Do your likes improve the results?" meta={['Simulated shopper, not a person', `${feedback.setup.test_queries} held-out searches`, 'One round of likes']}
+          answer={<>A little, in a simulation. A computer pretending to be a shopper liked the right products among the first {feedback.setup.shown_before_feedback} shown; the results after those improved from <strong>{fb.ndcg10_residual_without_feedback.mean.toFixed(3)}</strong> to <strong>{fb.ndcg10_residual_with_feedback.mean.toFixed(3)}</strong> (better on {fb.paired_difference.better} searches, worse on {fb.paired_difference.worse}). Pushing away from disliked products made results worse, so the Lab uses likes only.</>}
+          means={<>A simulation built from the dataset's own labels, which are incomplete. A consented study with real people is running in the Lab; it has no results yet.</>} meansLabel="How sure">
+          <Bars title="Results beyond the first ten shown" scale="match score NDCG@10 · 0–1" max={0.6} ticks={[0, 0.2, 0.4, 0.6]}
+            rows={[{ name: 'Without likes', value: fb.ndcg10_residual_without_feedback.mean }, { name: 'With likes', value: fb.ndcg10_residual_with_feedback.mean, primary: true }]}
+            caption={<>Difference {sign(fb.paired_difference.mean, 3)} [{sign(fb.paired_difference.ci95[0], 3)}, {sign(fb.paired_difference.ci95[1], 3)}]: small but clear. The weight was chosen on the other half of the searches. Source: runs/feedback-sim.summary.json.</>} />
+        </Card>
       )}
     </>
   )

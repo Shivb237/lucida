@@ -92,7 +92,7 @@ export function SystemPage({ health, viewer }: { health: Health | null | undefin
 
       {!viewer && (
       <section className="film film-nodes" style={{ marginTop: 56 }} aria-label="Live cluster state">
-        <h2 className="h-record" style={{ fontSize: 28 }}>Live now</h2>
+        <h2 className="h-record" style={{ fontSize: 28 }}>Live now <span className="lg dim" style={{ fontSize: 13, letterSpacing: '.08em' }}>· read from this server just now</span></h2>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 20, alignItems: 'flex-start' }}>
           <Node label="Ollama" up={!!health?.ollama} sub={health === undefined ? 'checking' : undefined} />
           <Node label="Encoder" up={!!r?.encoder} />
@@ -106,7 +106,7 @@ export function SystemPage({ health, viewer }: { health: Health | null | undefin
           ))}
         </div>
         <p style={{ margin: '16px 0 0', fontSize: 15, lineHeight: '22px', color: 'var(--z7)', maxWidth: '70ch' }}>
-          {health === null ? 'The web server is off, so nothing can be read.' : r ? 'The cluster is running, so searches go through it.' : <>The cluster is off, so searches run inside the web server. To start it: <code className="mono" style={{ fontSize: 13 }}>scripts/cluster.sh start</code>.</>}
+          {health?.hosted ? 'This hosted Lab searches inside one program, with all four collections in its memory. The split system (router, encoder and slices) is not running here, so its parts show as off; what follows is how it behaved when it was running, on a laptop and on AWS.' : health === null ? 'The web server is off, so nothing can be read.' : r ? 'The cluster is running, so searches go through it.' : <>The cluster is off, so searches run inside the web server. To start it: <code className="mono" style={{ fontSize: 13 }}>scripts/cluster.sh start</code>.</>}
         </p>
       </section>
       )}
@@ -114,7 +114,7 @@ export function SystemPage({ health, viewer }: { health: Health | null | undefin
 
       <AwsTour />
 
-      {viewer && <p className="live-off">Live cluster status needs your own server. Switch to Lab in the mode menu, top right, or see the recorded runs above.</p>}
+      {viewer && <p className="live-off">Live cluster status needs your own server. Switch to Lab in Settings, top right, or see the recorded runs above.</p>}
 
       {e2e && (
         <Block title="Splitting the work changes nothing in the answers" plain={<>{e2e.identical.toLocaleString('en')} of {e2e.requests.toLocaleString('en')} test searches gave exactly the same top 4 as the single-program version. Splitting into 2, 4 or 8 slices matched every time too. It is not faster at this size; splitting pays off when the product list outgrows one machine.</>} lead={<>{e2e.identical.toLocaleString('en')} of {e2e.requests.toLocaleString('en')} requests through the live cluster returned exactly the same top 4 products, sources and ids as the single-process search; {e2e.partial} were partial.

@@ -305,3 +305,21 @@ def test_a_wrong_model_name_is_explained_in_plain_words_not_with_library_text():
     msg = str(e.value)
     assert "does not know the model" in msg and "3.5" in msg and "Load my models" in msg
     assert "http" not in msg and KEY not in msg                                 # no addresses or links from the library's own text
+
+
+def test_the_providers_own_reason_is_shown_short_and_without_the_key():
+    import httpx
+
+    def reply(status, body):
+        return BrainChain(Brain("openai", "gemini-x", KEY, "https://generativelanguage.googleapis.com/v1beta/openai"), _mock(lambda req: httpx.Response(status, json=body))).invoke({"system": "s", "request": "r"})
+
+    with pytest.raises(BrainError) as e:
+        reply(400, [{"error": {"code": 400, "message": f"API key not valid. Please pass a valid API key. ({KEY})"}}])      # Gemini sends a list
+    msg = str(e.value)
+    assert "did not accept the request (400)" in msg and "API key not valid" in msg and KEY not in msg
+    with pytest.raises(BrainError) as e:
+        reply(400, {"error": {"message": "x" * 500}})                                                                      # OpenAI-style, and capped
+    assert len(str(e.value)) < 400
+    with pytest.raises(BrainError) as e:
+        reply(400, {"unexpected": "shape"})                                                                                 # nothing known to add: just the plain sentence
+    assert "The provider says" not in str(e.value)

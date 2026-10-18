@@ -1,5 +1,5 @@
 // The page's calls to the local server: health, example prompts, and the live step stream (EventSource).
-import { toBody, type BrainSetting } from './brain'
+import { providerOf, toBody, type BrainSetting } from './brain'
 import type { Hit, TraceEvent } from './trace'
 
 export type RouterHealth = { ok: boolean; encoder: boolean; shards: boolean[]; replicas: boolean[][] }
@@ -36,7 +36,8 @@ export async function getExamples(): Promise<string[]> {
 /** Opens the step stream for one request. Returns a function that stops it.
  *  Without a key: a plain GET (EventSource). With one: a POST, because EventSource cannot send a body and a key must never sit in an address. */
 export function streamSearch(q: string, onEvent: (e: TraceEvent) => void, onError: (message: string) => void, brain?: BrainSetting | null): () => void {
-  if (brain && brain.kind !== 'local') return streamPost(q, brain, onEvent, onError)
+  if (brain?.kind === 'device') return streamDevice(q, brain, onEvent, onError)
+  if (brain && brain.kind !== 'local') return streamPost(toBody(q, brain), onEvent, onError)
   const source = new EventSource(`/api/search?${new URLSearchParams({ q })}`)
   let ended = false
   source.onmessage = (m) => {
@@ -54,12 +55,13 @@ export function streamSearch(q: string, onEvent: (e: TraceEvent) => void, onErro
   return () => source.close()
 }
 
-function streamPost(q: string, brain: BrainSetting, onEvent: (e: TraceEvent) => void, onError: (message: string) => void): () => void {
+function streamPost(body: unknown, onEvent: (e: TraceEvent) => void, onError: (message: string) => void, signal?: AbortSignal): () => void {
   const ac = new AbortController()
+  signal?.addEventListener('abort', () => ac.abort())
   let ended = false
   ;(async () => {
     try {
-      const r = await fetch('/api/search', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(toBody(q, brain)), signal: ac.signal })
+      const r = await fetch('/api/search', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ac.signal })
       if (!r.ok || !r.body) {
         const d = await r.json().catch(() => null)
         const detail = typeof d?.detail === 'string' ? d.detail : Array.isArray(d?.detail) ? d.detail.map((x: { msg: string }) => x.msg).join('; ') : `the server answered ${r.status}`
@@ -109,4 +111,75 @@ export async function refineSearch(q: string, liked: string[], gender?: string |
     throw new Error(typeof d?.detail === 'string' ? d.detail : `the server answered ${r.status}`)
   }
   return r.json()
+}
+
+// ---------------------------------------------------------------- a model on the visitor's own device (Ollama, LM Studio...)
+// The page talks to it directly: a server on the internet cannot reach a visitor's computer. Only the resulting plan is sent to the server,
+// which puts it through the same checks as its own models' answers.
+
+const DEVICE_HELP = 'Is the app running, and does it allow this page? (see "Let this page talk to your app" in Settings, top right)'
+
+/** The model names the app on this device has. Throws a plain message on any failure. */
+export async function deviceModels(baseUrl: string): Promise<string[]> {
+  let r: Response
+  try {
+    r = await fetch(`${baseUrl.replace(/\/$/, '')}/models`, { signal: AbortSignal.timeout(8000) })
+  } catch {
+    throw new Error(`Could not reach ${baseUrl}. ${DEVICE_HELP}`)
+  }
+  if (!r.ok) throw new Error(`The app at ${baseUrl} answered ${r.status}. ${DEVICE_HELP}`)
+  const d = await r.json().catch(() => null)
+  const names = ((d?.data ?? []) as { id?: string }[]).map((m) => String(m.id ?? '')).filter(Boolean)
+  if (!names.length) throw new Error('The app has no models yet. Download one in the app first (in Ollama: ollama pull qwen3:4b-instruct).')
+  return names
+}
+
+let promptCache: Promise<{ system: string; schema: unknown }> | null = null
+
+/** Ask the device model for a plan, with the server's own instructions and answer shape. Resolves to the plan, or throws a plain message. */
+async function askDevice(q: string, b: BrainSetting, signal: AbortSignal): Promise<Record<string, unknown>> {
+  promptCache ??= fetch('/api/understand-prompt').then((r) => { if (!r.ok) throw new Error('the server would not give the instructions'); return r.json() })
+  const { system, schema } = await promptCache.catch((e) => { promptCache = null; throw e })
+  const url = `${b.baseUrl.replace(/\/$/, '')}/chat/completions`
+  const body: Record<string, unknown> = { model: b.model, temperature: 0, messages: [
+    { role: 'system', content: `${system}\nAnswer with ONE JSON object that matches this JSON schema: ${JSON.stringify(schema)}` },
+    { role: 'user', content: `Request: ${q}` }], response_format: { type: 'json_object' } }
+  const timeout = AbortSignal.any([signal, AbortSignal.timeout(90000)])        // a local model can be slow, but not for ever
+  const call = () => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: timeout })
+  let r: Response
+  try {
+    r = await call()
+    if (r.status === 400) { delete body.response_format; r = await call() }    // some apps do not know JSON mode; the instructions already ask for JSON only
+  } catch (e) {
+    if ((e as Error).name === 'TimeoutError') throw new Error('it did not answer within 90 seconds')
+    if ((e as Error).name === 'AbortError') throw e
+    throw new Error(`could not reach ${b.baseUrl}. ${DEVICE_HELP}`)
+  }
+  if (!r.ok) throw new Error(`the app answered ${r.status}${r.status === 404 ? ` (is "${b.model}" a model it has?)` : ''}`)
+  const text = String((await r.json().catch(() => null))?.choices?.[0]?.message?.content ?? '')
+  const raw = text.replace(/^```(?:json)?\s*|\s*```$/g, '')
+  try { return JSON.parse(raw) } catch { /* fall through: take the first {...} block */ }
+  const m = raw.match(/\{[\s\S]*\}/)
+  if (!m) throw new Error('it did not answer with JSON')
+  try { return JSON.parse(m[0]) } catch { throw new Error('it did not answer with valid JSON') }
+}
+
+/** A search whose sentence-reading step runs on the visitor's device. While the device model thinks, the page already shows step 2 as running. */
+function streamDevice(q: string, b: BrainSetting, onEvent: (e: TraceEvent) => void, onError: (message: string) => void): () => void {
+  const ac = new AbortController()
+  let stopStream: (() => void) | null = null
+  ;(async () => {
+    onEvent({ kind: 'step', request_id: 'device', stage: 'understand', status: 'started', seconds: null, payload: {} } as TraceEvent)
+    const t0 = performance.now()
+    const model = `${b.model} · ${providerOf(b.provider).label.replace(/ \(.*\)$/, '')}`
+    let device: Record<string, unknown>
+    try {
+      device = { plan: await askDevice(q, b, ac.signal), model, seconds: (performance.now() - t0) / 1000 }
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return
+      device = { model, seconds: Math.min((performance.now() - t0) / 1000, 600), error: String((e as Error).message).slice(0, 300) }
+    }
+    stopStream = streamPost({ q, device }, onEvent, onError, ac.signal)
+  })()
+  return () => { ac.abort(); stopStream?.() }
 }

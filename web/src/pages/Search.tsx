@@ -7,6 +7,7 @@ import { ComposePanel, GraphSheet, LiveStrip, PlanCard, RecordTable, SearchPanel
 import { CostPanel, type Resources } from '../components/CostPanel'
 import { CompareCard, type Plain } from '../components/CompareCard'
 import { FrontDoor } from '../components/FrontDoor'
+import { LiveWhy } from '../components/Explain'
 import { RefinePanel } from '../components/Refine'
 import { ContactSheet, Glance, Print, type Mode } from '../components/Sheet'
 import { Sentence } from '../components/Sentence'
@@ -38,8 +39,8 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const [mode, setMode] = useState<Mode>('idle')
   const [steps, setSteps] = useState<Record<StageId, StepState>>(emptySteps)
   const [running, setRunning] = useState(false)
+  const [hint, setHint] = useState(false)          // an empty search was pressed: show what to write
   const [liked, setLiked] = useState<Set<string>>(new Set())   // products the visitor tapped 👍 on in a live run; forgotten with the next run
-  const [slow, setSlow] = useState(false)               // a live run has taken more than 2 seconds: say why (a sleeping host loading its model)
   const [photoWait, setPhotoWait] = useState(false)     // the Viewer asked the hosted Lab for photos and none has arrived yet
   const [error, setError] = useState<string | null>(null)
   const [announce, setAnnounce] = useState('')
@@ -66,11 +67,6 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const [photosReady, setPhotosReady] = useState(false)
   useEffect(() => { if (import.meta.env.VITE_VIEWER === '1') { photos.current = HOSTED_PHOTO_IDS; setPhotosReady(true); return }   // a public Viewer build asks no server; Marqo photos come from the hosted Lab when its address is set
     fetch('/api/recorded-photos').then((r) => (r.ok ? r.json() : {})).then((m) => { photos.current = m }).catch(() => {}).finally(() => setPhotosReady(true)) }, [])   // only a computer that has the photos answers
-  useEffect(() => {
-    if (mode !== 'live' || !running) return
-    const t = window.setTimeout(() => setSlow(true), 2000)
-    return () => window.clearTimeout(t)
-  }, [mode, running])
   useEffect(() => {
     if (!photoWait) return
     const done = () => setPhotoWait(false)
@@ -128,11 +124,12 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       window.setTimeout(() => document.getElementById('step1')?.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }), 120)
     }
-    setPlainLive(null); setSlow(false); setLiked(new Set())
+    setPlainLive(null); setLiked(new Set())
     setMode(m); setShown(q); setSteps(emptySteps()); setRunning(true); setError(null); setT0(t); setNow(t); setEndAt(null); setStartedAt({})
   }
   const runLive = (q: string) => {
-    if (!q.trim()) return
+    if (!q.trim()) { setHint(true); document.getElementById('req')?.focus(); return }      // nothing typed: say what to write, send nothing
+    setHint(false)
     if (!health) { setError('The server is not running, so nothing was searched. Start it, or play the demo replay.'); return }
     start('live', q.trim())
     stop.current = streamSearch(q.trim(), apply, (msg) => { setError(msg); setRunning(false) }, brain)
@@ -175,7 +172,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
       {viewer && (
         <Notice id="viewer" style={{ transform: 'rotate(.6deg)', marginTop: 36 }}>
           <span className="lg">Viewer</span>
-          <span style={{ marginLeft: 10 }}>Real runs recorded on {RECORDED.recorded_at}, replayed. Nothing is searched now. To search your own words, open the mode menu at the top right.</span>
+          <span style={{ marginLeft: 10 }}>Real runs recorded on {RECORDED.recorded_at}, replayed. Nothing is searched now. To search your own words, open Settings at the top right.</span>
           {PHOTO_BASE ? (
             <span style={{ display: 'block', marginTop: 8 }}>Photos load live from the author's hosted Lab (credits and how to ask for a removal are at the bottom of the page). A sketch means a photo could not be loaded; the product shown is still the real search result. The hosted Lab sleeps when nobody uses it, so the first photos can take about 50 seconds (measured once: 47.5 s) and then arrive quickly. Each photo costs the author a small amount of cloud money (not measured), so please do not reload in a loop.</span>
           ) : (
@@ -186,16 +183,14 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
       {photoWait && (
         <div className="notice" role="status"><span className="lg">Waking up</span><span style={{ marginLeft: 10 }}>Waking up the hosted Lab to fetch the photos. The first load can take about 45 seconds; until then the tiles show sketches.</span></div>
       )}
-      {mode === 'live' && running && slow && steps.search.status !== 'done' && (
-        <div className="notice" role="status"><span className="lg">Still working</span><span style={{ marginLeft: 10 }}>If this server was asleep, the first search after a quiet spell takes about 45 seconds while it loads the search model. After that a search takes about a second.</span></div>
-      )}
-      {health?.hosted && brain.kind === 'local' && (
+      {mode === 'live' && running && <LiveWhy steps={steps} startedAt={startedAt} now={now} who={describe(brain)} onStop={stopRun} />}
+      {!viewer && health?.hosted && brain.kind === 'local' && (
         <Notice id="hosted" style={{ transform: 'rotate(.4deg)' }}>
           <span className="lg">Hosted Lab</span>
-          <span style={{ marginLeft: 10 }}>This public Lab has no built-in AI model. Your whole sentence is searched as typed. To have an AI read it first, add your own API key in the mode menu (top right); the key is used for that one request and never saved.</span>
+          <span style={{ marginLeft: 10 }}>This public Lab has no built-in AI model. Your whole sentence is searched as typed. To have an AI read it first, add your own API key in Settings (top right); the key is used for that one request and never saved.</span>
         </Notice>
       )}
-      {health && !health.hosted && !health.ollama && (
+      {!viewer && health && !health.hosted && !health.ollama && (
         <Notice id="ollama" style={{ transform: 'rotate(.4deg)' }}>
           <span className="lg">Ollama off</span>
           <span style={{ marginLeft: 10 }}>Step 2 needs the local AI model. Start Ollama and install <code>qwen3:4b-instruct</code>. Until then your whole sentence is searched as typed.</span>
@@ -227,9 +222,12 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
         </p>
       )}
       {!viewer && <form className="req" style={{ marginTop: 32 }} onSubmit={(e) => { e.preventDefault(); runLive(query) }}>
-        <label htmlFor="req" className="lg dim" style={{ width: '100%', marginBottom: 10 }}>What do you need to wear?</label>
-        <input id="req" type="text" value={query} maxLength={300} onChange={(e) => setQuery(e.target.value)} autoComplete="off" />
-        <button type="submit" className="btn-expose">{running && live ? 'Run again' : 'Search'}</button>
+        <label htmlFor="req" className="lg dim" style={{ width: '100%', marginBottom: 4 }}>What do you need to wear?</label>
+        <p id="req-help" className="req-help">Describe the occasion, the garment, a colour, the season, or a piece you already own. Up to 300 characters.</p>
+        <input id="req" type="text" value={query} maxLength={300} onChange={(e) => { setQuery(e.target.value); setHint(false) }} autoComplete="off"
+          placeholder="A men's outfit for Diwali with a black kurta and ivory trousers" aria-describedby={hint ? 'req-help req-hint' : 'req-help'} aria-invalid={hint || undefined} />
+        <button type="submit" className="btn-expose">{running && live ? 'Run again' : 'Search outfit'}</button>
+        {hint && <p id="req-hint" role="alert" className="req-hint">Write one sentence first, for example the occasion and the garment. Nothing was searched.</p>}
       </form>}
       {running && (
         <div className="run-controls" role="group" aria-label="Control this run">
@@ -239,8 +237,8 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
       )}
       {error && <p role="alert" style={{ margin: '12px 0 0', fontSize: 15, fontWeight: 600, display: 'flex', gap: 10, alignItems: 'center' }}><span className="tile cross" style={{ width: 16, height: 16, flex: 'none' }} aria-hidden="true" />{error}</p>}
       {!viewer && <div className="chip-row" style={{ marginTop: 14 }}>
-        {examples.length > 0 && <span className="lg dim" style={{ marginRight: 4 }}>Try</span>}
-        {examples.map((s) => <button key={s} type="button" className="chip" onClick={() => { setQuery(s); runLive(s) }}>{s}</button>)}
+        {examples.length > 0 && <span className="lg dim" style={{ marginRight: 4 }}>Examples: tap to fill, then edit</span>}
+        {examples.map((s) => <button key={s} type="button" className="chip" onClick={() => { setQuery(s); setHint(false); document.getElementById('req')?.focus() }}>{s}</button>)}
         <button type="button" className="chip" style={{ borderStyle: 'dashed' }} onClick={runDemo}>Play the demo replay</button>
       </div>}
       {health && !viewer && (
@@ -250,7 +248,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
       )}
       {health && !viewer && (
         <p className="dim" style={{ margin: '8px 0 0', fontSize: 14, lineHeight: '21px' }}>
-          The AI that reads your sentence: {describe(brain)}. Change it in the mode menu, top right.
+          The AI that reads your sentence: {health?.hosted && brain.kind === 'local' ? 'none here (your sentence is searched as typed)' : describe(brain)}. Change it in Settings, top right.
         </p>
       )}
 

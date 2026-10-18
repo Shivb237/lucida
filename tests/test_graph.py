@@ -60,3 +60,10 @@ def test_piece_that_already_names_the_garment_keeps_its_wording():
 
 def _styles_casual():
     return _styles()
+
+
+def test_a_garment_the_shopper_named_is_never_swapped_even_with_an_invented_last_word():
+    g = _styles()
+    plan = Plan(main_query="x", gender="men", pieces=[Piece(kind="top", search_text="black tuxedo shirt")])
+    out = expand_plan(g, plan, "black tuxedo for a diwali reception")          # the shopper wrote "tuxedo", the model added "shirt"
+    assert out.pieces[0].search_text == "black tuxedo shirt" and not out.notes

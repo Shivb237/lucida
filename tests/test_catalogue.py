@@ -83,3 +83,11 @@ def test_search_all_merges_every_catalogue_even_when_the_general_one_scores_abov
     q = np.array([1.0, 0.0], dtype=np.float32)
     assert [h.source for h in cat.search(q, k=2)] == ["marqo"]    # the old routing never looks at the other catalogue
     assert [h.source for h in cat.search_all(q, k=2)] == ["kaggle", "marqo"]
+
+
+def test_childrens_items_are_their_own_group():
+    assert title_gender("Moustache Little Boy's & Boy's Patent Oxford Shoes - Black - Size 1.5 (Child)") == "Boys"
+    assert title_gender("Girls Light Up Rain Jacket") == "Girls" and title_gender("Kids Unisex Hoodie") == "Kids"
+    assert title_gender("Men's Patent Oxford Shoes") == "Men"
+    assert not title_gender_ok("Little Boy's Patent Oxford Shoes", "men") and title_gender_ok("Little Boy's Patent Oxford Shoes", "boys")
+    assert title_gender_ok("Toddler Raincoat", "girls") and not title_gender_ok("Toddler Raincoat", "women")

@@ -1,9 +1,9 @@
 // The mode control at the top right of the navigation: says which mode you are in, explains both, and is where your own model key is entered.
 // A disclosure (a button that opens a panel), not a menu: the panel holds a form, so Escape closes it and Tab moves through it normally.
 import { useEffect, useRef, useState } from 'react'
-import { loadModels } from '../api'
+import { deviceModels, loadModels } from '../api'
 import { PHOTO_BASE } from '../recorded'
-import { describe, LOCAL, PROVIDERS, providerOf, usable, withProvider, type BrainSetting } from '../brain'
+import { DEVICE_APPS, describe, LOCAL, PROVIDERS, providerOf, usable, withProvider, type BrainSetting } from '../brain'
 
 const START = [
   { cmd: 'scripts/setup_env.sh', what: 'Once: set up Python and the libraries.' },
@@ -67,7 +67,8 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
   }, [open])
 
   const kind = draft.kind
-  const needsKey = kind !== 'local'
+  const isKey = kind === 'anthropic' || kind === 'openai'
+  const isDevice = kind === 'device'
   const ready = usable(draft)
   const prov = providerOf(draft.provider)
   const host = (() => { try { return new URL(draft.baseUrl).host } catch { return '' } })()
@@ -76,23 +77,21 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
   const forgetModels = () => { setModels(null); setTyping(false); setModelState({ loading: false, error: null }) }      // a new key or provider: the old list no longer applies
   const fetchModels = () => {
     setModelState({ loading: true, error: null })
-    loadModels({ kind: draft.kind, key: draft.key.trim(), baseUrl: draft.baseUrl }).then((names) => {
+    ;(isDevice ? deviceModels(draft.baseUrl.trim()) : loadModels({ kind: draft.kind, key: draft.key.trim(), baseUrl: draft.baseUrl })).then((names) => {
       setModels(names); setTyping(false); setModelState({ loading: false, error: null })
       if (!names.includes(draft.model)) set({ model: names.find((n) => /flash|haiku|mini|chat|small|instruct/i.test(n)) ?? names[0] })       // a sensible first pick; the visitor can change it
     }).catch((e: Error) => setModelState({ loading: false, error: e.message }))
   }
-  const canLoad = draft.key.trim().length >= 8 && (draft.provider !== 'custom' || /^https?:\/\//.test(draft.baseUrl.trim())) && !modelState.loading
+  const canLoad = !modelState.loading && (isDevice ? /^https?:\/\//.test(draft.baseUrl.trim()) : draft.key.trim().length >= 8 && (draft.provider !== 'custom' || /^https?:\/\//.test(draft.baseUrl.trim())))
 
   return (
     <div className="mode-wrap" ref={root}>
       <button ref={btn} type="button" className="mode-btn" aria-expanded={open} aria-controls="mode-panel" onClick={() => setOpen((o) => !o)}>
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          {lab
-            ? <path d="M7 2h4M8 2v5L3.5 14.5A1.2 1.2 0 0 0 4.6 16h8.8a1.2 1.2 0 0 0 1.1-1.5L10 7V2" />          /* a flask: Lab */
-            : <><path d="M1.5 9S4.2 4 9 4s7.5 5 7.5 5-2.7 5-7.5 5S1.5 9 1.5 9Z" /><circle cx="9" cy="9" r="2.2" /></>}  {/* an eye: Viewer */}
+          <circle cx="9" cy="9" r="2.6" /><path d="M9 1.5v2.2M9 14.3v2.2M1.5 9h2.2M14.3 9h2.2M3.7 3.7l1.5 1.5M12.8 12.8l1.5 1.5M3.7 14.3l1.5-1.5M12.8 5.2l1.5-1.5" />   {/* a gear: settings */}
         </svg>
-        <span className="mode-name">{lab ? 'Lab' : 'Viewer'}</span>
-        <span className="mode-sub">{lab ? (using ? 'your key' : hosted ? 'hosted' : 'this computer') : 'recorded runs'}</span>
+        <span className="mode-name">Settings</span>
+        <span className="mode-sub">{lab ? (brain.kind === 'device' ? 'device model' : using ? 'your key' : hosted ? 'no model set' : 'this computer') : 'how it works'}</span>
         <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={open ? 'flip' : ''}><path d="M2 4l4 4 4-4" /></svg>
       </button>
 
@@ -158,15 +157,44 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
               <form onSubmit={(e) => { e.preventDefault(); if (ready) { onBrain({ ...draft, key: draft.key.trim() }); close() } }}>
                 <fieldset className="mp-kinds">
                   <legend className="sr-only">Which model reads your sentence</legend>
-                  {([[false, 'On this computer', 'A free AI program (Ollama) on your computer. Nothing leaves it.'], [true, 'With an API key (a password for a paid AI service)', 'Claude, Gemini, DeepSeek, OpenAI, Groq, Mistral, OpenRouter, Together, or any service that works like OpenAI\'s']] as [boolean, string, string][]).filter(([withKey]) => withKey || !hosted).map(([withKey, name, sub]) => (
-                    <label key={name} className="mp-kind" data-on={needsKey === withKey}>
-                      <input type="radio" name="brain-kind" checked={needsKey === withKey} onChange={() => setDraft(withKey ? withProvider(draft.kind === 'local' ? { ...LOCAL, provider: 'anthropic' } : draft, draft.kind === 'local' ? 'anthropic' : draft.provider) : LOCAL)} />
-                      <span><strong>{name}</strong><span className="dim">{sub}</span></span>
-                    </label>
-                  ))}
+                  {([['local', 'On this computer', 'A free AI program (Ollama) on your computer. Nothing leaves it.'],
+                    ['key', 'With an API key (a password for a paid AI service)', 'Claude, Gemini, DeepSeek, OpenAI, Groq, Mistral, OpenRouter, Together, or any service that works like OpenAI\'s'],
+                    ['device', 'On your device (Ollama, LM Studio…)', 'A free model already running on the computer you are using now. Your sentence goes from this page straight to it; no key.']] as ['local' | 'key' | 'device', string, string][])
+                    .filter(([k]) => (k === 'local' ? !hosted : k === 'device' ? hosted : true)).map(([k, name, sub]) => {
+                      const on = k === 'local' ? kind === 'local' : k === 'key' ? isKey : isDevice
+                      return (
+                        <label key={k} className="mp-kind" data-on={on}>
+                          <input type="radio" name="brain-kind" checked={on} onChange={() => { setDraft(k === 'local' ? LOCAL : k === 'key' ? withProvider(isKey ? draft : { ...LOCAL, provider: 'anthropic' }, isKey ? draft.provider : 'anthropic') : withProvider({ ...LOCAL, provider: 'ollama' }, 'ollama')); forgetModels() }} />
+                          <span><strong>{name}</strong><span className="dim">{sub}</span></span>
+                        </label>
+                      )
+                    })}
                 </fieldset>
-                {needsKey && (
+                {(isKey || isDevice) && (
                   <div className="mp-fields">
+                    {isDevice && (
+                      <>
+                        <label>App on your device
+                          <select value={draft.provider} onChange={(e) => { setDraft(withProvider(draft, e.target.value)); forgetModels() }}>
+                            {DEVICE_APPS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                          </select>
+                        </label>
+                        <label>Its address
+                          <input type="text" value={draft.baseUrl} onChange={(e) => { set({ baseUrl: e.target.value }); forgetModels() }} autoComplete="off" spellCheck={false} placeholder="http://localhost:PORT/v1" />
+                        </label>
+                        <details className="mp-safe" open>
+                          <summary>Let this page talk to your app (once)</summary>
+                          <ul>
+                            {draft.provider === 'lmstudio'
+                              ? <li><strong>LM Studio:</strong> open the Developer tab, start the server, and switch on <em>Enable CORS</em> (it lets a web page call it).</li>
+                              : <li><strong>Ollama:</strong> quit Ollama, then start it allowing this page: <code>OLLAMA_ORIGINS={window.location.origin} ollama serve</code> <Copy text={`OLLAMA_ORIGINS=${window.location.origin} ollama serve`} /> On a Mac with the Ollama app instead: <code>launchctl setenv OLLAMA_ORIGINS "{window.location.origin}"</code> <Copy text={`launchctl setenv OLLAMA_ORIGINS "${window.location.origin}"`} /> then restart the app.</li>}
+                            <li><strong>Your browser</strong> may ask whether this page may reach apps on your device or local network. Allow it, or nothing can connect.</li>
+                            <li><strong>What travels where:</strong> your sentence goes from this page to the app on your device. Only the plan it writes comes to this server, which checks it like any other model's answer.</li>
+                          </ul>
+                        </details>
+                      </>
+                    )}
+                    {isKey && (<>
                     <label>Provider
                       <select value={draft.provider} onChange={(e) => { setDraft(withProvider(draft, e.target.value)); forgetModels() }}>
                         {PROVIDERS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
@@ -185,9 +213,10 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                         <li><strong>What I cannot promise:</strong> the key does pass through this server on its way. So use a key you can revoke, ideally with a spend limit, and revoke it afterwards if you feel unsure.</li>
                       </ul>
                     </details>
+                    </>)}
                     <div className="mp-models">
-                      <button type="button" className="btn-line" disabled={!canLoad} onClick={fetchModels}>{modelState.loading ? 'Asking your provider…' : models ? 'Reload my models' : 'Load my models'}</button>
-                      <span className="mp-note">{models ? `${models.length} models your key can use` : draft.key.trim().length < 8 ? 'Paste your key first, then load the names it can use.' : 'Asks your provider which model names your key can use, so you do not have to guess one.'}</span>
+                      <button type="button" className="btn-line" disabled={!canLoad} onClick={fetchModels}>{modelState.loading ? (isDevice ? 'Asking your app…' : 'Asking your provider…') : models ? 'Reload my models' : isDevice ? 'Load models from my device' : 'Load my models'}</button>
+                      <span className="mp-note">{models ? `${models.length} model${models.length === 1 ? '' : 's'} ${isDevice ? 'on your device' : 'your key can use'}` : isDevice ? 'Asks the app on your device which models it has.' : draft.key.trim().length < 8 ? 'Paste your key first, then load the names it can use.' : 'Asks your provider which model names your key can use, so you do not have to guess one.'}</span>
                     </div>
                     {modelState.error && <p role="alert" className="mp-err">{modelState.error}</p>}
                     {models && !typing ? (
@@ -207,6 +236,7 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                         <input type="text" value={draft.baseUrl} onChange={(e) => set({ baseUrl: e.target.value })} autoComplete="off" spellCheck={false} placeholder="https://your-server.example/v1" />
                       </label>
                     )}
+                    {isKey && (<>
                     <div className="mp-prices">
                       <label>Price per million input tokens, $ (optional)
                         <input type="text" inputMode="decimal" value={draft.priceIn} onChange={(e) => set({ priceIn: e.target.value })} autoComplete="off" placeholder="to show money" />
@@ -216,16 +246,19 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                       </label>
                     </div>
                     <p className="mp-note">Prices only show what a run cost you (a token is roughly three quarters of a word). Known Claude models fill themselves in. Your key will be sent to <strong>{kind === 'anthropic' ? 'api.anthropic.com' : host || 'the address you type'}</strong> and nowhere else.</p>
+                    </>)}
                   </div>
                 )}
                 <p className="mp-note">
-                  {needsKey
+                  {isDevice
+                    ? <>Nothing is saved. Your sentence goes from this page straight to the app on your device; only the plan it writes is sent to this server.</>
+                    : isKey
                     ? <>Your key stays in this tab's memory and is gone when you reload. {hosted ? 'It goes to this hosted server for the one request, then only to the provider you chose.' : 'It goes only to the server on your computer, then only to the provider you chose.'} It is never saved or logged. Your provider bills you.{hosted ? '' : ' This server stops after 100 searches with a key.'}</>
                     : <>Nothing leaves your computer: the model runs here.</>}
                 </p>
                 <div className="mp-actions">
-                  <button type="submit" className="btn-line" disabled={!ready}>{needsKey ? 'Use this model' : 'Use the model on this computer'}</button>
-                  {using && <button type="button" className="mp-forget" onClick={() => { onBrain(LOCAL); setDraft(LOCAL) }}>Forget the key</button>}
+                  <button type="submit" className="btn-line" disabled={!ready}>{isDevice ? 'Use my device model' : isKey ? 'Use this model' : 'Use the model on this computer'}</button>
+                  {using && <button type="button" className="mp-forget" onClick={() => { onBrain(LOCAL); setDraft(LOCAL) }}>{brain.kind === 'device' ? 'Stop using it' : 'Forget the key'}</button>}
                 </div>
                 <p className="mp-now" aria-live="polite">In use now: {describe(brain)}</p>
               </form>

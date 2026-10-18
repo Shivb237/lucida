@@ -39,7 +39,7 @@ export function WakePage() {
     return () => { window.clearInterval(tick); window.clearTimeout(go); ctl.abort() }
   }, [])
 
-  if (!PHOTO_BASE) return <main id="main" tabIndex={-1} className="wrap wake"><h1>No live Lab is linked</h1><p>This copy of the site has no hosted Lab address, so there is nothing to wake. Open the mode menu to see how to run the Lab yourself.</p></main>
+  if (!PHOTO_BASE) return <main id="main" tabIndex={-1} className="wrap wake"><h1>No live Lab is linked</h1><p>This copy of the site has no hosted Lab address, so there is nothing to wake. Open Settings to see how to run the Lab yourself.</p></main>
 
   const stuck = state === 'waking' && secs >= STUCK_AFTER
   return (

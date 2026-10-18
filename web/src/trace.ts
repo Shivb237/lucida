@@ -27,8 +27,8 @@ export type LocalInfo = { encode_seconds: number; catalogues: string[]; load_sec
 
 export type RequestPayload = { query?: string; guard?: string; note?: string | null; refused?: boolean; category?: string; message?: string }
 export type UnderstandPayload = { plan: Plan; model?: string; fell_back?: boolean; error?: string; demo?: boolean }
-export type ExpandPayload = { usages?: string[]; notes?: string[]; pieces?: PlanPiece[]; reason?: string; error?: string }
-export type SearchPayload = { backend: 'router' | 'in-process'; info: RouterInfo | LocalInfo; pieces: PieceResult[]; error?: string }
+export type ExpandPayload = { usages?: string[]; notes?: string[]; pieces?: PlanPiece[]; reason?: string; error?: string; graph_first_use?: { import_seconds: number; read_seconds: number; build_seconds: number }; waited_for_startup_seconds?: number }
+export type SearchPayload = { backend: 'router' | 'in-process'; info: RouterInfo | LocalInfo; pieces: PieceResult[]; error?: string; checks?: string[] }   // checks: what the candidate checks changed (src/genkart/checks.py)
 export type ComposePayload = { harmony?: { baseline: number; coherent: number }; changed?: number; pieces?: number; colours?: (string | null)[]; picks?: string[]; reason?: string }
 export type OutfitItem = { kind: string; piece: string; pick: Hit; rank: number; reasons: string[] }
 export type OutfitPayload = { items?: OutfitItem[]; already_has?: string[]; gender?: string; reason?: string }
