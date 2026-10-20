@@ -22,7 +22,7 @@ certifi==2026.7.22
 charset_normalizer==3.5.2
 urllib3==2.8.0
 # milestone 4 (prompt understanding)
-langchain-core==1.6.10
+langchain-core==1.6.12
 langchain-ollama==1.1.0
 # web UI backend (search + live step stream for web/)
 fastapi==0.143.0
