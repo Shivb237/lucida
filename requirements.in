@@ -25,7 +25,7 @@ urllib3==2.8.0
 langchain-core==1.6.10
 langchain-ollama==1.1.0
 # web UI backend (search + live step stream for web/)
-fastapi==0.143.0
+fastapi==0.143.3
 uvicorn==0.54.0
 # milestone 5 context data (local only): official Kaggle download
 kaggle==2.2.4
