@@ -1,0 +1,170 @@
+{
+  "created_by": "scripts/evidence_paired.py",
+  "created_at": "2026-10-18T06:44:51+00:00",
+  "inputs": {
+    "runs/bm25.jsonl": "b4c17be0dc94d8a64a5af5c75631411fb6f8b3e18d4f12786c371398be0c2e9a",
+    "runs/marqo-fashionsiglip.jsonl": "9fe7121bfe1f0b25a03aa09643a01557a0785be0c77416f50a2b11e67d882187",
+    "runs/scale-bm25.jsonl": "347e8cfd70905a02ac48395d671a1aa5d82066f276c326a5a589d738af12c8c6",
+    "runs/scale-marqo-fashionsiglip.jsonl": "0cf08cb140b0d5dc9a3e66145cabbe9c553cb5f5eb97ad0ea463011e95778b5b",
+    "runs/scale-siglip-base.jsonl": "a75aa34f7a5415d5295ad4b674ed9b2908f3435c881f6828dd7bacdbe35a6a26",
+    "runs/siglip-base.jsonl": "018bdd4b5a6c962721858303ecf55f8306a2cce174d56884d727e87ea654c98d"
+  },
+  "pairs": [
+    {
+      "id": "scale-marqo-vs-siglip",
+      "a": "scale-marqo-fashionsiglip",
+      "b": "scale-siglip-base",
+      "set": "scale",
+      "metrics": {
+        "ndcg10": {
+          "mean": 0.025727236382274556,
+          "ci95": [
+            0.01801337765817872,
+            0.033491045333350136
+          ],
+          "better": 500,
+          "tied": 20,
+          "worse": 332
+        },
+        "recall50": {
+          "mean": 0.04728628198491496,
+          "ci95": [
+            0.03802045326007111,
+            0.05651490299060462
+          ],
+          "better": 385,
+          "tied": 301,
+          "worse": 166
+        },
+        "mrr": {
+          "mean": 0.01771097273893252,
+          "ci95": [
+            -0.0018084099087023625,
+            0.03850617549393211
+          ],
+          "better": 391,
+          "tied": 175,
+          "worse": 286
+        }
+      },
+      "n": 852
+    },
+    {
+      "id": "scale-marqo-vs-bm25",
+      "a": "scale-marqo-fashionsiglip",
+      "b": "scale-bm25",
+      "set": "scale",
+      "metrics": {
+        "ndcg10": {
+          "mean": 0.06507561703743787,
+          "ci95": [
+            0.049939392375785686,
+            0.07994834491128706
+          ],
+          "better": 523,
+          "tied": 13,
+          "worse": 316
+        },
+        "recall50": {
+          "mean": 0.19414765517706695,
+          "ci95": [
+            0.1759586679961965,
+            0.21331120114629074
+          ],
+          "better": 581,
+          "tied": 125,
+          "worse": 146
+        },
+        "mrr": {
+          "mean": 0.05851851437006432,
+          "ci95": [
+            0.03048622645137474,
+            0.08889564662481256
+          ],
+          "better": 492,
+          "tied": 80,
+          "worse": 280
+        }
+      },
+      "n": 852
+    },
+    {
+      "id": "pilot-marqo-vs-siglip",
+      "a": "marqo-fashionsiglip",
+      "b": "siglip-base",
+      "set": "pilot",
+      "metrics": {
+        "ndcg10": {
+          "mean": 0.016563833021850622,
+          "ci95": [
+            -0.006641917772768241,
+            0.037833718111414026
+          ],
+          "better": 38,
+          "tied": 0,
+          "worse": 26
+        },
+        "recall50": {
+          "mean": 0.046288628905816406,
+          "ci95": [
+            0.01958482435533217,
+            0.0760248762738997
+          ],
+          "better": 29,
+          "tied": 26,
+          "worse": 9
+        },
+        "mrr": {
+          "mean": 0.03264953362609613,
+          "ci95": [
+            -0.02508434545055638,
+            0.0912596371727231
+          ],
+          "better": 26,
+          "tied": 16,
+          "worse": 22
+        }
+      },
+      "n": 64
+    },
+    {
+      "id": "pilot-marqo-vs-bm25",
+      "a": "marqo-fashionsiglip",
+      "b": "bm25",
+      "set": "pilot",
+      "metrics": {
+        "ndcg10": {
+          "mean": 0.11778460424934889,
+          "ci95": [
+            0.06628235735918722,
+            0.168371933097238
+          ],
+          "better": 46,
+          "tied": 0,
+          "worse": 18
+        },
+        "recall50": {
+          "mean": 0.3471431996822622,
+          "ci95": [
+            0.2843517436339702,
+            0.4091697132077991
+          ],
+          "better": 55,
+          "tied": 7,
+          "worse": 2
+        },
+        "mrr": {
+          "mean": 0.003665502311784639,
+          "ci95": [
+            -0.08973961694934217,
+            0.09390388493062253
+          ],
+          "better": 28,
+          "tied": 12,
+          "worse": 24
+        }
+      },
+      "n": 64
+    }
+  ]
+}
