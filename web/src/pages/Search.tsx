@@ -8,7 +8,7 @@ import { HEADLINE } from '../brand'
 import { ComposePanel, GraphSheet, LiveStrip, PlanCard, RecordTable, SearchPanel, TimeStrip, type Clock } from '../components/Panels'
 import { CostPanel, type Resources } from '../components/CostPanel'
 import { CompareCard, type Plain } from '../components/CompareCard'
-import { Hero, Learned } from '../components/Hero'
+import { Hero, Learned, SearchBoard, type BoardHit } from '../components/Hero'
 import { LiveWhy } from '../components/Explain'
 import { ContactSheet, Print, type Mode } from '../components/Sheet'
 import { Sentence } from '../components/Sentence'
@@ -16,7 +16,7 @@ import { Stepper } from '../components/Stepper'
 import { DEMO_QUERY, playDemo } from '../demo'
 import { bestRun, HOSTED_PHOTO_IDS, PHOTO_BASE, playRecorded, RECORDED, VIEWER_ONLY, wakeHostedLab, withPhotos, type Pace, type RecordedRun } from '../recorded'
 import {
-  emptySteps, STEPS, type OutfitPayload, type RequestPayload, type SearchPayload, type StageId, type StepState, type TraceEvent, type UnderstandPayload,
+  emptySteps, STEPS, type OutfitPayload, type PieceResult, type RequestPayload, type SearchPayload, type StageId, type StepState, type TraceEvent, type UnderstandPayload,
 } from '../trace'
 import { fmt, openModelDialog, scrollToId } from '../ui'
 
@@ -198,6 +198,10 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const examplesShown = examples.length ? examples : RECORDED.runs.map((r) => r.prompt)
   const hosted = !!health?.hosted
   const reader = hosted && brain.kind === 'local' ? 'no AI here, so your words are searched as typed' : describe(brain)
+  // The first-screen board is a real recorded contact sheet until this search has returned its own candidates.
+  const recordedSearch = withPhotos(RECORDED.runs.find((r) => r.id === 't5-p17') ?? bestRun(), photos.current).events.find((e): e is Extract<TraceEvent, { kind: 'step' }> => e.kind === 'step' && e.stage === 'search' && e.status === 'done')
+  const recordedPieces = recordedSearch?.payload as unknown as { pieces?: PieceResult[] } | undefined
+  const boardHits: BoardHit[] = (search?.pieces ?? recordedPieces?.pieces ?? []).flatMap((piece) => piece.hits.map((hit) => ({ hit, kind: piece.kind }))).slice(0, 4)
 
   const detail: Partial<Record<StageId, React.ReactNode>> = {
     understand: <><Sentence text={shown} plan={plan} animate={steps.understand.status === 'done'} /><PlanCard step={steps.understand} demo={demo} head={false} /></>,
@@ -248,34 +252,37 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
           </p>
         </section>
       </>) : (
-        <section className="lab-top" aria-labelledby="lab-h">
-          <h1 id="lab-h" className="voice lab-h">{HEADLINE}</h1>
-          {hosted && brain.kind === 'local' && (
-            <Notice id="hosted"><span className="lg">Hosted Lab</span><span className="notice-text">This Lab has no AI model of its own. Add your own key under AI model.</span></Notice>
-          )}
-          {health && !hosted && !health.ollama && (
-            <Notice id="ollama"><span className="lg">Ollama off</span><span className="notice-text">Start Ollama with <code>qwen3:4b-instruct</code>. Until then your words are searched as typed.</span></Notice>
-          )}
-          <form className="req" onSubmit={(e) => { e.preventDefault(); if (running && live) stopRun(); else runLive(query) }}>
-            <label htmlFor="req" className="lg dim" style={{ width: '100%', marginBottom: 4 }}>What do you need to wear?</label>
-            <p id="req-help" className="req-help">Name the occasion, a garment, a colour, the season, or a piece you own. Up to 300 characters.</p>
-            <input id="req" type="text" value={query} maxLength={300} onChange={(e) => { setQuery(e.target.value); setHint(false) }} autoComplete="off"
-              placeholder="A men's outfit for Diwali with a black kurta and ivory trousers" aria-describedby={hint ? 'req-help req-hint' : 'req-help'} aria-invalid={hint || undefined} />
-            <button type="submit" className="btn-expose">{running && live ? 'Stop' : 'Search outfit'}</button>
-            {hint && <p id="req-hint" role="alert" className="req-hint"><span className="tile cross" aria-hidden="true" />Write one sentence first, for example the occasion and the garment. Nothing was searched.</p>}
-          </form>
-          <div className="chip-row" style={{ marginTop: 14 }} role="group" aria-labelledby="ex-h">
-            <span id="ex-h" className="lg dim" style={{ marginRight: 4 }}>Examples: tap to fill, then edit</span>
-            {examplesShown.map((s) => <button key={s} type="button" className="chip" onClick={() => { setQuery(s); setHint(false); document.getElementById('req')?.focus() }}>{s}</button>)}
-            <button type="button" className="chip" style={{ borderStyle: 'dashed' }} onClick={runDemo}>Play the demo replay</button>
+        <section className="lab-hero" aria-labelledby="lab-h">
+          <div className="lab-top">
+            <h1 id="lab-h" className="voice lab-h">{HEADLINE}</h1>
+            {hosted && brain.kind === 'local' && (
+              <Notice id="hosted"><span className="lg">Hosted Lab</span><span className="notice-text">This Lab has no AI model of its own. Add your own key under AI model.</span></Notice>
+            )}
+            {health && !hosted && !health.ollama && (
+              <Notice id="ollama"><span className="lg">Ollama off</span><span className="notice-text">Start Ollama with <code>qwen3:4b-instruct</code>. Until then your words are searched as typed.</span></Notice>
+            )}
+            <form className="req" onSubmit={(e) => { e.preventDefault(); if (running && live) stopRun(); else runLive(query) }}>
+              <label htmlFor="req" className="lg dim" style={{ width: '100%', marginBottom: 4 }}>What do you need to wear?</label>
+              <p id="req-help" className="req-help">Name the occasion, a garment, a colour, the season, or a piece you own. Up to 300 characters.</p>
+              <input id="req" type="text" value={query} maxLength={300} onChange={(e) => { setQuery(e.target.value); setHint(false) }} autoComplete="off"
+                placeholder="A men's outfit for Diwali with a black kurta and ivory trousers" aria-describedby={hint ? 'req-help req-hint' : 'req-help'} aria-invalid={hint || undefined} />
+              <button type="submit" className="btn-expose">{running && live ? 'Stop' : 'Search outfit'}</button>
+              {hint && <p id="req-hint" role="alert" className="req-hint"><span className="tile cross" aria-hidden="true" />Write one sentence first, for example the occasion and the garment. Nothing was searched.</p>}
+            </form>
+            <div className="chip-row" style={{ marginTop: 14 }} role="group" aria-labelledby="ex-h">
+              <span id="ex-h" className="lg dim" style={{ marginRight: 4 }}>Examples: tap to fill, then edit</span>
+              {examplesShown.map((s) => <button key={s} type="button" className="chip" onClick={() => { setQuery(s); setHint(false); document.getElementById('req')?.focus() }}>{s}</button>)}
+              <button type="button" className="chip" style={{ borderStyle: 'dashed' }} onClick={runDemo}>Play the demo replay</button>
+            </div>
+            {health && (
+              <p className="lab-status">
+                <span className="lg dim">Reads your words with</span> {reader}
+                {' · '}<button type="button" className="text-btn" onClick={openModelDialog}>change</button>
+                {ready && !ready.ready && <><br /><span className="lg dim">Still loading</span> {ready.loading.join(', ') || 'the search model'} · <span className="mono">{ready.seconds.toFixed(0)} s</span> so far. Searches wait until it is done.</>}
+              </p>
+            )}
           </div>
-          {health && (
-            <p className="lab-status">
-              <span className="lg dim">Reads your words with</span> {reader}
-              {' · '}<button type="button" className="text-btn" onClick={openModelDialog}>change</button>
-              {ready && !ready.ready && <><br /><span className="lg dim">Still loading</span> {ready.loading.join(', ') || 'the search model'} · <span className="mono">{ready.seconds.toFixed(0)} s</span> so far. Searches wait until it is done.</>}
-            </p>
-          )}
+          <SearchBoard hits={boardHits} live={live && !!search} />
         </section>
       )}
 

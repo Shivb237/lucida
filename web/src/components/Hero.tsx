@@ -8,8 +8,8 @@ import evidence from 'virtual:evidence-front'
 import { HEADLINE, PROBLEM, WHY } from '../brand'
 import { narrateSteps } from '../content/story'
 import { RECORDED, type RecordedRun } from '../recorded'
-import { emptySteps, MARK_CLASS, STAGES, STEPS, type OutfitPayload, type StageId, type StepState } from '../trace'
-import { Picture } from './Sheet'
+import { emptySteps, MARK_CLASS, STAGES, STEPS, type Hit, type OutfitPayload, type StageId, type StepState } from '../trace'
+import { Picture, SourceChip } from './Sheet'
 
 const calm = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const RUN_MS = 650, GAP_MS = 250, HOLD_MS = 3400      // per step: running, then done; the finished outfit holds; 6 x 0.9 s + 3.4 s = about 8.8 s a run
@@ -44,6 +44,26 @@ function framesOf(run: RecordedRun): Frame[] {
 }
 
 const picksOf = (run: RecordedRun) => ((framesOf(run)[LAST].steps.outfit.payload as OutfitPayload)?.items ?? []).map((it) => it.pick)
+
+export type BoardHit = { hit: Hit; kind: string }
+
+/** A real recorded contact sheet until a live search has returned its own candidate photos. */
+export function SearchBoard({ hits, live }: { hits: BoardHit[]; live: boolean }) {
+  return (
+    <aside className="search-board sheet" aria-labelledby="board-h" data-live={live || undefined}>
+      <h2 id="board-h">On the light table</h2>
+      <div className="board-images">
+        {hits.map(({ hit, kind }, i) => (
+          <figure key={`${hit.id}-${kind}`} style={{ '--board-order': i } as React.CSSProperties}>
+            <div className="board-photo"><Picture hit={hit} /></div>
+            <figcaption><span>{kind}</span><SourceChip source={hit.source} /></figcaption>
+          </figure>
+        ))}
+      </div>
+      <p className="board-note">{live ? 'Candidate photos returned by this search. Not a recommendation.' : 'Illustrative recorded candidates from the catalogue. Not a recommendation.'}</p>
+    </aside>
+  )
+}
 
 export function Hero({ runs, onWatch }: { runs: RecordedRun[]; onWatch: (run: RecordedRun) => void }) {
   const still = useMemo(() => calm(), [])

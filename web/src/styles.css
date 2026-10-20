@@ -155,7 +155,7 @@ img { display: block; max-width: 100%; }
 .dev { animation: develop 560ms var(--ease) both; }
 .tile.started { animation: pulse 900ms ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .dev, .grease path, .tile.started { animation: none; }
+  .dev, .grease path, .tile.started, .board-images figure { animation: none; }
 }
 
 /* narrow screens */
@@ -663,12 +663,28 @@ h2.step-h { margin: 0; }
 .learned-card a:hover { color: var(--mag); }
 .learned-fine { margin: 14px 0 0; font-size: 15px; line-height: 22px; color: var(--z4); max-width: 70ch; }
 
-/* the Lab, idle */
-.lab-top { max-width: 1100px; }
+/* the Lab: its first-screen contact sheet becomes this search's real candidates once they arrive */
+.lab-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 390px); gap: clamp(28px, 5vw, 76px); align-items: start; }
+.lab-top { min-width: 0; }
 .lab-h { margin: 0 0 24px; font-size: clamp(34px, 4.4vw, 60px); line-height: 1.06; max-width: 22ch; }
 .lab-top .notice { margin-bottom: 18px; }
 .lab-status { margin: 12px 0 0; font-size: 17px; line-height: 27px; }
 .lab-status .lg { margin-right: 6px; }
+.search-board { margin: 4px 0 0; padding: 20px; min-width: 0; overflow: hidden; transform: rotate(.4deg); }
+.search-board h2 { margin: 0; font-size: 22px; line-height: 28px; }
+.board-images { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.board-images::before { content: ''; position: absolute; z-index: 0; left: 17%; right: 17%; top: 50%; height: 1px; background: var(--z7); transform: rotate(-12deg); transform-origin: center; }
+.board-images figure { position: relative; z-index: 1; margin: 0; padding: 7px 7px 9px; background: var(--white); box-shadow: 0 2px 8px rgba(20, 20, 22, 0.12); transform: rotate(calc((var(--board-order) - 1.5) * 1.7deg)); animation: board-settle 560ms var(--ease) both; animation-delay: calc(var(--board-order) * 70ms); }
+.board-images figure:nth-child(2) { margin-top: 14px; }
+.board-images figure:nth-child(3) { margin-top: -10px; }
+.board-images figure:nth-child(4) { margin-top: 4px; }
+.board-photo { aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--positive); }
+.board-photo img { width: 100%; height: 100%; object-fit: contain; background: var(--white); }
+.board-photo .no-photo { min-height: 100%; font-size: 12px; }
+.board-images figcaption { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 7px; color: var(--z4); font-size: 13px; line-height: 17px; text-transform: uppercase; letter-spacing: .06em; }
+.board-images .src { padding: 1px 4px; font-size: 11px; white-space: nowrap; }
+.board-note { margin: 16px 0 0; font-size: 15px; line-height: 23px; color: var(--z4); }
+@keyframes board-settle { from { opacity: 0; transform: translateY(12px) rotate(calc((var(--board-order) - 1.5) * 1.7deg)); } to { opacity: 1; transform: rotate(calc((var(--board-order) - 1.5) * 1.7deg)); } }
 
 /* results: the run log as a sticky rail on the left, the result first on the right */
 .results { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 48px; align-items: start; margin-top: 48px; }
@@ -716,6 +732,8 @@ details[open] > summary .step-name::after { transform: translateY(0) rotate(-135
 @media (max-width: 1100px) {
   .hero { grid-template-columns: minmax(0, 1fr); }
   .hero-run { max-width: 640px; }
+  .lab-hero { grid-template-columns: minmax(0, 1fr); }
+  .search-board { max-width: 500px; }
   .results { grid-template-columns: 260px minmax(0, 1fr); gap: 32px; }
 }
 @media (max-width: 900px) {
@@ -730,6 +748,8 @@ details[open] > summary .step-name::after { transform: translateY(0) rotate(-135
   .hero-why { font-size: 18px; line-height: 28px; }
   .hero-actions .btn-expose { width: 100%; margin-top: 0; }
   .hero-run, .hero-print, .run-log { transform: none; }
+  .search-board { transform: none; padding: 18px; }
+  .board-images { max-width: 420px; }
   .chapter + .chapter { margin-top: 64px; }
   /* on a phone each stage is one row: its name, then its steps' marks (the caption names the step) */
   .hero-stages { grid-template-columns: minmax(0, 1fr); gap: 8px; }
