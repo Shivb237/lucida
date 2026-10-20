@@ -8,12 +8,25 @@ import { DEVICE_APPS, describe, LOCAL, PROVIDERS, providerOf, usable, withProvid
 
 
 function Copy({ text }: { text: string }) {
-  const [done, setDone] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setStatus('copied')
+      window.setTimeout(() => setStatus('idle'), 1500)
+    } catch {
+      setStatus('failed')
+    }
+  }
   return (
-    <button type="button" className="mp-copy" onClick={() => { navigator.clipboard?.writeText(text).then(() => { setDone(true); window.setTimeout(() => setDone(false), 1500) }).catch(() => {}) }}>
-      {done ? 'Copied' : 'Copy'}
+    <button type="button" className="mp-copy" onClick={copy} aria-live="polite" title={status === 'failed' ? 'Select the command and copy it manually.' : undefined}>
+      {status === 'copied' ? 'Copied' : status === 'failed' ? 'Copy failed' : 'Copy command'}
     </button>
   )
+}
+
+function Command({ children }: { children: string }) {
+  return <div className="mp-command"><code>{children}</code><Copy text={children} /></div>
 }
 
 export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
@@ -30,10 +43,12 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
   const btn = useRef<HTMLButtonElement>(null)
   const closeBtn = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
-  const close = () => { setOpen(false); btn.current?.focus() }   // always hand focus back to the button that opened it
+  const opener = useRef<HTMLElement | null>(null)
+  const close = () => { setOpen(false); (opener.current?.isConnected ? opener.current : btn.current)?.focus() }   // return keyboard focus to the control that opened the dialog
+  const toggle = () => { if (!open) opener.current = btn.current; setOpen((wasOpen) => !wasOpen) }
 
   useEffect(() => {
-    const onOpen = () => setOpen(true)
+    const onOpen = (event: Event) => { opener.current = (event as CustomEvent<HTMLElement | null>).detail; setOpen(true) }
     window.addEventListener(MODEL_DIALOG_EVENT, onOpen)
     return () => window.removeEventListener(MODEL_DIALOG_EVENT, onOpen)
   }, [])
@@ -81,7 +96,7 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
 
   return (
     <div className="mode-wrap">
-      <button ref={btn} type="button" className="mode-btn" aria-expanded={open} aria-haspopup="dialog" aria-controls="mode-panel" onClick={() => setOpen((o) => !o)}>
+      <button ref={btn} type="button" className="mode-btn" aria-expanded={open} aria-haspopup="dialog" aria-controls="mode-panel" onClick={toggle}>
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="9" cy="9" r="2.6" /><path d="M9 1.5v2.2M9 14.3v2.2M1.5 9h2.2M14.3 9h2.2M3.7 3.7l1.5 1.5M12.8 12.8l1.5 1.5M3.7 14.3l1.5-1.5M12.8 5.2l1.5-1.5" />
         </svg>
@@ -109,8 +124,8 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
                   <legend className="sr-only">Which model reads your sentence</legend>
                   {([['local', 'On this computer', 'A free AI program (Ollama) on your computer. Nothing leaves it.'],
                     ['key', 'With an API key (a password for a paid AI service)', 'Claude, Gemini, DeepSeek, OpenAI, Groq, Mistral, OpenRouter, Together, or any service that works like OpenAI\'s'],
-                    ['device', 'On your device (Ollama, LM Studio…)', 'A free model already running on the computer you are using now. Your sentence goes from this page straight to it; no key.']] as ['local' | 'key' | 'device', string, string][])
-                    .filter(([k]) => (k === 'local' ? !hosted : k === 'device' ? hosted : true)).map(([k, name, sub]) => {
+                    ['device', 'On your device (Ollama, LM Studio, or another local server)', 'Use a local OpenAI-compatible model server. Your sentence goes from this page straight to it; no key.']] as ['local' | 'key' | 'device', string, string][])
+                    .filter(([k]) => k !== 'local' || !hosted).map(([k, name, sub]) => {
                       const on = k === 'local' ? kind === 'local' : k === 'key' ? isKey : isDevice
                       return (
                         <label key={k} className="mp-kind" data-on={on}>
@@ -130,15 +145,26 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
                           </select>
                         </label>
                         <label>Its address
-                          <input type="text" value={draft.baseUrl} onChange={(e) => { set({ baseUrl: e.target.value }); forgetModels() }} autoComplete="off" spellCheck={false} placeholder="http://localhost:PORT/v1" />
+                          <input type="text" value={draft.baseUrl} onChange={(e) => { set({ baseUrl: e.target.value }); forgetModels() }} autoComplete="off" spellCheck={false} placeholder="http://localhost:PORT/v1" aria-describedby={draft.provider === 'device-custom' ? 'device-address-help' : undefined} />
                         </label>
+                        {draft.provider === 'device-custom' && <p id="device-address-help" className="mp-note">Enter the local server’s OpenAI-compatible address, including <code>/v1</code>. It must provide <code>/models</code> and <code>/chat/completions</code>.</p>}
                         <details className="mp-safe" open>
                           <summary>Let this page talk to your app (once)</summary>
                           <ul>
                             {draft.provider === 'lmstudio'
                               ? <li><strong>LM Studio:</strong> open the Developer tab, start the server, and switch on <em>Enable CORS</em> (it lets a web page call it).</li>
-                              : <li><strong>Ollama:</strong> quit Ollama, then start it allowing this page: <code>OLLAMA_ORIGINS={window.location.origin} ollama serve</code> <Copy text={`OLLAMA_ORIGINS=${window.location.origin} ollama serve`} /> On a Mac with the Ollama app instead: <code>launchctl setenv OLLAMA_ORIGINS "{window.location.origin}"</code> <Copy text={`launchctl setenv OLLAMA_ORIGINS "${window.location.origin}"`} /> then restart the app.</li>}
+                              : draft.provider === 'ollama' ? <>
+                                <li><strong>Ollama:</strong> quit it first. In a macOS or Linux terminal, run:</li>
+                                <li className="mp-command-item"><Command>{`OLLAMA_ORIGINS=${window.location.origin} ollama serve`}</Command></li>
+                                <li>With the Ollama app on macOS instead, run this in Terminal, then restart the app:</li>
+                                <li className="mp-command-item"><Command>{`launchctl setenv OLLAMA_ORIGINS "${window.location.origin}"`}</Command></li>
+                                <li>For Windows, use Ollama’s documented environment-variable setup for allowed origins; the commands above are not Windows commands.</li>
+                              </> : <>
+                                <li><strong>Your local server:</strong> start its OpenAI-compatible API, then enter its address above. The address must end in <code>/v1</code>.</li>
+                                <li>Configure that app to allow requests from <code>{window.location.origin}</code>. Its documentation names this CORS or allowed-origins setting.</li>
+                              </>}
                             <li><strong>Your browser</strong> may ask whether this page may reach apps on your device or local network. Allow it, or nothing can connect.</li>
+                            <li>Then choose <strong>Load models from my device</strong> below. If it still fails, the app is running but is not allowing this page yet.</li>
                             <li><strong>What travels where:</strong> your sentence goes from this page to the app on your device. Only the plan it writes comes to this server, which checks it like any other model's answer.</li>
                           </ul>
                         </details>

@@ -9,7 +9,7 @@ export function scrollToId(id: string, block: ScrollLogicalPosition = 'start') {
 export const MODEL_DIALOG_EVENT = 'lucida-open-model'
 /** Opens the "AI model" dialog in the header from anywhere on the page (the "change" link beside the search box). */
 export function openModelDialog() {
-  window.dispatchEvent(new Event(MODEL_DIALOG_EVENT))
+  window.dispatchEvent(new CustomEvent<HTMLElement | null>(MODEL_DIALOG_EVENT, { detail: document.activeElement instanceof HTMLElement ? document.activeElement : null }))
 }
 
 /** A number of seconds (or any measured value) to fixed digits; a dash when there is none. */

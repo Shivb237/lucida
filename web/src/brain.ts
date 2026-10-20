@@ -20,7 +20,7 @@ export const PROVIDERS: Provider[] = [
 export const DEVICE_APPS: Provider[] = [
   { id: 'ollama', label: 'Ollama', kind: 'device', baseUrl: 'http://localhost:11434/v1', modelHint: 'e.g. qwen3:4b-instruct' },
   { id: 'lmstudio', label: 'LM Studio', kind: 'device', baseUrl: 'http://localhost:1234/v1', modelHint: 'the model loaded in LM Studio' },
-  { id: 'device-custom', label: 'Another app on this device (type its address)', kind: 'device', baseUrl: '', modelHint: 'the model name your app uses' },
+  { id: 'device-custom', label: 'Another OpenAI-compatible local server', kind: 'device', baseUrl: '', modelHint: 'the model name your server uses' },
 ]
 export const providerOf = (id: string): Provider => PROVIDERS.find((p) => p.id === id) ?? DEVICE_APPS.find((p) => p.id === id) ?? PROVIDERS[PROVIDERS.length - 1]
 

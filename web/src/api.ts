@@ -146,7 +146,7 @@ export async function refineSearch(q: string, liked: string[], gender?: string |
 // The page talks to it directly: a server on the internet cannot reach a visitor's computer. Only the resulting plan is sent to the server,
 // which puts it through the same checks as its own models' answers.
 
-const DEVICE_HELP = 'Is the app running, and does it allow this page? (see "Let this page talk to your app" under AI model, top right)'
+const DEVICE_HELP = 'Make sure the app is running and allows this page to connect. See “Let this page talk to your app” under AI model for the exact origin and browser permission.'
 
 /** The model names the app on this device has. Throws a plain message on any failure. */
 export async function deviceModels(baseUrl: string): Promise<string[]> {
@@ -159,7 +159,7 @@ export async function deviceModels(baseUrl: string): Promise<string[]> {
   if (!r.ok) throw new Error(`The app at ${baseUrl} answered ${r.status}. ${DEVICE_HELP}`)
   const d = await r.json().catch(() => null)
   const names = ((d?.data ?? []) as { id?: string }[]).map((m) => String(m.id ?? '')).filter(Boolean)
-  if (!names.length) throw new Error('The app has no models yet. Download one in the app first (in Ollama: ollama pull qwen3:4b-instruct).')
+  if (!names.length) throw new Error('The app has no models available. Load or download a model in that app, then try again.')
   return names
 }
 
