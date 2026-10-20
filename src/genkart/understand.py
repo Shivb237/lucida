@@ -7,29 +7,47 @@ from __future__ import annotations
 
 import re
 import time
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field, field_validator
+
+
+def _clip(n: int):
+    """Over-long text is cut to the limit, not refused: a model that writes 201 characters must not cost the visitor the whole answer."""
+    return BeforeValidator(lambda v: v[:n] if isinstance(v, str) else v)
+
+
+def _first(n: int):
+    """Too many items: keep the first n (the model lists the most important first), do not refuse the plan."""
+    return lambda v: v[:n] if isinstance(v, list) else v
 
 Kind = Literal["top", "bottom", "dress", "outerwear", "footwear", "accessory", "other"]
 Gender = Literal["men", "women", "boys", "girls", "unisex", "unknown"]
+Short = Annotated[str, _clip(120), Field(max_length=120)]
+Note = Annotated[str, _clip(300), Field(max_length=300)]
 
 
 class Piece(BaseModel):
     kind: Kind
-    search_text: str = Field(description="short product-style phrase, e.g. \"men's navy cotton polo shirt\"")
-    colours: list[str] = Field(default_factory=list, description="only colours the shopper wrote")
+    search_text: Annotated[str, _clip(200)] = Field(max_length=200, description="short product-style phrase, e.g. \"men's navy cotton polo shirt\"")
+    colours: list[Short] = Field(default_factory=list, max_length=10, description="only colours the shopper wrote")
+
+    _colours = field_validator("colours", mode="before")(_first(10))
 
 
 class Plan(BaseModel):
-    main_query: str = Field(description="one clean product search phrase for the whole request")
+    main_query: Annotated[str, _clip(300)] = Field(max_length=300, description="one clean product search phrase for the whole request")
     gender: Gender
-    occasion: Optional[str] = None
-    season: Optional[str] = None
+    occasion: Optional[Short] = None
+    season: Optional[Short] = None
     budget_inr: Optional[float] = None
-    pieces: list[Piece]
-    already_has: list[str] = Field(default_factory=list, description="items the shopper says they already own (v2)")
-    notes: list[str] = Field(default_factory=list, description="what code changed after the model answered (graph expansion)")
+    pieces: list[Piece] = Field(max_length=12)      # bounded (a model or a visitor's device could send hundreds); the search uses at most server.MAX_PIECES
+    already_has: list[Short] = Field(default_factory=list, max_length=10, description="items the shopper says they already own (v2)")
+    notes: list[Note] = Field(default_factory=list, max_length=40, description="what code changed after the model answered (graph expansion)")
+
+    _pieces = field_validator("pieces", mode="before")(_first(12))
+    _owned = field_validator("already_has", mode="before")(_first(10))
+    _notes = field_validator("notes", mode="before")(_first(40))
 
 
 SYSTEM_V1 = """You turn a shopper's request into a product search plan for a fashion store. Answer with JSON only.

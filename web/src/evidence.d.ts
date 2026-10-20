@@ -34,7 +34,37 @@ declare module 'virtual:evidence' {
     ingest: { baseline: number[]; happy: Record<string, unknown>; dedup: Record<string, unknown>; replicaOff: { sent: number; dlqWhileDown: number; cause: string }; permanent: { sent: number }; totals: string; bugs: string[]; source: string } | null
   }
 
+  export type Verdict = 'helped' | 'no clear effect' | 'hurt'
+  /** retrieval: a 0 to 1 search score · rating: a person's 0 to 2 rating · rate: a share or agreement score · count: counted events */
+  export type EScale = 'retrieval' | 'rating' | 'rate' | 'count'
+  export type ClaimId = 'model' | 'drawing' | 'collections' | 'plan' | 'graph' | 'colour' | 'likes' | 'judge' | 'checks' | 'guard' | 'data'
+  /** One measured effect: a paired difference (ref 0) or a share against a stated reference. better/worse count units that improved/got worse. */
+  export type Effect = {
+    key: string; label: string; sub?: string; scale: EScale; mean: number; ci95: [number, number] | null; n: number | null
+    better?: number; tied?: number; worse?: number; ref: number | null; refLabel?: string; higherIsBetter: boolean
+    verdict: Verdict | null; rule: string; forest: boolean; digits: number; file: string; unit?: string
+  }
+  export type LevelRow = { name: string; sub?: string; mean: number; ci95: [number, number] | null; n?: number | null; inUse?: boolean; old?: boolean; value?: string }
+  export type Level = { title: string; note?: string; scale: EScale; domain?: [number, number]; ref?: number | null; digits: number; bars?: boolean; fold?: boolean; rows: LevelRow[] }
+  export type Table = { title: string; head: string[]; num: boolean[]; rows: string[][]; note?: string }
+  export type Source = { file: string; script?: string }
+  export type Claim = {
+    id: ClaimId; num: string; short: string; question: string; scale: EScale; status: 'ok' | 'partial' | 'missing'; missing: string[]
+    effect: Effect | null; effects: Effect[]; verdict: Verdict | null; verdictLabel: string | null; answer: string[]
+    method: string[]; measured: [string, string][]; limits: string[]; test_set: string; date: string; sources: Source[]
+    levels: Level[]; tables: Table[]
+  }
+
+  /** A second rater's agreement with the author on one blind test (runs/blind-test{4,5}-agreement.summary.json); null when no such file exists. */
+  export type Agreement = { file: string; test: string; date: string; raters: number; nItems: number; weightedKappa: Metric; agreementPct: Metric | null }
+
   const evidence: {
+    /** Second-rater agreement per blind test; each is null until scripts/analyze_agreement.py has written its file. */
+    agreement: { test4: Agreement | null; test5: Agreement | null }
+    /** The Evidence page's questions, in page order, each with a computed verdict. */
+    claims: Claim[]
+    /** Files that could not be read when the page was built (printed by the build; fatal only with EVIDENCE_STRICT=1). */
+    warnings: string[]
     aws: Aws
     claudeSpend: { purpose: string; model: string; calls: number; input_tokens: number; output_tokens: number; cost_usd: number }[]
     judge5: { agreement: number; kappa: number; n: number } | null
@@ -46,7 +76,7 @@ declare module 'virtual:evidence' {
     checksEval: { prompts: number; pieces?: number; before: Record<'wrong_slot' | 'child_for_adult' | 'mixed_gender_outfit' | 'colour_missing' | 'colour_named', number>; after: Record<'wrong_slot' | 'child_for_adult' | 'mixed_gender_outfit' | 'colour_missing' | 'colour_named', number>; setup: { prompts: number } } | null
     claudeVsQwen: { n: number; word_kept_qwen: number; word_kept_claude: number; diff_claude_minus_qwen: number; diff_ci95: [number, number]; claude_cost_usd: number } | null
     pilot: Record<'random' | 'bm25' | 'siglipBase' | 'marqo' | 'siglip2' | 'zooclaw' | 'siglip2Bug' | 'zooclawBug', Strip>
-    drawing: { text: Strip | null; textGen: Strip | null; genFashion: Strip | null; genResnet: Strip | null; frames: Frame[] }
+    drawing: { text: Strip | null; textGen: Strip | null; genFashion: Strip | null; genResnet: Strip | null; frames: Frame[]; steps: number[] }
     scale: Record<'random' | 'bm25' | 'marqo' | 'siglipBase', Strip>
     findings: {
       blind4: RatingSummary | null

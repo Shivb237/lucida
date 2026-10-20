@@ -2,11 +2,14 @@
 
 Before every call we reserve the worst case (input tokens estimated from the text, plus the full max_tokens of output) and refuse to call
 if spent + reserve would pass the cap. After the call the real token counts from the API response are booked. Every call is appended to a
-ledger file so the total can be audited. Prices are per million tokens (USD), from https://platform.claude.com/docs/en/about-claude/pricing
+ledger file so the total can be audited. Check, call and booking happen under an exclusive lock on <ledger>.lock (fcntl), so two scripts
+sharing a ledger cannot both pass the check before either has booked its spend. Prices are per million tokens (USD), from https://platform.claude.com/docs/en/about-claude/pricing
 read 2026-10-14; update them here if they change.
 """
 from __future__ import annotations
 
+import contextlib
+import fcntl
 import json
 import os
 import pathlib
@@ -28,7 +31,23 @@ class CapExceeded(RuntimeError):
 def ledger_total(path: pathlib.Path) -> float:
     """Everything every purpose has spent, read fresh from the ledger file."""
     p = pathlib.Path(path)
-    return sum(json.loads(l).get("cost_usd", 0.0) for l in p.open() if l.strip()) if p.exists() else 0.0
+    if not p.exists():
+        return 0.0
+    with p.open() as f:
+        return sum(json.loads(l).get("cost_usd", 0.0) for l in f if l.strip())
+
+
+@contextlib.contextmanager
+def ledger_lock(path: pathlib.Path):
+    """Exclusive lock shared by every process using this ledger (released when the block ends, or when the process dies)."""
+    lock = pathlib.Path(path).with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    with open(lock, "a") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
 
 
 class CappedClaude:
@@ -45,7 +64,8 @@ class CappedClaude:
         self.ledger = pathlib.Path(ledger)
         self.spent, self.calls = 0.0, 0
         if self.ledger.exists():  # resume: count what earlier runs with this ledger already spent
-            rows = [json.loads(l) for l in self.ledger.open() if l.strip()]
+            with self.ledger.open() as f:
+                rows = [json.loads(l) for l in f if l.strip()]
             self.spent = sum(r["cost_usd"] for r in rows if r["purpose"] == purpose)   # the cap is per purpose; the ledger keeps the grand total
 
     def _cost(self, tin: int, tout: int) -> float:
@@ -54,21 +74,25 @@ class CappedClaude:
     def call(self, system: str, content, max_tokens: int, tools=None, tool_choice=None, est_input_tokens: int | None = None, **extra):
         est_in = est_input_tokens if est_input_tokens is not None else (len(system) + len(json.dumps(content, default=str))) // 3 + 200
         worst = self._cost(est_in, max_tokens)
-        if self.spent + worst > self.cap:
-            raise CapExceeded(f"spent ${self.spent:.4f} + worst case ${worst:.4f} would pass the ${self.cap:.2f} cap")
-        total = ledger_total(self.ledger)
-        if total + worst > TOTAL_CAP_USD:
-            raise CapExceeded(f"all purposes together have spent ${total:.4f}; with this call's worst case ${worst:.4f} that would pass the ${TOTAL_CAP_USD:.2f} total budget")
-        kw = dict(model=self.model, max_tokens=max_tokens, system=system, messages=[{"role": "user", "content": content}])
-        if tools:
-            kw.update(tools=tools, tool_choice=tool_choice)
-        kw.update(extra)
-        t = time.time()
-        resp = self.client.messages.create(**kw)
-        cost = self._cost(resp.usage.input_tokens, resp.usage.output_tokens)
-        self.spent += cost
-        self.calls += 1
-        with self.ledger.open("a") as f:
-            f.write(json.dumps({"ts": round(time.time()), "purpose": self.purpose, "model": self.model, "input_tokens": resp.usage.input_tokens,
-                                "output_tokens": resp.usage.output_tokens, "cost_usd": round(cost, 6), "seconds": round(time.time() - t, 2)}) + "\n")
+        with ledger_lock(self.ledger):          # held through the call: check-then-spend must be one step for every process sharing the ledger
+            if self.ledger.exists():             # read fresh: another process may have spent on this purpose since we last looked
+                with self.ledger.open() as f:
+                    self.spent = max(self.spent, sum(r.get("cost_usd", 0.0) for r in map(json.loads, filter(str.strip, f)) if r.get("purpose") == self.purpose))
+            if self.spent + worst > self.cap:
+                raise CapExceeded(f"spent ${self.spent:.4f} + worst case ${worst:.4f} would pass the ${self.cap:.2f} cap")
+            total = ledger_total(self.ledger)
+            if total + worst > TOTAL_CAP_USD:
+                raise CapExceeded(f"all purposes together have spent ${total:.4f}; with this call's worst case ${worst:.4f} that would pass the ${TOTAL_CAP_USD:.2f} total budget")
+            kw = dict(model=self.model, max_tokens=max_tokens, system=system, messages=[{"role": "user", "content": content}])
+            if tools:
+                kw.update(tools=tools, tool_choice=tool_choice)
+            kw.update(extra)
+            t = time.time()
+            resp = self.client.messages.create(**kw)
+            cost = self._cost(resp.usage.input_tokens, resp.usage.output_tokens)
+            self.spent += cost
+            self.calls += 1
+            with self.ledger.open("a") as f:
+                f.write(json.dumps({"ts": round(time.time()), "purpose": self.purpose, "model": self.model, "input_tokens": resp.usage.input_tokens,
+                                    "output_tokens": resp.usage.output_tokens, "cost_usd": round(cost, 6), "seconds": round(time.time() - t, 2)}) + "\n")
         return resp

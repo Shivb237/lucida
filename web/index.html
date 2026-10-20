@@ -2,11 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <!-- The Content-Security-Policy meta tag is added to production builds by vite.config.ts (cspMeta); the dev server needs an inline script. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lucida · fashion search you can see inside</title>
+    <title>Lucida · describe an occasion, get a whole outfit, see every step</title>
+    <meta name="description" content="Describe an occasion. Get a whole outfit. See every step that chose it. Every step is timed, and the AI steps are tested. Steps that didn't help are labelled." />
+    <meta name="theme-color" content="#1b1b1d" />
+    <meta name="color-scheme" content="light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Lucida" />
+    <meta property="og:title" content="Lucida · fashion search you can see inside" />
+    <meta property="og:description" content="Describe an occasion. Get a whole outfit. See every step that chose it. Every step is timed, and the AI steps are tested. Steps that didn't help are labelled." />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Lucida · fashion search you can see inside" />
+    <meta name="twitter:description" content="Describe an occasion. Get a whole outfit. See every step that chose it. Every step is timed, and the AI steps are tested. Steps that didn't help are labelled." />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
   </head>
   <body>
+    <noscript>
+      <p style="font: 16px/1.5 system-ui, sans-serif; max-width: 60ch; margin: 40px auto; padding: 0 16px;">
+        Lucida needs JavaScript to replay its recorded runs. The code, the logged runs and every number are in the repository:
+        <a href="https://github.com/Shivb237/lucida">github.com/Shivb237/lucida</a>.
+      </p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -1,15 +1,14 @@
 """Judge vs human on test set 5 (options the judge never saw before; the judge setup was fixed before these ratings existed).
 Agreement, weighted kappa, confusion, and whether the judge's method comparisons (C-B, D-B, D-C, paired by prompt) match the human's. Writes runs/judge-test5.summary.json."""
-import collections, json, random, statistics as st
+import json, random, statistics as st, sys
+sys.path.insert(0, "src")
+from genkart.metrics import weighted_kappa
 S = {"good": 2, "okay": 1, "bad": 0}
 R = [json.loads(l) for l in open("runs/judge-test5.jsonl")]
 key = json.load(open("data/preview/blind_key5.json"))
 ok = [r for r in R if r["judge"] in S and r["human"] in S]
-def kw(rows):
-    n = len(rows); O = collections.Counter((S[r["human"]], S[r["judge"]]) for r in rows)
-    ph = collections.Counter(S[r["human"]] for r in rows); pj = collections.Counter(S[r["judge"]] for r in rows)
-    num = sum(abs(i - j) * O[(i, j)] / n for i in range(3) for j in range(3)); den = sum(abs(i - j) * ph[i] * pj[j] / n / n for i in range(3) for j in range(3))
-    return 1 - num / den if den else float("nan")
+def kw(rows):  # linear-weighted kappa, now in genkart.metrics (same formula)
+    return weighted_kappa([S[r["human"]] for r in rows], [S[r["judge"]] for r in rows])
 ag = lambda rows: sum(r["human"] == r["judge"] for r in rows) / len(rows)
 rng = random.Random(0)
 def boot(f, rows, B=3000):

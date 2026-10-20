@@ -24,6 +24,11 @@ test("copies of one product are merged and exact ties go to the smaller id, whic
   assert.equal(byScoreThenId(c("m", "2", 0.1, 1), c("m", "10", 0.1, 2)), -1);
 });
 
+test("the same item in two specialist catalogues (one cluster) is shown once", () => {
+  const out = mergeRoute([{ marqo: [c("marqo", "10", 0.05, 1)], kaggle: [c("kaggle", "5", 0.12, 9)], myntra2: [c("myntra2", "200001", 0.11, 9), c("myntra2", "200002", 0.1, 4)] }], 4, 0.098);
+  assert.deepEqual(out.map((x) => x.id), ["5", "200002"]);
+});
+
 test("nothing from any shard gives an empty answer", () => {
   assert.deepEqual(mergeRoute([{}, {}], 4, 0.098), []);
 });
@@ -40,4 +45,22 @@ test("identical to the Python reference and to the single process on real cases"
     same++;
   }
   assert.ok(same > 100, `only ${same} cases`);
+});
+
+// Committed, so it always runs (CI included): synthetic cases with the Python reference's answer, made by
+// `.venv/bin/python scripts/make_router_fixtures.py --synthetic` (no data/ needed). Each shard candidate is [id, score, cluster].
+const SYNTHETIC = new URL("./fixtures/merge_cases.json", import.meta.url);
+test("identical to the Python reference (merge_route) on the committed synthetic cases: ties, big ids, cross-catalogue copies, k 1..12, theta edges", () => {
+  type Case = { k: number; theta: number; shards: Record<string, [string, number, number][]>[]; expected: { source: string; id: string; score: number; cluster: number }[] };
+  const cases: Case[] = JSON.parse(readFileSync(SYNTHETIC, "utf8"));
+  assert.ok(cases.length >= 100, `only ${cases.length} cases`);
+  const ks = new Set<number>();
+  for (const [n, k] of cases.entries()) {
+    const shards = k.shards.map((sh) => Object.fromEntries(Object.entries(sh).map(([src, cs]) => [src, cs.map(([id, score, cluster]) => c(src, id, score, cluster))])));
+    const got = mergeRoute(shards, k.k, k.theta);
+    assert.deepEqual(got.map(({ source, id, score, cluster }) => ({ source, id, score, cluster })), k.expected, `case ${n} (k ${k.k}, theta ${k.theta})`);
+    ks.add(k.k);
+  }
+  assert.equal(ks.size, 12, "every k from 1 to 12 should be covered");
+  assert.ok(cases.some((k) => k.expected.length > 0 && k.expected[0].source !== "marqo"), "no case falls back to the specialists");
 });

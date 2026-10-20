@@ -1,0 +1,11 @@
+# The encoder service on the router host (genkart.encoder_service). Versions from the main lock (-c); compiled by scripts/lock.sh.
+# torch and torchvision are installed before this file by the host's start-up script (CPU builds from PyTorch's index), so they are left out here.
+-c ../requirements.txt
+fastapi
+huggingface_hub
+numpy
+open_clip_torch
+pillow
+pydantic
+transformers
+uvicorn

@@ -6,10 +6,13 @@ export type Config = {
   shardTimeoutMs: number;
   encoderTimeoutMs: number;
   theta: number;
-  perShard: number;
-  hedgeMs: number;           // ask the next replica too when the first has not answered after this long
-  maxInflight?: number;      // at most this many searches at once; the next one is answered 429 "busy" at once. 0 or missing = no limit
+  perShard: number;          // candidates asked of each shard per source. 72 keeps the merged top k exact up to MAX_K (see sharding.py)
+  hedgeMs: number;           // ask the next replica too when the first has not answered after this long, or after that shard's recent p90 if longer
+  maxInflight?: number;      // at most this many searches at once; the next one is answered 429 "busy" at once. Missing = 12 (loadConfig), 0 = no limit
+  shardToken?: string;       // shared secret sent to every shard as x-genkart-token; empty or missing = no header
 };
+
+export const MAX_K = 12;     // the largest k a caller may ask for: the merge is exact only while k stays within what PER_SHARD covers
 
 const num = (v: string | undefined, d: number): number => (v !== undefined && v !== "" && Number.isFinite(Number(v)) ? Number(v) : d);
 
@@ -24,8 +27,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     shardTimeoutMs: num(env.SHARD_TIMEOUT_MS, 800),
     encoderTimeoutMs: num(env.ENCODER_TIMEOUT_MS, 5000),
     theta: num(env.THETA, 0.098),
-    perShard: num(env.PER_SHARD, 32),
+    perShard: num(env.PER_SHARD, 72),
     hedgeMs: num(env.HEDGE_MS, 40),
     maxInflight: num(env.MAX_INFLIGHT, 12),
+    shardToken: env.SHARD_TOKEN || undefined,
   };
 }

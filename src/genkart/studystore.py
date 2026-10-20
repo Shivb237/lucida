@@ -1,4 +1,4 @@
-"""Where the consented study keeps its answers. Two places, one small interface (save / delete a document by id):
+"""Where the consented study keeps its answers. Two places, one small interface (save / has / delete a document by id, delete_many in one request):
   JsonlStore      a local file, for trying the study on your own computer and for tests (GENKART_STUDY=jsonl:data/study/answers.jsonl)
   FirestoreStore  Google Firestore in the project the server runs in (GENKART_STUDY=firestore). It speaks Firestore's plain web interface with httpx and the
                   token of the service account the server runs as (read from Google's metadata server), so no extra package is installed.
@@ -42,9 +42,17 @@ class JsonlStore:
             tmp.write_text("".join(json.dumps(r) + "\n" for r in rows))
             tmp.replace(self.path)
 
-    def delete(self, collection: str, doc_id: str) -> None:
+    def has(self, collection: str, doc_id: str) -> bool:
         with self.lock:
-            rows = [r for r in self._rows() if not (r["_collection"] == collection and r["_id"] == doc_id)]
+            return any(r["_collection"] == collection and r["_id"] == doc_id for r in self._rows())
+
+    def delete(self, collection: str, doc_id: str) -> None:
+        self.delete_many([(collection, doc_id)])
+
+    def delete_many(self, docs: list[tuple[str, str]]) -> None:
+        gone = set(docs)
+        with self.lock:
+            rows = [r for r in self._rows() if (r["_collection"], r["_id"]) not in gone]
             tmp = self.path.with_suffix(".tmp")
             tmp.write_text("".join(json.dumps(r) + "\n" for r in rows))
             tmp.replace(self.path)
@@ -81,19 +89,37 @@ class FirestoreStore:
                 self._project = self._meta("project/project-id").text.strip()
             return {"authorization": f"Bearer {self._token}"}
 
+    def _name(self, collection: str, doc_id: str) -> str:
+        return f"projects/{self._project}/databases/(default)/documents/{collection}/{urllib.parse.quote(doc_id, safe='')}"
+
     def _url(self, collection: str, doc_id: str) -> str:
-        return f"{API}/projects/{self._project}/databases/(default)/documents/{collection}/{urllib.parse.quote(doc_id, safe='')}"
+        return f"{API}/{self._name(collection, doc_id)}"
 
     def save(self, collection: str, doc_id: str, doc: dict) -> None:
         headers = self._auth()
         r = self.http.patch(self._url(collection, doc_id), headers=headers, json={"fields": {k: _typed(v) for k, v in doc.items()}})      # no field mask: creates or replaces
         r.raise_for_status()
 
+    def has(self, collection: str, doc_id: str) -> bool:
+        headers = self._auth()
+        r = self.http.get(self._url(collection, doc_id), headers=headers, params={"mask.fieldPaths": "ts"})     # one small field: existence is all we need
+        if r.status_code == 404:
+            return False
+        r.raise_for_status()
+        return True
+
     def delete(self, collection: str, doc_id: str) -> None:
         headers = self._auth()
         r = self.http.delete(self._url(collection, doc_id), headers=headers)
         if r.status_code != 404:       # nothing to delete is fine
             r.raise_for_status()
+
+    def delete_many(self, docs: list[tuple[str, str]]) -> None:
+        """Every delete in ONE commit (atomic: all or none). Deleting a document that does not exist is not an error in a commit."""
+        headers = self._auth()
+        r = self.http.post(f"{API}/projects/{self._project}/databases/(default)/documents:commit", headers=headers,
+                           json={"writes": [{"delete": self._name(c, d)} for c, d in docs]})
+        r.raise_for_status()
 
 
 def make_store(spec: str):

@@ -1,12 +1,14 @@
 [Unit]
 Description=GenKart ingest worker (SQS queue -> photo from S3 -> encoder -> both replicas of the shard)
 After=genkart-encoder.service network-online.target
+Wants=network-online.target
 
 [Service]
 User=genkart
 WorkingDirectory=/opt/genkart
 Environment=PYTHONPATH=/opt/genkart/src
-# router.env gives SHARD_URLS; ingest.env gives the two SQS queue URLs (neither contains a secret)
+# router.env gives SHARD_URLS; ingest.env gives the two SQS queue URLs and GENKART_SHARD_TOKEN, the secret the shards ask for on /ingest.
+# Both files hold that secret now: they are readable by root and genkart only (written at boot from Secrets Manager)
 EnvironmentFile=/etc/genkart/router.env
 EnvironmentFile=/etc/genkart/ingest.env
 ExecStart=/opt/genkart/.venv/bin/python -m genkart.ingest_worker --sqs-queue ${SQS_QUEUE_URL} --sqs-dlq ${SQS_DLQ_URL} --region ap-south-1
@@ -17,6 +19,15 @@ StandardOutput=append:/var/log/genkart/ingest.log
 StandardError=append:/var/log/genkart/ingest.log
 NoNewPrivileges=true
 PrivateTmp=true
+# sandbox: the whole file system is read-only for this service (the code and the venv belong to root), except the folders listed in
+# ReadWritePaths; no home folders, no devices, no capabilities (it runs as genkart on ports above 1024 and needs none)
+ProtectSystem=strict
+ProtectHome=yes
+PrivateDevices=yes
+CapabilityBoundingSet=
+# writes the photos of the batch in hand (data/ingest-photos under WorkingDirectory; deleted once embedded) and its log.
+# No IPAddressDeny here: this worker reads SQS and S3 with the machine's role, and boto3 gets those credentials from the metadata service
+ReadWritePaths=/opt/genkart/data/ingest-photos /var/log/genkart
 
 [Install]
 WantedBy=multi-user.target

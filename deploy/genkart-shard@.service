@@ -1,11 +1,15 @@
 [Unit]
 Description=GenKart shard worker %i
 After=network-online.target
+Wants=network-online.target
 
 [Service]
 User=genkart
 WorkingDirectory=/opt/genkart
 Environment=PYTHONPATH=/opt/genkart/src
+# shard.env: GENKART_SHARD_TOKEN, the shared secret a caller must send as x-genkart-token (when it is set, /ingest is refused without it).
+# Written at boot from Secrets Manager, readable by root and genkart only. The leading - means: fine if missing (then no token is checked)
+EnvironmentFile=-/etc/genkart/shard.env
 # 0.0.0.0 = listen on the network, not only on this machine; the security group lets only the router in
 ExecStart=/bin/sh -c 'exec /opt/genkart/.venv/bin/python -m genkart.shard_worker --shard %i --of 4 --dir /opt/genkart/shards/n4 --host 0.0.0.0 --port $((9101+%i))'
 # always: a clean exit (for example a polite SIGTERM) must also bring it back; `systemctl stop` still stops it on purpose
@@ -16,6 +20,21 @@ StandardOutput=append:/var/log/genkart/shard-%i.log
 StandardError=append:/var/log/genkart/shard-%i.log
 NoNewPrivileges=true
 PrivateTmp=true
+# sandbox: the whole file system is read-only for this service (the code and the venv belong to root), except the folders listed in
+# ReadWritePaths; no home folders, no devices, no capabilities (it runs as genkart on ports above 1024 and needs none)
+ProtectSystem=strict
+ProtectHome=yes
+PrivateDevices=yes
+CapabilityBoundingSet=
+# writes the write-ahead log of added products (shard-<i>.port<p>.added.jsonl, next to the shard files in --dir) and its log
+ReadWritePaths=/opt/genkart/shards/n4 /var/log/genkart
+# no route to the instance metadata service: a hole in this program cannot borrow the machine's AWS role (it needs none)
+IPAddressDeny=169.254.169.254
+# 4 workers on a 2 GB t4g.small: each holds a quarter of about 85,000 products x 768 floats (about 65 MB of vectors; briefly twice that while
+# /ingest rebuilds the arrays) plus Python, numpy and uvicorn. A runaway worker is stopped (and restarted) at 420 MB instead of pushing
+# the other three, the SSM agent and the CloudWatch agent into the kernel's out-of-memory killer. Not yet measured on the hosts: check
+# `systemctl show genkart-shard@0 -p MemoryPeak` after a load test and adjust
+MemoryMax=420M
 
 [Install]
 WantedBy=multi-user.target

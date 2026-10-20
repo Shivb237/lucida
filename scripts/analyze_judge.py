@@ -1,16 +1,14 @@
 """How far can the LLM judge be trusted? Compares judge ratings with the user's 141 human ratings (test set 4) and writes runs/judge-validate.summary.json.
 Scores: good=2, okay=1, bad=0. Agreement = same word. Weighted kappa (linear) corrects for chance and for near-misses counting less. Bootstrap 95% CIs over options."""
-import collections, json, random, statistics as st
+import json, random, statistics as st, sys
+sys.path.insert(0, "src")
+from genkart.metrics import weighted_kappa
 S = {"good": 2, "okay": 1, "bad": 0}
 R = [json.loads(l) for l in open("runs/judge-validate.jsonl")]
 ok = [r for r in R if r["judge"] in S and r["human"] in S]
 bad = len(R) - len(ok)
-def kappa_w(rows):
-    n = len(rows); O = collections.Counter((S[r["human"]], S[r["judge"]]) for r in rows)
-    ph = collections.Counter(S[r["human"]] for r in rows); pj = collections.Counter(S[r["judge"]] for r in rows)
-    num = sum(abs(i - j) * O[(i, j)] / n for i in range(3) for j in range(3))
-    den = sum(abs(i - j) * ph[i] * pj[j] / n / n for i in range(3) for j in range(3))
-    return 1 - num / den if den else float("nan")
+def kappa_w(rows):  # linear-weighted kappa, now in genkart.metrics (same formula)
+    return weighted_kappa([S[r["human"]] for r in rows], [S[r["judge"]] for r in rows])
 def agree(rows): return sum(r["human"] == r["judge"] for r in rows) / len(rows)
 rng = random.Random(0)
 def boot(f, rows, B=3000):

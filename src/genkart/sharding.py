@@ -3,7 +3,11 @@
 Pure logic with no networking, so it can be tested exactly against the single-process search (genkart.catalogue.Catalogue):
   ShardData.search     one shard's top candidates per catalogue (gender filter applied)
   merge_route          the router's job: merge per catalogue, merge duplicate clusters, then the "general first, specialists when weak" rule
-A shard returns its top M candidates per catalogue (M >= k x the largest duplicate cluster, 6, so the merged top k is exact).
+A shard returns its top M candidates per catalogue. The merged top k is exact when M >= 6(k-1)+1 (6 = the largest duplicate cluster: the k-th distinct
+cluster can sit behind at most k-1 clusters of 6 copies in one shard). PER_SHARD = 72 covers k <= 12, which is what the web server asks for (2 x 6 per piece);
+the router refuses a larger k.
+Across catalogues, products are merged by duplicate cluster as well as by id: the cluster ids come from one four-catalogue clustering (dup_clusters_4.json),
+so the same item listed in two catalogues is shown once.
 Not supported yet: the optional garment-type filter on Kaggle (the pipeline does not use it).
 """
 from __future__ import annotations
@@ -14,11 +18,11 @@ import threading
 
 import numpy as np
 
-from genkart.catalogue import ALLOWED, THETA, Catalogue, Hit
+from genkart.catalogue import ALLOWED, THETA, Catalogue, Hit, top_rows
 
 GENERAL = "marqo"
 SOURCES = ["marqo", "kaggle", "myntra2", "mens3"]
-PER_SHARD = 32
+PER_SHARD = 72
 
 
 @dataclass
@@ -61,8 +65,8 @@ class ShardData:
 
     @classmethod
     def load(cls, path: str) -> "ShardData":
-        z = np.load(path, allow_pickle=False)   # a shard file may come from a bucket: pickle can run code, so it is refused
-        return cls([int(i) for i in z["ids"]], z["vecs"], z["source"], z["gender"], z["cluster"], list(z["titles"]))
+        with np.load(path, allow_pickle=False) as z:   # a shard file may come from a bucket: pickle can run code, so it is refused
+            return cls([int(i) for i in z["ids"]], z["vecs"], z["source"], z["gender"], z["cluster"], list(z["titles"]))
 
     def validate(self, items: list[dict]) -> None:
         """Raises ValueError for any item that could not be added cleanly. Called BEFORE anything is logged or changed."""
@@ -111,7 +115,7 @@ class ShardData:
             if len(idx) == 0:
                 out[src] = []
                 continue
-            top = idx[np.lexsort((ids_u64[idx], -scores[idx]))[:m]]     # equal scores: smaller id first, like Catalogue
+            top = idx[top_rows(scores[idx], ids_u64[idx], m)]     # equal scores: smaller id first, like Catalogue (only the best m are sorted)
             out[src] = [Cand(src, ids[i], float(scores[i]), int(cluster[i]), titles[i]) for i in top]
         return out
 
@@ -137,8 +141,8 @@ def merge_route(per_shard: list[dict[str, list[Cand]]], k: int = 4, theta: float
     pool = sorted((c for s in SOURCES if s != GENERAL for c in by_source[s]), key=lambda c: (-c.score, c.id))
     seen, out = set(), []
     for c in pool:
-        if c.id not in seen:
-            seen.add(c.id)
+        if c.id not in seen and ("c", c.cluster) not in seen:      # the same item in two specialist catalogues shares a cluster id: shown once
+            seen.update((c.id, ("c", c.cluster)))
             out.append(c)
         if len(out) == k:
             break

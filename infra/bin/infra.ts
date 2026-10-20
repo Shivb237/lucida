@@ -17,8 +17,11 @@ if (!myIpCidr || !/^\d{1,3}(\.\d{1,3}){3}\/32$/.test(myIpCidr)) {
 }
 
 const network = new NetworkStack(app, 'GenkartNetwork', { env, myIpCidr });
-const data = new DataStack(app, 'GenkartData', { env });
+// The /genkart/* log groups belong to the data stack (created before any machine boots; see data-stack.ts). If they already exist in the
+// account (an agent made them, or they come from the older layout), add -c logGroupsExist=true and they are looked up instead of created.
+const logGroupsExist = ['true', '1', true].includes(app.node.tryGetContext('logGroupsExist'));
+const data = new DataStack(app, 'GenkartData', { env, logGroupsExist });
 const compute = new ComputeStack(app, 'GenkartCompute', { env, vpc: network.vpc, routerSg: network.routerSg, shardSg: network.shardSg, bucket: data.bucket, ingestQueue: data.ingestQueue, deadLetterQueue: data.deadLetterQueue });
 
 // Monitoring: it now names the computers (status-check alarms), so ALWAYS deploy GenkartCompute first, then GenkartObservability. Optional: -c alarmEmail=you@example.com to also get alarm emails.
-new ObservabilityStack(app, 'GenkartObservability', { env, ingestQueue: data.ingestQueue, deadLetterQueue: data.deadLetterQueue, hosts: compute.hosts, alarmEmail: app.node.tryGetContext('alarmEmail') });
+new ObservabilityStack(app, 'GenkartObservability', { env, logGroups: data.logGroups, ingestQueue: data.ingestQueue, deadLetterQueue: data.deadLetterQueue, hosts: compute.hosts, alarmEmail: app.node.tryGetContext('alarmEmail') });

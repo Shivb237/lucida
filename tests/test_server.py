@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from genkart.catalogue import Hit
 from genkart.colour import Colour
 from genkart.server import SearchOut, Services, create_app, run_pipeline, screen
+from genkart import server
 from genkart.understand import Piece, Plan
 
 BIG = 10216370546107146501  # larger than JavaScript's safe integer range
@@ -408,3 +409,536 @@ def test_device_route_validates_the_plan_and_the_prompt_is_published():
     assert any(e.get("stage") == "understand" and e.get("status") == "done" for e in events) and events[-1]["kind"] == "end"
     assert c.post("/api/search", json={"q": "kurta", "device": {"plan": {"nonsense": True}, "model": "x"}}).status_code == 422
     assert c.post("/api/search", json={"q": "kurta", "device": {"plan": good, "seconds": 9999}}).status_code == 422      # seconds are bounded
+
+
+# ---- bounds, slots, limits and readiness (production hardening) ------------------------------------------------------------------
+def _many_pieces(n):
+    return Plan(main_query="outfit", gender="men", pieces=[Piece(kind="other", search_text=f"men's item {i}") for i in range(n)])
+
+
+def _hits_for(texts):
+    return [[Hit("marqo", 1000 * (i + 1) + j, f"p{i}-{j}", 0.2 - j * 0.001) for j in range(12)] for i in range(len(texts))]
+
+
+def test_at_most_six_pieces_are_searched_and_composed_whatever_the_plan_says():
+    import time
+
+    svc = make_services(plan=_many_pieces(12))
+    seen = []
+    svc.search = lambda texts, g, k: (seen.append(texts), SearchOut("in-process", _hits_for(texts), [0.0] * len(texts), {}))[1]
+    svc.colour = lambda h, kind: Colour(h.product_id % 360, 0.5, 0.5)
+    t = time.perf_counter()
+    evs = events(svc)
+    assert time.perf_counter() - t < 10                                      # 6^6 combinations would take minutes; the beam does not
+    assert len(seen[0]) == 6 and ("compose", "done") in steps(evs) and evs[-1]["kind"] == "end"
+    compose = next(e for e in evs if e["stage"] == "compose" and e["status"] == "done")["payload"]
+    assert compose["pieces"] == 6 and compose["exact"] is False
+    outfit = next(e for e in evs if e["stage"] == "outfit")["payload"]
+    assert len(outfit["items"]) == 6 and len({i["pick"]["id"] for i in outfit["items"]}) == 6
+
+
+def test_a_failing_compose_still_gives_an_outfit_and_an_end_event(monkeypatch):
+    import genkart.outfit as outfit
+
+    def boom(*a, **k):
+        raise RuntimeError("colour table broken")
+
+    monkeypatch.setattr(outfit, "build_outfits", boom)
+    evs = events(make_services())
+    assert ("compose", "failed") in steps(evs) and ("outfit", "done") in steps(evs) and evs[-1]["kind"] == "end"
+
+
+def test_a_bug_inside_the_stream_still_sends_end(monkeypatch):
+    import genkart.server as srv
+
+    def broken(*a, **k):
+        yield {"kind": "step", "request_id": "r1", "stage": "request", "status": "done", "seconds": 0, "payload": {}}
+        raise ValueError("unexpected")
+
+    monkeypatch.setattr(srv, "run_pipeline", broken)
+    c = TestClient(create_app(lambda: make_services()))
+    with c.stream("GET", "/api/search", params={"q": "kurta"}) as r:
+        got = [json.loads(l[6:]) for l in r.iter_lines() if l.startswith("data: ")]
+    assert got[-1] == {"kind": "end", "request_id": "r1", "error": "ValueError"}
+    assert c.app.state.runs._value == 4
+
+
+def _asgi_get(app, path, query=b"", headers=()):
+    """Call the app as a server would, with a visitor who disconnects before reading anything."""
+    import asyncio
+
+    msgs = [{"type": "http.request", "body": b"", "more_body": False}]
+
+    async def receive():
+        return msgs.pop(0) if msgs else {"type": "http.disconnect"}
+
+    sent = []
+
+    async def send(m):
+        sent.append(m)
+
+    scope = {"type": "http", "asgi": {"version": "3.0", "spec_version": "2.3"}, "http_version": "1.1", "method": "GET", "scheme": "http", "path": path,
+             "raw_path": path.encode(), "query_string": query, "headers": list(headers), "client": ("1.2.3.4", 5), "server": ("test", 80), "root_path": ""}
+    asyncio.run(app(scope, receive, send))
+    return sent
+
+
+def test_a_visitor_who_disconnects_before_the_first_read_gives_the_slot_back(monkeypatch):
+    monkeypatch.setenv("GENKART_MAX_RUNS", "1")
+    app = create_app(lambda: make_services())
+    for _ in range(3):                                   # with a leak the second visit would already find the only slot taken
+        _asgi_get(app, "/api/search", b"q=kurta")
+        assert app.state.runs._value == 1
+
+
+def test_plain_refine_and_study_items_share_the_run_gate(monkeypatch, tmp_path):
+    import dataclasses
+
+    (tmp_path / "data" / "study").mkdir(parents=True)
+    (tmp_path / "data" / "study" / "prompts.json").write_text(json.dumps([{"query_id": 7, "query": "linen shirt"}]))
+    monkeypatch.setenv("GENKART_STUDY", f"jsonl:{tmp_path}/answers.jsonl")
+    monkeypatch.setenv("GENKART_MAX_RUNS", "0")           # no free slot at all
+    svc = dataclasses.replace(make_services(), refine=lambda *a: SearchOut("in-process", [[]], [0.0], {}))
+    c = TestClient(create_app(lambda: svc, root=tmp_path))
+    assert c.post("/api/plain", json={"q": "linen shirt"}).status_code == 429
+    assert c.get("/api/plain", params={"q": "linen shirt"}).status_code == 429
+    assert c.post("/api/refine", json={"q": "linen shirt", "liked": ["7"]}).status_code == 429
+    r = c.get("/api/study/items")
+    assert r.status_code == 429 and "busy" in r.json()["detail"]
+    monkeypatch.setenv("GENKART_MAX_RUNS", "1")
+    one = TestClient(create_app(lambda: svc, root=tmp_path))
+    assert [one.post("/api/plain", json={"q": "linen shirt"}).status_code for _ in range(3)] == [200, 200, 200]     # each frees its slot
+    assert one.get("/api/study/items").status_code == 200 and one.app.state.runs._value == 1
+
+
+def test_post_plain_returns_what_get_plain_returns():
+    c = TestClient(create_app(lambda: make_services()))
+    got, old = c.post("/api/plain", json={"q": "linen shirt"}).json(), c.get("/api/plain", params={"q": "linen shirt"}).json()
+    assert got["hits"] == old["hits"] and got["backend"] == old["backend"] == "in-process" and set(got) == {"seconds", "backend", "hits"}
+    assert c.post("/api/plain", json={"q": ""}).status_code == 422
+
+
+def test_post_search_without_a_brain_runs_the_local_model_like_get():
+    seen = []
+    svc = make_services()
+    real = svc.understand
+    svc.understand = lambda t: (seen.append(t), real(t))[1]
+    c = TestClient(create_app(lambda: svc))
+    with c.stream("POST", "/api/search", json={"q": "wedding outfit"}) as r:
+        posted = [json.loads(l[6:]) for l in r.iter_lines() if l.startswith("data: ")]
+    with c.stream("GET", "/api/search", params={"q": "wedding outfit"}) as r:
+        got = [json.loads(l[6:]) for l in r.iter_lines() if l.startswith("data: ")]
+    assert seen == ["wedding outfit", "wedding outfit"] and steps(posted) == steps(got)
+    u = next(e for e in posted if e["stage"] == "understand" and e["status"] == "done")
+    assert u["payload"]["model"] == "qwen3:4b-instruct"
+
+
+def test_get_search_removes_personal_data_first_and_the_access_log_never_shows_the_query():
+    import logging
+
+    from genkart.server import _AccessLogScrub
+
+    seen = []
+    svc = make_services()
+    real = svc.understand
+    svc.understand = lambda t: (seen.append(t), real(t))[1]
+    c = TestClient(create_app(lambda: svc))
+    c.get("/api/search", params={"q": "kurta, mail me at a@b.com"})
+    assert seen and "a@b.com" not in seen[0]
+    rec = logging.LogRecord("uvicorn.access", logging.INFO, "", 0, '%s - "%s %s HTTP/%s" %d', ("1.2.3.4", "GET", "/api/search?q=secret", "1.1", 200), None)
+    _AccessLogScrub().filter(rec)
+    assert "secret" not in rec.getMessage() and "/api/search" in rec.getMessage()
+
+
+def test_bodies_over_16_kb_are_refused_with_413_and_safety_headers():
+    c = TestClient(create_app(lambda: make_services()))
+    r = c.post("/api/plain", content=json.dumps({"q": "x" * 17000}), headers={"content-type": "application/json"})
+    assert r.status_code == 413 and r.headers["x-content-type-options"] == "nosniff"
+    assert c.post("/api/plain", json={"q": "linen shirt"}).status_code == 200
+
+
+def test_x_forwarded_for_is_read_counting_hops_from_the_end_and_two_clients_are_told_apart(monkeypatch):
+    monkeypatch.setenv("GENKART_RATE_PER_MIN", "1")
+    monkeypatch.setenv("GENKART_BEHIND_PROXY", "1")
+    monkeypatch.setenv("GENKART_XFF_HOPS", "2")           # two proxies append: the visitor is the second entry from the end
+    c = TestClient(create_app(lambda: make_services()))
+
+    def go(xff):
+        return c.post("/api/plain", json={"q": "kurta"}, headers={"x-forwarded-for": xff}).status_code
+
+    assert go("6.6.6.6, 1.1.1.1, 10.0.0.1") == 200            # client A
+    assert go("2.2.2.2, 10.0.0.1") == 200                     # client B, its own allowance
+    assert go("7.7.7.7, 1.1.1.1, 10.0.0.2") == 429            # client A again, with a different fake first entry and another proxy: still A
+    assert go("2.2.2.2, 10.0.0.1") == 429
+
+
+def test_a_search_and_its_paired_plain_comparison_count_once_but_only_once(monkeypatch):
+    monkeypatch.setenv("GENKART_RATE_PER_MIN", "1")
+    c = TestClient(create_app(lambda: make_services()))
+    pair = {"x-paired-run": "run-123"}
+    assert c.get("/api/search", params={"q": "kurta"}, headers=pair).status_code == 200
+    assert c.post("/api/plain", json={"q": "kurta"}, headers=pair).status_code == 200            # the other half: not counted
+    assert c.post("/api/plain", json={"q": "kurta"}, headers=pair).status_code == 429            # the same id again is a new request
+    assert c.get("/api/search", params={"q": "kurta"}, headers={"x-paired-run": "run-456"}).status_code == 429
+
+
+def test_paired_ids_expire_after_30_seconds():
+    from genkart.server import RateLimit
+
+    r = RateLimit(1)
+    assert r.allow("a", 0.0, "p1", "/api/search") and r.allow("a", 1.0, "p1", "/api/plain")
+    r2 = RateLimit(2)
+    assert r2.allow("a", 0.0, "p1", "/api/search") and r2.allow("a", 31.0, "p1", "/api/plain") and not r2.allow("a", 32.0)   # 31 s later it counted
+
+
+def test_photos_have_their_own_larger_bucket(tmp_path, monkeypatch):
+    (tmp_path / "data").mkdir()
+    from PIL import Image
+
+    Image.new("RGB", (60, 80), "#d8c7a6").save(tmp_path / "data" / "5.jpg")
+    monkeypatch.setenv("GENKART_RATE_PER_MIN", "1")
+    monkeypatch.setenv("GENKART_IMAGE_RATE_PER_MIN", "3")
+    c = TestClient(create_app(lambda: make_services(), root=tmp_path, image_of=lambda pid: f"data/{pid}.jpg"))
+    assert c.post("/api/plain", json={"q": "kurta"}).status_code == 200
+    assert [c.get("/api/image/5").status_code for _ in range(4)] == [200, 200, 200, 429]       # photos did not use the search allowance
+
+
+def test_key_calls_are_limited_per_address_and_a_model_list_counts(monkeypatch):
+    import genkart.server as srv
+
+    monkeypatch.setenv("GENKART_BYO_PER_ADDR_PER_HOUR", "2")
+    monkeypatch.setattr(srv, "list_models", lambda brain: ["m1"])
+    c = TestClient(create_app(lambda: make_services()))
+    good = {"kind": "openai", "key": "k" * 20, "base_url": "https://api.openai.com/v1"}
+    assert [c.post("/api/models", json=good).status_code for _ in range(3)] == [200, 200, 429]
+    assert c.post("/api/search", json={"q": "kurta", "brain": good}).status_code == 429
+    assert c.post("/api/plain", json={"q": "kurta"}).status_code == 200                         # searches without a key are not key calls
+
+
+def test_the_model_list_counts_toward_the_servers_key_call_total(monkeypatch):
+    import httpx
+
+    from genkart import brain as b
+
+    monkeypatch.setenv("GENKART_BYO_MAX_CALLS", "1")
+    monkeypatch.setattr(b, "_calls", 0)
+    http = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200, json={"data": [{"id": "gpt-x"}]})))
+    assert b.list_models(b.Brain("openai", "x", "k" * 20, "https://api.openai.com/v1"), http) == ["gpt-x"]
+    import pytest
+
+    with pytest.raises(b.BrainError, match="already made 1 calls"):
+        b.list_models(b.Brain("openai", "x", "k" * 20, "https://api.openai.com/v1"), http)
+
+
+def test_ready_is_503_while_loading_and_200_after(monkeypatch):
+    import threading
+    import time
+
+    gate = threading.Event()
+    svc = make_services()
+    svc.warmup = [("search model and catalogues", gate.wait)]
+    with TestClient(create_app(lambda: svc)) as c:            # `with` runs the start-up (lifespan), which starts the warm-up
+        r = c.get("/api/ready")
+        assert r.status_code == 503 and r.json()["ready"] is False and r.json()["loading"] == ["search model and catalogues"] and r.json()["seconds"] >= 0
+        assert c.get("/api/health").status_code == 200        # liveness does not wait for the load
+        gate.set()
+        for _ in range(100):
+            if c.get("/api/ready").status_code == 200:
+                break
+            time.sleep(0.02)
+        body = c.get("/api/ready").json()
+        assert body["ready"] is True and body["loading"] == [] and set(body) == {"ready", "loading", "seconds"}
+
+
+def _ready_after_warmup(c):
+    import time
+
+    for _ in range(200):
+        body = c.get("/api/ready").json()
+        if not any(not n.endswith("(failed)") for n in body["loading"]):
+            return body
+        time.sleep(0.02)
+    raise AssertionError(f"warm-up never finished: {body}")
+
+
+def test_a_warm_up_step_that_keeps_failing_keeps_ready_false_after_its_retries(monkeypatch):
+    monkeypatch.setattr(server, "WARMUP_RETRY_S", 0.0)
+    calls = []
+
+    def boom():
+        calls.append(1)
+        raise OSError("model files missing")
+
+    svc = make_services()
+    svc.warmup = [("knowledge graph", boom)]
+    body = _ready_after_warmup(TestClient(create_app(lambda: svc)))     # no lifespan here: the first /api/ready starts the warm-up itself
+    assert body["ready"] is False and body["loading"] == ["knowledge graph (failed)"] and len(calls) == server.WARMUP_TRIES
+
+
+def test_a_passing_warm_up_failure_is_retried_and_the_server_becomes_ready(monkeypatch):
+    monkeypatch.setattr(server, "WARMUP_RETRY_S", 0.0)
+    calls = []
+
+    def flaky():
+        calls.append(1)
+        if len(calls) == 1:
+            raise MemoryError("a spike while loading")
+
+    svc = make_services()
+    svc.warmup = [("search model and catalogues", flaky)]
+    body = _ready_after_warmup(TestClient(create_app(lambda: svc)))
+    assert body["ready"] is True and body["loading"] == [] and len(calls) == 2
+
+
+def test_hosted_hides_api_docs_and_sends_hsts_and_csp_even_on_a_429(monkeypatch):
+    monkeypatch.setenv("GENKART_HOSTED", "1")
+    monkeypatch.setenv("GENKART_RATE_PER_MIN", "1")
+    c = TestClient(create_app(lambda: make_services()))
+    assert c.get("/docs").status_code == 404 and c.get("/openapi.json").status_code == 404
+    c.post("/api/plain", json={"q": "kurta"})
+    r = c.post("/api/plain", json={"q": "kurta"})
+    assert r.status_code == 429
+    for h in ("content-security-policy", "strict-transport-security", "permissions-policy", "referrer-policy", "x-frame-options"):
+        assert h in r.headers, h
+    monkeypatch.delenv("GENKART_HOSTED")
+    local = TestClient(create_app(lambda: make_services()))
+    assert local.get("/openapi.json").status_code == 200 and "strict-transport-security" not in local.get("/api/health").headers
+
+
+def test_ollama_counts_as_up_only_with_the_exact_model_tag(monkeypatch):
+    import genkart.server as srv
+
+    monkeypatch.setattr(srv, "_get_json", lambda url, timeout=1.0: {"models": [{"name": "qwen3:8b"}]})
+    s = srv.default_services()
+    assert s.ollama_up() is False and "qwen3:4b-instruct is not installed" in s.ollama_why()
+    monkeypatch.setattr(srv, "_get_json", lambda url, timeout=1.0: {"models": [{"name": "qwen3:4b-instruct"}]})
+    assert s.ollama_up() is True and s.ollama_why() == ""
+    monkeypatch.setattr(srv, "_get_json", lambda url, timeout=1.0: None)
+    assert s.ollama_why() == "Ollama is not running"
+
+
+def test_a_device_plan_cannot_fake_graph_reasons_and_its_pieces_lose_personal_data():
+    c = TestClient(create_app(lambda: make_services()))
+    plan = {"main_query": "kurta", "gender": "men", "notes": ["graph: 'x' -> 'men's kurta' (fake)"],
+            "pieces": [{"kind": "top", "search_text": "men's kurta"}, {"kind": "footwear", "search_text": "juttis for 9876543210"}]}
+    with c.stream("POST", "/api/search", json={"q": "men's kurta and juttis", "device": {"plan": plan, "model": "m"}}) as r:
+        evs = [json.loads(l[6:]) for l in r.iter_lines() if l.startswith("data: ")]
+    u = next(e for e in evs if e.get("stage") == "understand" and e.get("status") == "done")["payload"]["plan"]
+    assert not any("fake" in n for n in u["notes"]) and all("9876543210" not in p["search_text"] for p in u["pieces"])
+    long = {**plan, "pieces": [{"kind": "top", "search_text": "x" * 250}] * 14}      # a small model overshooting the limits: trimmed, not refused
+    with c.stream("POST", "/api/search", json={"q": "kurta", "device": {"plan": long, "model": "m"}}) as r:
+        assert r.status_code == 200
+        evs = [json.loads(l[6:]) for l in r.iter_lines() if l.startswith("data: ")]
+    u = next(e for e in evs if e.get("stage") == "understand" and e.get("status") == "done")["payload"]["plan"]
+    assert len(u["pieces"]) == 12 and all(len(p["search_text"]) == 200 for p in u["pieces"])
+
+
+def test_a_deep_link_with_personal_data_is_searched_without_it_and_says_so():
+    c = TestClient(create_app(lambda: make_services()))
+    with c.stream("GET", "/api/search", params={"q": "linen shirt for a wedding, mail me at a.b@example.com"}) as r:
+        text = "".join(r.iter_lines())
+    assert "a.b@example.com" not in text and "personal_data_redacted" in text
+
+
+def test_a_model_plan_over_the_limits_is_trimmed_not_refused():
+    p = Plan.model_validate({"main_query": "x" * 400, "gender": "men", "pieces": [{"kind": "top", "search_text": "y" * 250, "colours": ["red"] * 15}] * 14,
+                             "already_has": ["a"] * 12, "notes": ["n"] * 50})
+    assert (len(p.main_query), len(p.pieces), len(p.pieces[0].search_text), len(p.pieces[0].colours), len(p.already_has), len(p.notes)) == (300, 12, 200, 10, 10, 40)
+
+
+def test_a_photo_that_already_fits_is_sent_as_it_is_and_a_big_one_is_resized_once_onto_disk(tmp_path, monkeypatch):
+    from PIL import Image
+
+    from genkart import server as srv
+
+    (tmp_path / "data").mkdir()
+    Image.new("RGB", (400, 500), "#d8c7a6").save(tmp_path / "data" / "1.jpg")       # like every hosted thumbnail: already small
+    Image.new("RGB", (2000, 2400), "#2e3a4f").save(tmp_path / "data" / "2.jpg")     # an original photo on a laptop
+    c = TestClient(create_app(lambda: make_services(), root=tmp_path, image_of=lambda pid: f"data/{pid}.jpg"))
+    r = c.get("/api/image/1")
+    assert r.status_code == 200 and r.content == (tmp_path / "data" / "1.jpg").read_bytes() and "immutable" in r.headers["cache-control"]
+    opened = []
+    real_open = Image.open
+    monkeypatch.setattr(Image, "open", lambda *a, **k: (opened.append(a[0]), real_open(*a, **k))[1])
+    first = c.get("/api/image/2")
+    cached = list((tmp_path / "data" / ".thumbs" / "480").glob("*.jpg"))
+    assert first.status_code == 200 and len(cached) == 1 and real_open(cached[0]).size[0] == 480
+    srv._fits.cache_clear()
+    opened.clear()
+    second = c.get("/api/image/2")
+    assert second.content == first.content and all(str(p).endswith("2.jpg") for p in opened)   # only the header of the original is read; no new resize
+
+
+def test_ipv6_visitors_count_per_64_and_ipv4_per_address():
+    from genkart.server import RateLimit, rate_key
+
+    assert rate_key("2001:db8:1:2:aaaa::1") == rate_key("2001:db8:1:2:ffff:1:2:3") == "2001:db8:1:2::/64"
+    assert rate_key("2001:db8:1:3::1") != rate_key("2001:db8:1:2::1")
+    assert rate_key("8.8.8.8") == "8.8.8.8" and rate_key("8.8.8.9") == "8.8.8.9" and rate_key("::ffff:8.8.8.8") == "8.8.8.8"
+    assert rate_key("testclient") == "testclient"
+    r = RateLimit(1)
+    assert r.allow("2001:db8:1:2::1", 0.0) and not r.allow("2001:db8:1:2::99", 1.0)      # a new address in the same /64 is the same visitor
+    assert r.allow("2001:db8:1:3::1", 1.0) and r.allow("8.8.8.9", 1.0)
+
+
+def test_expired_visitors_are_swept_once_per_window_not_on_every_call():
+    from genkart.server import RateLimit
+
+    r = RateLimit(5, window=60.0)
+    for i in range(100):
+        r.allow(f"10.0.{i // 256}.{i % 256}", 0.0, paired=f"p{i}", path="/api/search")
+    assert len(r.seen) == 100 and len(r.pairs) == 100
+    r.allow("10.9.9.9", 59.0)                                   # inside the first window: nothing is rebuilt
+    assert len(r.seen) == 101
+    r.allow("10.9.9.9", 61.0)                                   # the window has passed: one sweep drops every visitor whose last request expired
+    assert set(r.seen) == {"10.9.9.9"} and r.pairs == {}
+    r.allow("10.9.9.8", 62.0)
+    assert len(r.seen) == 2 and r.next_sweep == 121.0           # the next sweep is a window later
+
+
+def test_study_writes_have_their_own_looser_bucket_and_items_stay_in_the_search_bucket(tmp_path, monkeypatch):
+    (tmp_path / "data" / "study").mkdir(parents=True)
+    (tmp_path / "data" / "study" / "prompts.json").write_text(json.dumps([{"query_id": 7, "query": "linen shirt"}]))
+    monkeypatch.setenv("GENKART_STUDY", f"jsonl:{tmp_path}/answers.jsonl")
+    monkeypatch.setenv("GENKART_RATE_PER_MIN", "1")
+    monkeypatch.setenv("GENKART_STUDY_RATE_PER_MIN", "3")
+    c = TestClient(create_app(lambda: make_services(), root=tmp_path))
+    code = "3f2b8c1e-5a47-4d09-9c1e-7a6b2d8e4f10"
+    from genkart import study
+
+    assert c.post("/api/plain", json={"q": "kurta"}).status_code == 200                  # the one search of this minute
+    assert c.get("/api/study/items").status_code == 429                                  # 20 searches: counted with the searches
+    consent = {"participant": code, "consent_version": study.CONSENT_VERSION}
+    answer = {**consent, "query_id": "7", "arm": "with", "rating": 4, "position": 0, "seconds": 3.0}
+    got = [c.post("/api/study/consent", json=consent).status_code, c.post("/api/study/answer", json=answer).status_code,
+           c.post("/api/study/withdraw", json={"participant": code}).status_code, c.post("/api/study/answer", json=answer).status_code]
+    assert got[:3] == [200, 200, 200] and got[3] == 429                                   # the search limit did not touch them; their own did
+    assert "answers" in c.post("/api/study/consent", json=consent).json()["detail"]
+
+
+def test_a_run_waits_briefly_for_a_slot_before_saying_busy(monkeypatch):
+    import threading
+    import time
+
+    monkeypatch.setenv("GENKART_MAX_RUNS", "1")
+    monkeypatch.setenv("GENKART_RUN_WAIT_S", "5")
+    c = TestClient(create_app(lambda: make_services()))
+    runs = c.app.state.runs
+    assert runs.acquire(blocking=False)                          # another run holds the only slot ...
+    threading.Timer(0.3, runs.release).start()                   # ... and finishes 0.3 s later
+    t = time.perf_counter()
+    assert c.post("/api/plain", json={"q": "kurta"}).status_code == 200      # queued, then ran: not a 429
+    assert 0.25 < time.perf_counter() - t < 4.0 and runs._value == 1         # and its own slot is back
+    monkeypatch.setenv("GENKART_RUN_WAIT_S", "0.2")
+    c2 = TestClient(create_app(lambda: make_services()))
+    assert c2.app.state.runs.acquire(blocking=False)             # held for good this time
+    t = time.perf_counter()
+    r = c2.get("/api/search", params={"q": "kurta"})
+    assert r.status_code == 429 and r.headers["retry-after"] == "5" and 0.15 < time.perf_counter() - t < 2.0
+
+
+def test_waiting_for_a_slot_does_not_block_the_event_loop(monkeypatch):
+    """Two requests at once, one slot held: while the first waits for a slot (in a pool thread), /api/health still answers straight away."""
+    import threading
+    import time
+
+    import anyio
+    import httpx
+
+    monkeypatch.setenv("GENKART_MAX_RUNS", "1")
+    monkeypatch.setenv("GENKART_RUN_WAIT_S", "5")
+    app = create_app(lambda: make_services())
+    runs = app.state.runs
+    runs.acquire()
+    timings = {}
+
+    async def main():
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://t") as client:
+            async def waiting():
+                timings["plain"] = (await client.post("/api/plain", json={"q": "kurta"})).status_code
+
+            async def health():
+                await anyio.sleep(0.1)
+                t = time.perf_counter()
+                assert (await client.get("/api/health")).status_code == 200
+                timings["health_s"] = time.perf_counter() - t
+                threading.Timer(0.2, runs.release).start()
+
+            async with anyio.create_task_group() as tg:
+                tg.start_soon(waiting)
+                tg.start_soon(health)
+
+    anyio.run(main)
+    assert timings["plain"] == 200 and timings["health_s"] < 1.0
+
+
+def test_with_warm_up_off_ready_starts_nothing_and_says_ready(monkeypatch):
+    monkeypatch.setenv("GENKART_WARMUP", "0")
+    calls = []
+    svc = make_services()
+    svc.warmup = [("search model and catalogues", lambda: calls.append(1))]
+    with TestClient(create_app(lambda: svc)) as c:
+        r = c.get("/api/ready")
+        assert r.status_code == 200 and r.json()["loading"] == []
+    assert calls == []
+
+
+def test_a_failed_resize_leaves_no_tmp_file(tmp_path, monkeypatch):
+    import pytest
+    from PIL import Image
+
+    from genkart import server as srv
+
+    (tmp_path / "data").mkdir()
+    Image.new("RGB", (2000, 2400), "#2e3a4f").save(tmp_path / "data" / "9.jpg")
+    srv._fits.cache_clear()
+
+    def broken_save(self, fp, *a, **k):
+        open(fp, "wb").write(b"half")
+        raise OSError("disk full")
+
+    monkeypatch.setattr(Image.Image, "save", broken_save)
+    with pytest.raises(OSError):
+        srv._thumb_file(tmp_path / "data" / "9.jpg", 480, tmp_path / "data" / ".thumbs")
+    assert list((tmp_path / "data" / ".thumbs" / "480").iterdir()) == []
+
+
+def test_a_photos_colour_is_read_once_across_the_checks_and_the_compose_step():
+    calls = []
+    plan = Plan(main_query="red top and blue jeans", gender="men", pieces=[Piece(kind="top", search_text="men's red top", colours=["red"]),
+                                                                          Piece(kind="bottom", search_text="men's blue jeans", colours=["blue"])])
+    svc = make_services(plan=plan, hits=[[Hit("marqo", 1, "Red Top", 0.2), Hit("marqo", 2, "Top", 0.19)],
+                                         [Hit("marqo", 3, "Blue Jeans", 0.2), Hit("marqo", 4, "Jeans", 0.19)]])
+    base = svc.colour
+    svc.colour = lambda h, kind: (calls.append((h.product_id, kind)), base(h, kind))[1]
+    evs = events(svc, "red top and blue jeans")
+    assert ("compose", "done") in steps(evs)
+    assert sorted(calls) == sorted(set(calls)) and len(calls) == 4                          # each photo once, though both steps asked
+
+
+def test_the_real_services_cache_colour_per_photo_and_kind_and_load_the_model_text_only(monkeypatch):
+    import types
+
+    import numpy as np
+
+    from genkart import catalogue, colour, embed
+
+    reads = []
+    monkeypatch.setattr(colour, "dominant_colour", lambda path, kind: (reads.append((path, kind)), Colour(0, 0.5, 0.5))[1])
+    monkeypatch.setattr(catalogue, "image_path", lambda pid: f"data/{pid}.jpg")
+    svc = server.default_services()
+    h = Hit("marqo", 77, "t", 0.1)
+    assert svc.colour(h, "top") == svc.colour(h, "top") == svc.colour(Hit("kaggle", 77, "other title", 0.3), "top")
+    svc.colour(h, "bottom")
+    assert len(reads) == 2                                                                      # (77, top) once, (77, bottom) once
+    monkeypatch.setattr(colour, "dominant_colour", lambda path, kind: (_ for _ in ()).throw(OSError("unreadable")))
+    assert svc.colour(Hit("marqo", 78, "t", 0.1), "top") is None                                # a failure is None, and not cached:
+    monkeypatch.setattr(colour, "dominant_colour", lambda path, kind: Colour(1, 0.5, 0.5))
+    assert svc.colour(Hit("marqo", 78, "t", 0.1), "top") == Colour(1, 0.5, 0.5)                 # the next request reads it again
+    asked = {}
+    monkeypatch.setattr(embed, "load", lambda name, **kw: (asked.update(kw), (None, None, None, "cpu"))[1])
+    monkeypatch.setattr(embed, "encode_texts", lambda m, t, texts, d: np.ones((len(texts), 2), np.float32))
+    monkeypatch.setattr(catalogue.Catalogue, "load", classmethod(lambda cls: types.SimpleNamespace(search=lambda v, k, gender: [])))
+    monkeypatch.setattr(server, "_get_json", lambda *a, **k: None)                            # no router: the in-process search
+    monkeypatch.delenv("GENKART_ROUTER", raising=False)
+    assert svc.search(["red top"], None, 4).backend == "in-process" and asked == {"text_only": True}

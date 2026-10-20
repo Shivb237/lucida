@@ -9,6 +9,8 @@ What differs from the laptop queue, on purpose and written down:
   original. If the process dies between the two, the original reappears and is retried (harmless: the shard side is idempotent).
 - Errors: SQS keeps no error text for a failed attempt, so fail() logs it. Only dead_now() preserves the error (as a message attribute in the DLQ).
 - Every message is its own FIFO "message group" (the product id), so one stuck message never blocks the others; order does not matter because adding is idempotent.
+- redrive() moves dead-lettered messages back by hand (receive from the DLQ, send to the queue, delete from the DLQ): SQS's own redrive task works on
+  standard queues' consoles, this works anywhere. A copy can be sent twice if the process dies between send and delete (harmless, as above).
 - stats() are approximate (SQS counts lag), so the worker's --drain mode is not reliable on SQS; run the worker as a service instead.
 """
 from __future__ import annotations
@@ -89,6 +91,23 @@ class SqsJobQueue:
         self.sqs.send_message(QueueUrl=self.dlq_url, MessageBody=body, MessageGroupId=group[:128], MessageDeduplicationId=uuid.uuid4().hex,
                               MessageAttributes={"error": {"DataType": "String", "StringValue": error[:1000]}})
         self.delete(receipt)
+
+    def redrive(self, limit: int = 10_000) -> int:
+        """Move up to `limit` dead-lettered messages back into the queue (after the cause, such as a replica outage, is fixed). Returns how many moved."""
+        moved = 0
+        while moved < limit:
+            resp = self.sqs.receive_message(QueueUrl=self.dlq_url, MaxNumberOfMessages=min(10, limit - moved), VisibilityTimeout=60, WaitTimeSeconds=0,
+                                            MessageSystemAttributeNames=["MessageGroupId"])
+            msgs = resp.get("Messages", [])
+            if not msgs:
+                return moved
+            for m in msgs:
+                group = m.get("Attributes", {}).get("MessageGroupId") or uuid.uuid4().hex
+                # a fresh deduplication id: the original one may still be inside SQS's 5-minute window, which would drop the copy silently
+                self.sqs.send_message(QueueUrl=self.url, MessageBody=m["Body"], MessageGroupId=group[:128], MessageDeduplicationId=uuid.uuid4().hex)
+                self.sqs.delete_message(QueueUrl=self.dlq_url, ReceiptHandle=m["ReceiptHandle"])
+                moved += 1
+        return moved
 
     def stats(self) -> dict:
         a = self.sqs.get_queue_attributes(QueueUrl=self.url, AttributeNames=["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"])["Attributes"]

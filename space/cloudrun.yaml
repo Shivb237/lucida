@@ -1,0 +1,57 @@
+# The hosted Lab's Cloud Run settings, kept with the code so a deploy is repeatable:
+#   gcloud run services replace space/cloudrun.yaml --region <REGION>
+# Before the first use, replace the image (the tag `gcloud builds submit` pushed).
+# The service name must stay genkart-lab: that is the live Cloud Run service. Another name would create a second service with a new URL,
+# which breaks the Pages site's PHOTO_BASE.
+# Settings: 4 GiB and 2 CPUs (the model plus four catalogues need about 2.5 GiB), at most 6 instances, 8 requests at once per instance
+# (GENKART_MAX_RUNS=4 searches run at once; the rest are photos and small calls), and a startup probe on /api/ready, so no visitor is sent to an
+# instance that is still loading. The study's store is chosen here, not in the image (space/Dockerfile).
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: genkart-lab                                  # must match the live service (genkart-lab); another name means a new URL
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/maxScale: "6"
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: "6"
+        autoscaling.knative.dev/minScale: "0"
+        run.googleapis.com/cpu-throttling: "true"
+        run.googleapis.com/startup-cpu-boost: "true"
+    spec:
+      serviceAccountName: 746545184590-compute@developer.gserviceaccount.com
+      containerConcurrency: 8
+      timeoutSeconds: 300
+      containers:
+        - image: asia-south1-docker.pkg.dev/cs-project-lex2cwgp/genkart/lab:lucida-20261020
+          ports:
+            - name: http1
+              containerPort: 7860
+          resources:
+            limits:
+              memory: 4Gi
+              cpu: "2"
+          env:
+            - name: GENKART_STUDY
+              value: firestore
+          startupProbe:
+            httpGet:
+              path: /api/ready
+              port: 7860
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 60                     # up to about 5 minutes to load before Cloud Run gives up on the instance
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 7860
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+  traffic:
+    - latestRevision: true
+      percent: 100

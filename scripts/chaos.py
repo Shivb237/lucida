@@ -1,8 +1,11 @@
 """Milestone 6, step 3: load, a slow shard, a dead shard, and what partial answers cost. Needs the cluster (scripts/cluster.sh start).
 
-Phase 1  load: 1/4/16/64 concurrent clients; throughput and client-side latency
-Phase 2  slow shard: shard 2 delayed by 0/100/300/2000 ms (router deadline 800 ms)
-Phase 3  dead shard: shard 1 killed, requests measured, shard restarted, recovery checked
+Phase 1  load: 1/4/16/64 concurrent clients; throughput and client-side latency. Start the cluster with no in-flight limit (cluster.sh's
+         default, MAX_INFLIGHT=0): a 429 "busy" is counted apart ("shed") and kept out of the latency figures, since it is answered in
+         milliseconds without searching and would make an overloaded router look fast
+Phase 2  slow shard: shard 2 delayed by 0/100/300/2000 ms (router deadline 800 ms); with replicas (REPLICAS=2, the cluster default) every copy
+         of shard 2 is delayed, otherwise the router just fails over and the phase measures nothing
+Phase 3  dead shard: shard 1 killed (every copy), requests measured, shard restarted from the same SHARDS_DIR, recovery checked
 Phase 4  quality of partial answers, in-process (equivalent to the live system, which was verified identical): every one-dead and two-dead combination
 Writes runs/chaos.summary.json. Usage: .venv/bin/python scripts/chaos.py
 """
@@ -20,6 +23,9 @@ import numpy as np
 
 sys.path.insert(0, "src")
 ROUTER = "http://127.0.0.1:9100"
+SHARDS_DIR = os.environ.get("SHARDS_DIR", "data/shards/n4")   # must match what scripts/cluster.sh was started with
+# the copies of each shard, as scripts/cluster.sh starts them: copy A on 9101-9104 (pid file shard<i>.pid), copy B on 9111-9114 (shard<i>b.pid)
+COPIES = [("", 9101), ("b", 9111)]
 rd = lambda f: [l.strip() for l in open(f) if l.strip() and not l.startswith("#")]  # noqa: E731
 texts = [json.loads(l)["query"] for l in open("data/sample_scale/queries.jsonl")] + rd("data/human_prompts_test3.txt") + rd("data/human_prompts_test4.txt")
 rng = random.Random(0)
@@ -33,15 +39,19 @@ def sample(n):
 
 
 async def run(requests, concurrency):
-    lat, partial, errors, results = [], 0, 0, []
+    lat, partial, errors, shed, results = [], 0, 0, 0, []
     sem = asyncio.Semaphore(concurrency)
     async with httpx.AsyncClient(base_url=ROUTER, timeout=15, limits=httpx.Limits(max_connections=concurrency + 4)) as c:
         async def one(t, g):
-            nonlocal partial, errors
+            nonlocal partial, errors, shed
             async with sem:
                 t0 = time.perf_counter()
                 try:
                     r = await c.post("/search", json={"text": t, "k": 4, "gender": g})
+                    if r.status_code == 429:           # load shedding: no search was done, so no latency to record
+                        shed += 1
+                        results.append(None)
+                        return
                     j = r.json()
                     lat.append((time.perf_counter() - t0) * 1000)
                     if r.status_code != 200:
@@ -56,22 +66,36 @@ async def run(requests, concurrency):
         t0 = time.perf_counter()
         await asyncio.gather(*[one(t, g) for t, g in requests])
         wall = time.perf_counter() - t0
-    return {"n": len(requests), "throughput_rps": round(len(requests) / wall, 1), "p50": pct(lat, 50), "p95": pct(lat, 95), "p99": pct(lat, 99),
-            "partial": partial, "errors": errors}, results
+    q = (lambda p: pct(lat, p)) if lat else (lambda p: None)  # noqa: E731   (every request shed: no latency at all)
+    # throughput counts answered searches only (not shed ones)
+    return {"n": len(requests), "throughput_rps": round((len(requests) - shed) / wall, 1), "p50": q(50), "p95": q(95), "p99": q(99),
+            "partial": partial, "errors": errors, "shed_429": shed}, results
 
 
 def health():
     return httpx.get(f"{ROUTER}/health", timeout=3).json()
 
 
-assert health()["ok"], "start the cluster first: scripts/cluster.sh start"
+h0 = health()
+assert h0["ok"], "start the cluster first: scripts/cluster.sh start"
+replicas = len(h0.get("replicas", [[True]])[0])   # copies per shard the router knows about (1 or 2)
+copies = COPIES[:replicas]
+print(f"cluster: {len(h0['shards'])} shards x {replicas} replica(s)")
+out["replicas"] = replicas
+
+
+def delay_shard(i, ms):
+    for _, base in copies:
+        httpx.post(f"http://127.0.0.1:{base + i}/admin/delay", json={"ms": ms})
+
+
 asyncio.run(run(sample(100), 4))   # warm up
 print("== Phase 1: load (400 requests each)")
 out["load"] = {}
 for conc in (1, 4, 16, 64):
     r, _ = asyncio.run(run(sample(400), conc))
     out["load"][str(conc)] = r
-    print(f"  {conc:3} at once: {r['throughput_rps']:6.1f} req/s | latency ms p50/p95/p99 {r['p50']}/{r['p95']}/{r['p99']} | partial {r['partial']} errors {r['errors']}")
+    print(f"  {conc:3} at once: {r['throughput_rps']:6.1f} req/s | latency ms p50/p95/p99 {r['p50']}/{r['p95']}/{r['p99']} | partial {r['partial']} errors {r['errors']} shed (429) {r['shed_429']}")
 
 base_reqs = sample(200)
 base, base_res = asyncio.run(run(base_reqs, 1))
@@ -81,17 +105,17 @@ out["baseline_sequential"] = base
 print("== Phase 2: one slow shard (shard 2); router deadline 800 ms")
 out["slow_shard"] = {}
 for delay in (0, 100, 300, 2000):
-    httpx.post("http://127.0.0.1:9103/admin/delay", json={"ms": delay})
+    delay_shard(2, delay)
     r, res = asyncio.run(run(base_reqs[:100], 1))
     same = np.mean([a == b for a, b in zip(res, base_res[:100]) if a is not None])
     r["identical_to_full"] = round(float(same), 3)
     out["slow_shard"][str(delay)] = r
     print(f"  +{delay:4} ms: latency p50/p95/p99 {r['p50']}/{r['p95']}/{r['p99']} | partial {r['partial']}/100 | answers identical to the full answer on {same:.0%}")
-httpx.post("http://127.0.0.1:9103/admin/delay", json={"ms": 0})
+delay_shard(2, 0)
 
 print("== Phase 3: one dead shard (shard 1)")
-pid = int(open("data/run/shard1.pid").read())
-os.kill(pid, signal.SIGKILL)
+for suffix, _ in copies:
+    os.kill(int(open(f"data/run/shard1{suffix}.pid").read()), signal.SIGKILL)
 time.sleep(1)
 r, res = asyncio.run(run(base_reqs[:100], 1))
 same = np.mean([a == b for a, b in zip(res, base_res[:100]) if a is not None])
@@ -102,9 +126,10 @@ out["dead_shard"] = r
 print(f"  3 of 4 shards: latency p50/p95/p99 {r['p50']}/{r['p95']}/{r['p99']} | partial {r['partial']}/100 errors {r['errors']} | identical to full {same:.0%} | mean overlap with the full top-4 {overlap:.0%}")
 print("  health while down:", {k: v for k, v in health().items() if k != 'encoder'})
 env = dict(os.environ, PYTHONPATH="src", GENKART_ADMIN="1")   # the slow-shard runs use the local-only /admin/delay route
-p = subprocess.Popen([".venv/bin/python", "-m", "genkart.shard_worker", "--shard", "1", "--of", "4", "--port", "9102"], env=env,
-                     stdout=open("data/run/shard1.log", "a"), stderr=subprocess.STDOUT)
-open("data/run/shard1.pid", "w").write(str(p.pid))
+for suffix, base in copies:
+    p = subprocess.Popen([".venv/bin/python", "-m", "genkart.shard_worker", "--shard", "1", "--of", "4", "--dir", SHARDS_DIR, "--port", str(base + 1)], env=env,
+                         stdout=open(f"data/run/shard1{suffix}.log", "a"), stderr=subprocess.STDOUT)
+    open(f"data/run/shard1{suffix}.pid", "w").write(str(p.pid))
 t0 = time.time()
 while time.time() - t0 < 60:
     try:

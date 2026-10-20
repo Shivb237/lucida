@@ -1,16 +1,11 @@
-// The mode control at the top right of the navigation: says which mode you are in, explains both, and is where your own model key is entered.
-// A disclosure (a button that opens a panel), not a menu: the panel holds a form, so Escape closes it and Tab moves through it normally.
+// "AI model": the dialog at the top right of the navigation, shown only in Lab, where the visitor picks which AI reads their sentence:
+// the model on this computer, their own API key, or a model on their own device. The key lives in this tab's memory only (never storage, never an address).
+// A modal dialog: Escape and the backdrop close it, Tab stays inside it, focus returns to the button. Other parts of the page open it with openModelDialog() (ui.ts).
 import { useEffect, useRef, useState } from 'react'
 import { deviceModels, loadModels } from '../api'
-import { PHOTO_BASE } from '../recorded'
+import { MODEL_DIALOG_EVENT } from '../ui'
 import { DEVICE_APPS, describe, LOCAL, PROVIDERS, providerOf, usable, withProvider, type BrainSetting } from '../brain'
 
-const START = [
-  { cmd: 'scripts/setup_env.sh', what: 'Once: set up Python and the libraries.' },
-  { cmd: 'ollama pull qwen3:4b-instruct', what: 'Once: download the AI model (skip it if you will use your own key).' },
-  { cmd: '.venv/bin/uvicorn genkart.server:app --app-dir src --port 8000', what: 'Start the server and keep it running.' },
-  { cmd: 'cd web && npm ci && npm run dev', what: 'Start this site. It will find the server.' },
-]
 
 function Copy({ text }: { text: string }) {
   const [done, setDone] = useState(false)
@@ -21,28 +16,27 @@ function Copy({ text }: { text: string }) {
   )
 }
 
-export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, viewerOnly, brain, onBrain, onMode }: {
-  lab: boolean              // you are in Lab now
-  serverFound: boolean      // a Lab server answers at this address
-  detail: string            // what that server reports (model, router)
-  canByo: boolean           // that server can use a key
-  hosted?: boolean          // that server is a public host: no built-in model, so a key is the only way to use the AI step
-  viewerOnly: boolean       // a public Viewer build: it never looks for a server
+export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
+  canByo: boolean           // this server can use a key
+  hosted?: boolean          // a public host: no built-in model, so a key or a device model is the only way to use the AI step
   brain: BrainSetting
   onBrain: (b: BrainSetting) => void
-  onMode: (m: 'viewer' | 'lab') => void
 }) {
   const [open, setOpen] = useState(false)
   const [models, setModels] = useState<string[] | null>(null)       // the names the provider says this key can use (null: not asked yet)
   const [modelState, setModelState] = useState<{ loading: boolean; error: string | null }>({ loading: false, error: null })
   const [typing, setTyping] = useState(false)                         // chose "Other": type a name by hand
   const [draft, setDraft] = useState<BrainSetting>(() => (hosted && brain.kind === 'local' ? withProvider({ ...LOCAL, provider: 'anthropic' }, 'anthropic') : brain))
-  const root = useRef<HTMLDivElement>(null)
   const btn = useRef<HTMLButtonElement>(null)
-
   const closeBtn = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
   const close = () => { setOpen(false); btn.current?.focus() }   // always hand focus back to the button that opened it
+
+  useEffect(() => {
+    const onOpen = () => setOpen(true)
+    window.addEventListener(MODEL_DIALOG_EVENT, onOpen)
+    return () => window.removeEventListener(MODEL_DIALOG_EVENT, onOpen)
+  }, [])
 
   // While open this is a modal sheet: the page behind cannot scroll, Escape and the dimmed backdrop close it, a page change closes it,
   // Tab stays inside it, and focus starts on Close so a keyboard or screen-reader user always has a way out.
@@ -83,78 +77,34 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
     }).catch((e: Error) => setModelState({ loading: false, error: e.message }))
   }
   const canLoad = !modelState.loading && (isDevice ? /^https?:\/\//.test(draft.baseUrl.trim()) : draft.key.trim().length >= 8 && (draft.provider !== 'custom' || /^https?:\/\//.test(draft.baseUrl.trim())))
+  const submit = () => { if (ready) { onBrain({ ...draft, key: draft.key.trim() }); close() } }
 
   return (
-    <div className="mode-wrap" ref={root}>
-      <button ref={btn} type="button" className="mode-btn" aria-expanded={open} aria-controls="mode-panel" onClick={() => setOpen((o) => !o)}>
+    <div className="mode-wrap">
+      <button ref={btn} type="button" className="mode-btn" aria-expanded={open} aria-haspopup="dialog" aria-controls="mode-panel" onClick={() => setOpen((o) => !o)}>
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="9" cy="9" r="2.6" /><path d="M9 1.5v2.2M9 14.3v2.2M1.5 9h2.2M14.3 9h2.2M3.7 3.7l1.5 1.5M12.8 12.8l1.5 1.5M3.7 14.3l1.5-1.5M12.8 5.2l1.5-1.5" />   {/* a gear: settings */}
+          <circle cx="9" cy="9" r="2.6" /><path d="M9 1.5v2.2M9 14.3v2.2M1.5 9h2.2M14.3 9h2.2M3.7 3.7l1.5 1.5M12.8 12.8l1.5 1.5M3.7 14.3l1.5-1.5M12.8 5.2l1.5-1.5" />
         </svg>
-        <span className="mode-name">Settings</span>
-        <span className="mode-sub">{lab ? (brain.kind === 'device' ? 'device model' : using ? 'your key' : hosted ? 'no model set' : 'this computer') : 'how it works'}</span>
-        <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={open ? 'flip' : ''}><path d="M2 4l4 4 4-4" /></svg>
+        <span className="mode-name">AI model</span>
+        <span className="mode-sub">{brain.kind === 'device' ? 'your device' : using ? 'your key' : hosted ? 'none set' : 'this computer'}</span>
       </button>
 
       {open && <div className="mode-scrim" onClick={close} aria-hidden="true" />}
       {open && (
         <div id="mode-panel" className="mode-panel" role="dialog" aria-modal="true" aria-labelledby="mp-title" ref={panel}>
           <div className="mp-top">
-            <h2 id="mp-title" className="mp-h">Two ways to use Lucida</h2>
+            <h2 id="mp-title" className="mp-h">Which AI reads your sentence</h2>
             <button type="button" className="mp-close" ref={closeBtn} onClick={close}>
               <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M2 2l10 10M12 2L2 12" /></svg>
               Close
             </button>
           </div>
           <div className="mp-body">
-          <div className="mp-cards">
-            <section className="mp-card" aria-current={!lab ? 'true' : undefined}>
-              <h3>Viewer {!lab && <span className="mp-here">you are here</span>}</h3>
-              <p>Watch real runs that were recorded, and the recording from AWS. Nothing is searched, nothing is installed, and no key is needed.</p>
-              {lab && <button type="button" className="btn-line" onClick={() => { onMode('viewer'); close() }}>Switch to Viewer</button>}
-            </section>
-            <section className="mp-card" aria-current={lab ? 'true' : undefined}>
-              <h3>Lab {lab && <span className="mp-here">you are here</span>}</h3>
-              {hosted && serverFound
-                ? <p>Search your own words live on this hosted Lab. It has no built-in AI model: the whole sentence is searched as typed, or read first by the AI you choose with your own API key (below). All four catalogues are searched.</p>
-                : <p>Search your own words, live, on your own computer, with the model on it or with your own API key. Lab is for people who can run the project themselves. If that is not you, stay in Viewer: you miss nothing needed to judge the work.</p>}
-              {serverFound && <p className="mp-note">{hosted ? 'The hosted Lab is running' : 'Your own server is running'} ({detail}).</p>}
-              {serverFound
-                ? (!lab && <button type="button" className="btn-line" onClick={() => { onMode('lab'); close() }}>Switch to Lab</button>)
-                : (
-                  <>
-                    {viewerOnly && PHOTO_BASE ? (
-                      <>
-                        <p className="mp-note">Try the hosted Lab: search your own words live (all four catalogues; add your own API key to use the AI step). It sleeps when nobody is using it, so the first visit takes about 45 seconds.</p>
-                        <a className="btn-live" href="#/wake" onClick={close}>
-                          <span className="btn-live-main"><i className="live-dot" aria-hidden="true" />Open the live Lab<svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h11M10 4.5 14.5 9 10 13.5" /></svg></span>
-                          <span className="btn-live-sub">Wakes a sleeping server · about 45 s</span>
-                        </a>
-                      </>
-                    ) : (
-                      <p className="mp-note">{viewerOnly ? 'This public page cannot start Lab for you.' : 'No Lab server answers at this address.'} Lab runs on <strong>your</strong> computer. With the built-in model, nothing leaves it. With your own key, your sentence goes to the provider you chose.</p>
-                    )}
-                    <details className="mp-start">
-                      <summary>How to start Lab</summary>
-                      <ol>
-                        {START.map((s) => (
-                          <li key={s.cmd}><code>{s.cmd}</code><span>{s.what}</span><Copy text={s.cmd} /></li>
-                        ))}
-                      </ol>
-                      <p className="mp-note">Then open <code>http://localhost:5173</code>. This menu will say "Lab server found" and let you switch.</p>
-                    </details>
-                  </>
-                )}
-            </section>
-          </div>
-
-          <section className="mp-model" aria-labelledby="mp-model-h">
-            <h3 id="mp-model-h">Your model</h3>
-            {!lab ? (
-              <p className="mp-note">The AI step that reads your sentence can use the model on your computer or your own API key. Choose it here once you are in Lab.</p>
-            ) : !canByo ? (
+          <section className="mp-model" aria-label="Your model">
+            {!canByo ? (
               <p className="mp-note">This server is too old to use a key. Update it, or use the model on this computer.</p>
             ) : (
-              <form onSubmit={(e) => { e.preventDefault(); if (ready) { onBrain({ ...draft, key: draft.key.trim() }); close() } }}>
+              <div role="group" aria-label="Choose the model" onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') { e.preventDefault(); submit() } }}>
                 <fieldset className="mp-kinds">
                   <legend className="sr-only">Which model reads your sentence</legend>
                   {([['local', 'On this computer', 'A free AI program (Ollama) on your computer. Nothing leaves it.'],
@@ -201,9 +151,9 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                       </select>
                     </label>
                     <label>API key
-                      <input type="password" value={draft.key} onChange={(e) => { set({ key: e.target.value }); forgetModels() }} autoComplete="off" spellCheck={false} placeholder="paste your key" />
+                      <input type="password" name="lucida-api-key" value={draft.key} onChange={(e) => { set({ key: e.target.value }); forgetModels() }} autoComplete="new-password" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" spellCheck={false} placeholder="paste your key" />
                     </label>
-                    <p className="mp-assure"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="6" width="9" height="6.5" rx="1" /><path d="M4.5 6V4.2a2.5 2.5 0 0 1 5 0V6" /></svg> Not saved anywhere. Your key lives in this tab until you close or reload it.</p>
+                    <p className="mp-assure"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="6" width="9" height="6.5" /><path d="M4.5 6V4.2a2.5 2.5 0 0 1 5 0V6" /></svg> Not saved anywhere. Your key lives in this tab until you close or reload it.</p>
                     <details className="mp-safe">
                       <summary>Is my key safe? What happens to it</summary>
                       <ul>
@@ -257,11 +207,11 @@ export function ModeMenu({ lab, serverFound, detail, canByo, hosted = false, vie
                     : <>Nothing leaves your computer: the model runs here.</>}
                 </p>
                 <div className="mp-actions">
-                  <button type="submit" className="btn-line" disabled={!ready}>{isDevice ? 'Use my device model' : isKey ? 'Use this model' : 'Use the model on this computer'}</button>
+                  <button type="button" className="btn-line" disabled={!ready} onClick={submit}>{isDevice ? 'Use my device model' : isKey ? 'Use this model' : 'Use the model on this computer'}</button>
                   {using && <button type="button" className="mp-forget" onClick={() => { onBrain(LOCAL); setDraft(LOCAL) }}>{brain.kind === 'device' ? 'Stop using it' : 'Forget the key'}</button>}
                 </div>
                 <p className="mp-now" aria-live="polite">In use now: {describe(brain)}</p>
-              </form>
+              </div>
             )}
           </section>
           </div>

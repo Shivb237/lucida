@@ -1,4 +1,5 @@
-"""Fetch the Marqo product photos for the hosted Lab at start-up, small, from Marqo's own dataset repository (never stored in git).
+"""Fetch the Marqo product photos for the hosted Lab while its image is BUILT (space/Dockerfile runs this; nothing is downloaded at start-up),
+small, from Marqo's own dataset repository (never stored in git).
 
 Reads data/raw/MANIFEST_scale.json (dataset repo, pinned revision, the 20 parquet files with their sha256) and data/sample_scale/products.jsonl
 (the products the index knows). Each file is downloaded, checked against its sha256, its wanted photos are saved as small JPEGs (longest side

@@ -55,11 +55,22 @@ export const STEPS: { id: StageId; name: string; explain: string }[] = [
   { id: 'outfit', name: 'Your outfit', explain: 'The picks, each with a reason.' },
 ]
 
+/** The three stages a newcomer needs, each a group of the six steps above. The front page's "How it works" strip is drawn from these. */
+export const STAGES: { name: string; steps: StageId[] }[] = [
+  { name: 'Read your words', steps: ['request', 'understand', 'expand'] },
+  { name: 'Find products in 4 collections', steps: ['search'] },
+  { name: 'Pick one outfit', steps: ['compose', 'outfit'] },
+]
+export const stageExplain = (st: { steps: StageId[] }) => STEPS.find((s) => st.steps.includes(s.id) && s.id !== 'request')?.explain ?? ''
+
+/** One density mark per step state, the same everywhere: dotted waiting, hatched running, solid done, cross-hatched failed, struck skipped. */
+export const MARK_CLASS: Record<Status, string> = { waiting: 'waiting', started: 'hatch started', done: 'done', failed: 'cross', skipped: 'not_built' }
+export const STATUS_WORD: Record<Status, string> = { waiting: 'waiting', started: 'running', done: 'done', failed: 'failed', skipped: 'skipped' }
+
 export const emptySteps = (): Record<StageId, StepState> =>
   Object.fromEntries(STEPS.map((s) => [s.id, { status: 'waiting', seconds: null, payload: {} }])) as Record<StageId, StepState>
 
 export const SOURCE_LABEL: Record<string, string> = { marqo: 'Marqo', kaggle: 'Kaggle', myntra2: 'Myntra photos', mens3: "Men's set", demo: 'Demo' }
-export const SOURCE_NOTE_PLAIN = true   // the notes below are plain-words descriptions of each collection
 export const SOURCE_NOTE: Record<string, string> = {
   marqo: 'the big general collection: sharp photos, mostly from US stores',
   kaggle: 'many Indian items, men and women, tiny photos',

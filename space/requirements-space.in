@@ -1,0 +1,23 @@
+# What the hosted Lab needs. Versions come from the main lock (-c), so they match the laptop exactly; scripts/lock.sh compiles this to
+# requirements-space.txt with hashes. torch and torchvision are left out of that file: the Dockerfile installs the CPU builds first, from
+# PyTorch's own index, with the hashes in requirements-torch-cpu.txt.
+-c ../requirements.txt
+anthropic
+fastapi
+ftfy
+httpx
+huggingface_hub
+networkx
+numpy
+open_clip_torch
+pandas
+pillow
+pyarrow
+pydantic
+regex
+safetensors
+starlette
+timm
+tokenizers
+transformers
+uvicorn

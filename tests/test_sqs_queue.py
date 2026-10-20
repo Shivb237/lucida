@@ -228,7 +228,8 @@ def test_worker_skips_messages_it_can_no_longer_finish_inside_their_hiding_time(
         time.sleep(0.15)                                 # every shard write is slow
         return httpx.Response(200, json={"added": 1, "skipped": 0, "products": 1})
 
-    w = IngestWorker(q, "http://enc", [["http://s0"]], batch=8, visibility_s=0.25, client=httpx.Client(transport=httpx.MockTransport(handler)))
+    # one product per request (write_batch=1), so the writes take longer than the hiding time; batched, all three would fit in one request
+    w = IngestWorker(q, "http://enc", [["http://s0"]], batch=8, visibility_s=0.25, client=httpx.Client(transport=httpx.MockTransport(handler)), write_batch=1)
     w.step()
     assert w.stats["acked"] + w.stats.get("skipped_late", 0) == 3 and w.stats.get("skipped_late", 0) >= 1
 
@@ -282,3 +283,14 @@ def test_one_unreadable_message_goes_to_the_dead_letter_queue_and_the_rest_are_s
     [dead] = f.q["dlq"]
     assert dead["body"] == "this is not json" and "unreadable" in dead["attrs"]["error"]["StringValue"]
     assert all(m["body"] != "this is not json" for m in f.q["main"])  # and the original is gone from the main queue
+
+
+def test_redrive_moves_dead_letters_back_with_a_fresh_dedup_id():
+    f, q = make()
+    q.send({"id": "1"}, "1")
+    [m] = q.receive(1, 30)
+    q.dead_now(m["receipt"], "replica down")
+    assert len(f.q["dlq"]) == 1 and f.q["main"] == []
+    assert q.redrive() == 1                                             # within the 5-minute window: the original dedup id would have been dropped
+    assert f.q["dlq"] == [] and [json.loads(x["body"])["id"] for x in f.q["main"]] == ["1"]
+    assert q.redrive() == 0

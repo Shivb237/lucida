@@ -34,11 +34,13 @@ export function mergeRoute(perShard: ShardAnswer[], k = 4, theta = THETA): Cand[
   const first = bySource[GENERAL];
   if (first.length > 0 && first[0].score >= theta) return first;
   const pool = SOURCES.filter((s) => s !== GENERAL).flatMap((s) => bySource[s]).sort(byScoreThenId);
-  const seen = new Set<string>();
+  const seenIds = new Set<string>();
+  const seenClusters = new Set<number>();   // the same item in two specialist catalogues shares a cluster id: shown once (as merge_route does)
   const out: Cand[] = [];
   for (const c of pool) {
-    if (seen.has(c.id)) continue;
-    seen.add(c.id);
+    if (seenIds.has(c.id) || seenClusters.has(c.cluster)) continue;
+    seenIds.add(c.id);
+    seenClusters.add(c.cluster);
     out.push(c);
     if (out.length === k) break;
   }

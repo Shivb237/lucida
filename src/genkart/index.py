@@ -39,9 +39,9 @@ class VectorIndex:
     @classmethod
     def load(cls, path: str) -> "VectorIndex":
         p = pathlib.Path(path)
-        z = np.load(p.with_suffix(".npz"))
         meta = json.loads(p.with_suffix(".meta.json").read_text())
-        index = cls(list(z["ids"]), z["vecs"], meta)
+        with np.load(p.with_suffix(".npz")) as z:          # closes the file (one handle per catalogue otherwise stays open for the life of the server)
+            index = cls(list(z["ids"]), z["vecs"], meta)
         if cls.checksum(index.vecs) != meta["vectors_sha256"]:
             raise ValueError(f"{p}: vectors do not match the checksum in the metadata (file damaged or edited)")
         return index

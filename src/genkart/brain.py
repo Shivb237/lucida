@@ -3,7 +3,10 @@
 The key is held for the length of ONE request, in memory. It is never written to disk, never logged, never put in a step payload or a recorded run,
 and is removed from any error text before the error is shown. It is sent only to the provider the visitor chose. The model's answer goes through
 the same checks as the local model's (`understand.ground` and `qualify`), so a stronger model does not get to skip them.
-Limits: a call count per server start (GENKART_BYO_MAX_CALLS, default 100), 600 output tokens per call, no retries (a failed call is not paid twice).
+Limits: a call count per server start (GENKART_BYO_MAX_CALLS, default 100; 0 = no count, which the hosted image sets; a model-list request counts too), 600 output tokens
+per call, and no retries (a failed call is not paid twice) with ONE exception: an "openai"-kind provider that answers 400 to JSON mode
+(response_format) is asked once more without it, since several providers do not support it; that second request is not counted again.
+The web server adds a per-address limit on top (GENKART_BYO_PER_ADDR_PER_HOUR), so one visitor cannot use up everyone's calls.
 Two kinds: "anthropic" (the Messages API through the installed SDK, forced tool call) and "openai" (any server that speaks /chat/completions with JSON mode:
 OpenAI, Groq, Together, a local vLLM or Ollama /v1 ...).
 """
@@ -99,6 +102,7 @@ _NOT_CHAT = re.compile(r"embed|tts|whisper|moderation|image|imagen|veo|audio|tra
 def list_models(brain: Brain, client: httpx.Client | None = None) -> list[str]:
     """The model names this key can use, asked of the provider itself (so a visitor never has to guess a name). Chat-capable names only, best guess by
     name; Gemini lists names as 'models/<name>', which the chat address does not want. Raises BrainError with a plain message (never the key)."""
+    _count_call()                       # a model list is a call made with the visitor's key too
     own = client is None
     http = client or httpx.Client(timeout=httpx.Timeout(15.0, connect=5.0))
     try:
@@ -147,8 +151,11 @@ def _count_call() -> None:
     global _calls
     limit = int(os.environ.get("GENKART_BYO_MAX_CALLS", "100"))
     with _lock:
-        if limit and _calls >= limit:      # 0 = off (the hosted Lab: the keys are the visitors' own, and one visitor must not use up everyone's calls)
-            raise BrainError(f"this server has already made {limit} calls with a key since it started (the limit protects your account); restart it to continue")
+        # 0 = off. The hosted Lab sets 0: the keys are the visitors' own, so a server-wide count would only let the first visitors use up everyone's
+        # calls until the next restart; each address is limited per hour instead (GENKART_BYO_PER_ADDR_PER_HOUR, in the web server).
+        if limit and _calls >= limit:
+            raise BrainError(f"this server has already made {limit} calls with a key since it started (GENKART_BYO_MAX_CALLS, a guard for the key's "
+                             "account); whoever runs it can restart it or raise the limit")
         _calls += 1
 
 
@@ -190,10 +197,10 @@ class BrainChain:
     def _ask_anthropic(self, args: dict) -> Plan:
         from anthropic import Anthropic
 
-        client = Anthropic(api_key=self.brain.key, max_retries=0, timeout=60.0)
         tool = {"name": "answer", "description": "Return the product search plan.", "input_schema": Plan.model_json_schema()}
-        resp = client.messages.create(model=self.brain.model, max_tokens=MAX_TOKENS, system=args["system"], messages=[{"role": "user", "content": f"Request: {args['request']}"}],
-                                      tools=[tool], tool_choice={"type": "tool", "name": "answer"})
+        with Anthropic(api_key=self.brain.key, max_retries=0, timeout=60.0) as client:     # closed after the call: one client per request, never a pool of keys
+            resp = client.messages.create(model=self.brain.model, max_tokens=MAX_TOKENS, system=args["system"], messages=[{"role": "user", "content": f"Request: {args['request']}"}],
+                                          tools=[tool], tool_choice={"type": "tool", "name": "answer"})
         self.usage = {"input_tokens": resp.usage.input_tokens, "output_tokens": resp.usage.output_tokens} if getattr(resp, "usage", None) else None
         block = next((b for b in resp.content if b.type == "tool_use"), None)
         if block is None:

@@ -1,0 +1,34 @@
+# Weekly update proposals (pull requests; nothing is merged automatically). CI runs on each one.
+# pip: requirements.txt is a generated lock; regenerate it with scripts/lock.sh rather than merging a single bump blindly.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # torch and torchvision: their Linux CPU wheels are locked apart (space/requirements-torch-cpu.txt, hashes from PyTorch's index, by
+    # scripts/lock.sh), so a bump here alone would split the versions; move them in requirements.in and rerun the lock script instead
+    ignore:
+      - dependency-name: torch
+      - dependency-name: torchvision
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /services/router
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /infra
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

@@ -1,12 +1,15 @@
 [Unit]
-Description=GenKart router (TypeScript)
+Description=GenKart router (TypeScript, compiled to dist/)
 After=genkart-encoder.service network-online.target
+Wants=network-online.target
 
 [Service]
 User=genkart
 WorkingDirectory=/opt/genkart/router
+# router.env: SHARD_URLS, and SHARD_TOKEN (the shards' shared secret, from Secrets Manager at boot; the file is readable by root and genkart only)
 EnvironmentFile=/etc/genkart/router.env
-ExecStart=/usr/bin/env node --experimental-strip-types src/index.ts
+# the compiled router (scripts/package_shard_code.sh ships dist/): plain JavaScript, so any Node 22+ runs it
+ExecStart=/usr/bin/env node dist/index.js
 Restart=always
 RestartSec=2
 # logs go to a FILE (CloudWatch reads plain JSON lines from files; from the journal they arrive wrapped in extra fields)
@@ -14,6 +17,16 @@ StandardOutput=append:/var/log/genkart/router.log
 StandardError=append:/var/log/genkart/router.log
 NoNewPrivileges=true
 PrivateTmp=true
+# sandbox: the whole file system is read-only for this service (the code and the venv belong to root), except the folders listed in
+# ReadWritePaths; no home folders, no devices, no capabilities (it runs as genkart on ports above 1024 and needs none)
+ProtectSystem=strict
+ProtectHome=yes
+PrivateDevices=yes
+CapabilityBoundingSet=
+# writes nothing but its log
+ReadWritePaths=/var/log/genkart
+# no route to the instance metadata service: a hole in this program cannot borrow the machine's AWS role (it needs none)
+IPAddressDeny=169.254.169.254
 
 [Install]
 WantedBy=multi-user.target

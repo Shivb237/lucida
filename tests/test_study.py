@@ -88,8 +88,7 @@ def test_a_failing_store_answers_503_not_a_crash(tmp_path, monkeypatch):
         def save(self, *a):
             raise RuntimeError("database down")
 
-        def delete(self, *a):
-            raise RuntimeError("database down")
+        has = delete = delete_many = save
 
     monkeypatch.setattr(study, "make_store", lambda spec: Broken())
     c = _app(tmp_path, monkeypatch)
@@ -97,11 +96,84 @@ def test_a_failing_store_answers_503_not_a_crash(tmp_path, monkeypatch):
     assert c.post("/api/study/withdraw", json={"participant": CODE}).status_code == 503
 
 
-def test_a_daily_cap_stops_a_flood_of_writes(tmp_path, monkeypatch):
-    monkeypatch.setenv("GENKART_STUDY_MAX_PER_DAY", "2")
+def _consent(c, who=CODE):
+    return c.post("/api/study/consent", json={"participant": who, "consent_version": study.CONSENT_VERSION})
+
+
+def test_a_daily_cap_stops_a_flood_of_writes_and_counts_each_document_once(tmp_path, monkeypatch):
+    monkeypatch.setenv("GENKART_STUDY_MAX_PER_DAY", "3")
     c = _app(tmp_path, monkeypatch)
-    assert c.post("/api/study/answer", json=_answer()).status_code == 200
-    assert c.post("/api/study/answer", json=_answer(query_id="8")).status_code == 200
-    r = c.post("/api/study/answer", json=_answer(participant=OTHER))
+    assert _consent(c).status_code == 200                                              # 1
+    assert c.post("/api/study/answer", json=_answer()).status_code == 200              # 2
+    assert c.post("/api/study/answer", json=_answer(rating=1)).status_code == 200      # the same answer again: replaces itself, still 2
+    assert c.post("/api/study/answer", json=_answer(query_id="8")).status_code == 200  # 3
+    r = _consent(c, OTHER)
     assert r.status_code == 503 and "full for today" in r.json()["detail"]
-    assert len(_rows(tmp_path)) == 2
+    assert len(_rows(tmp_path)) == 3
+
+
+def test_an_answer_needs_a_consent_on_record(tmp_path, monkeypatch):
+    c = _app(tmp_path, monkeypatch)
+    r = c.post("/api/study/answer", json=_answer())
+    assert r.status_code == 403 and "consent" in r.json()["detail"] and _rows(tmp_path) == []
+    assert _consent(c).status_code == 200 and c.post("/api/study/answer", json=_answer()).status_code == 200
+    # a second server (another instance behind the same store) finds the consent in the store, not in its memory
+    c2 = TestClient(create_app(lambda: make_services(), root=tmp_path))
+    assert c2.post("/api/study/answer", json=_answer(query_id="8")).status_code == 200
+    assert c2.post("/api/study/withdraw", json={"participant": CODE}).status_code == 200
+    assert c2.post("/api/study/answer", json=_answer()).status_code == 403              # withdrawn: the consent is gone too
+
+
+def test_withdraw_is_one_batch_request(tmp_path, monkeypatch):
+    calls = []
+
+    class Store:
+        def save(self, *a):
+            calls.append("save")
+
+        def has(self, *a):
+            return True
+
+        def delete(self, *a):
+            calls.append("delete")
+
+        def delete_many(self, docs):
+            calls.append(("delete_many", sorted(docs)))
+
+    monkeypatch.setattr(study, "make_store", lambda spec: Store())
+    c = _app(tmp_path, monkeypatch)
+    assert c.post("/api/study/withdraw", json={"participant": CODE}).status_code == 200
+    assert calls == [("delete_many", [("study_answers", f"{CODE}__7"), ("study_answers", f"{CODE}__8"), ("study_participants", CODE)])]
+
+
+def test_firestore_withdraw_is_one_commit_and_has_reads_one_document():
+    import httpx
+
+    from genkart.studystore import FirestoreStore
+
+    seen = []
+
+    def handler(req: httpx.Request):
+        seen.append((req.method, req.url.path, json.loads(req.content) if req.content else None))
+        if req.url.path.endswith("/study_participants/nobody"):
+            return httpx.Response(404, json={})
+        return httpx.Response(200, json={})
+
+    fs = FirestoreStore(httpx.Client(transport=httpx.MockTransport(handler)), project="p")
+    fs._token, fs._expires = "t", float("inf")
+    fs.delete_many([("study_answers", "a__7"), ("study_participants", "a")])
+    assert len(seen) == 1 and seen[0][0] == "POST" and seen[0][1].endswith("/documents:commit")
+    assert [w["delete"] for w in seen[0][2]["writes"]] == ["projects/p/databases/(default)/documents/study_answers/a__7",
+                                                          "projects/p/databases/(default)/documents/study_participants/a"]
+    assert fs.has("study_participants", "a") is True and fs.has("study_participants", "nobody") is False
+
+
+def test_a_withdrawal_on_another_instance_stops_answers_here_too(tmp_path, monkeypatch):
+    """Instance A took the consent and an answer; the participant withdraws through instance B (same store). A must refuse the next answer:
+    it asks the store on every answer instead of remembering the consent."""
+    a = _app(tmp_path, monkeypatch)
+    assert _consent(a).status_code == 200 and a.post("/api/study/answer", json=_answer()).status_code == 200
+    b = TestClient(create_app(lambda: make_services(), root=tmp_path))
+    assert b.post("/api/study/withdraw", json={"participant": CODE}).status_code == 200
+    r = a.post("/api/study/answer", json=_answer(query_id="8"))
+    assert r.status_code == 403 and [x for x in _rows(tmp_path) if x["_collection"] == "study_answers"] == []

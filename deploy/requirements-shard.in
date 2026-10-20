@@ -1,0 +1,6 @@
+# A shard worker (genkart.shard_worker): numbers and a small web server, no model. Versions from the main lock (-c); compiled by scripts/lock.sh.
+-c ../requirements.txt
+fastapi
+numpy
+pydantic
+uvicorn

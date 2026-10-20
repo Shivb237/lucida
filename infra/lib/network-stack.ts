@@ -40,13 +40,14 @@ export class NetworkStack extends cdk.Stack {
     });
     this.routerSg.addIngressRule(ec2.Peer.ipv4(props.myIpCidr), ec2.Port.tcp(9100), 'router API from my IP only');
 
-    // Shard hosts: reachable only from the router host. 9101-9104 = first copy, 9111-9114 = second copy of each shard.
+    // Shard hosts: reachable only from the router host, on the four shard ports 9101-9104. On AWS the two copies of a shard live on two
+    // machines (host A and host B, same port), so 9111-9114 (the second copy on the same machine) is used only by the laptop cluster.
     this.shardSg = new ec2.SecurityGroup(this, 'ShardSg', {
       vpc: this.vpc,
       description: 'GenKart shard hosts: shard ports from the router host only',
       allowAllOutbound: true, // needs S3 (shard files), SSM and CloudWatch
     });
-    this.shardSg.addIngressRule(this.routerSg, ec2.Port.tcpRange(9101, 9114), 'shard workers, from router only');
+    this.shardSg.addIngressRule(this.routerSg, ec2.Port.tcpRange(9101, 9104), 'shard workers 0-3, from router only');
 
     new cdk.CfnOutput(this, 'VpcId', { value: this.vpc.vpcId });
   }

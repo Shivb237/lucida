@@ -1,4 +1,4 @@
-// The page's calls to the local server: health, example prompts, and the live step stream (EventSource).
+// The page's calls to the server: health and readiness, example prompts, the live step stream (a POST read as server-sent events), plain search.
 import { providerOf, toBody, type BrainSetting } from './brain'
 import type { Hit, TraceEvent } from './trace'
 
@@ -17,7 +17,7 @@ export type Health = {
 
 export async function getHealth(): Promise<Health | null> {
   try {
-    const r = await fetch('/api/health')
+    const r = await fetch('/api/health', { signal: AbortSignal.timeout(5000), cache: 'no-store' })
     return r.ok ? await r.json() : null
   } catch {
     return null
@@ -33,39 +33,68 @@ export async function getExamples(): Promise<string[]> {
   }
 }
 
-/** Opens the step stream for one request. Returns a function that stops it.
- *  Without a key: a plain GET (EventSource). With one: a POST, because EventSource cannot send a body and a key must never sit in an address. */
-export function streamSearch(q: string, onEvent: (e: TraceEvent) => void, onError: (message: string) => void, brain?: BrainSetting | null): () => void {
-  if (brain?.kind === 'device') return streamDevice(q, brain, onEvent, onError)
-  if (brain && brain.kind !== 'local') return streamPost(toBody(q, brain), onEvent, onError)
-  const source = new EventSource(`/api/search?${new URLSearchParams({ q })}`)
-  let ended = false
-  source.onmessage = (m) => {
-    const e = JSON.parse(m.data) as TraceEvent
-    onEvent(e)
-    if (e.kind === 'end') {
-      ended = true
-      source.close()
-    }
+/** What the server is still loading (GET /api/ready answers 503 until the search model and catalogues are in memory). null: no answer. */
+export type Ready = { ready: boolean; loading: string[]; seconds: number }
+export async function getReady(base = ''): Promise<Ready | null> {
+  try {
+    const r = await fetch(`${base}/api/ready`)
+    const d = await r.json().catch(() => null)
+    if (!d || typeof d.ready !== 'boolean') return null
+    return { ready: d.ready, loading: Array.isArray(d.loading) ? d.loading.map(String) : [], seconds: Number(d.seconds) || 0 }
+  } catch {
+    return null
   }
-  source.onerror = () => {
-    source.close()
-    if (!ended) onError('The server stopped answering. Check the terminal running it, then try again.')
-  }
-  return () => source.close()
 }
 
-function streamPost(body: unknown, onEvent: (e: TraceEvent) => void, onError: (message: string) => void, signal?: AbortSignal): () => void {
+/** A random id the page sends with a search and with its paired plain search, so the server's rate limit counts the pair once. */
+export const pairedRunId = (): string => randomId()
+
+/** A version-4 UUID. crypto.randomUUID only exists on secure pages (https or localhost); a Lab opened at a LAN address (http://192.168...)
+ *  has crypto.getRandomValues only, so the id is built from that. */
+export function randomId(): string {
+  if (typeof crypto.randomUUID === 'function' && window.isSecureContext) return crypto.randomUUID()
+  const b = crypto.getRandomValues(new Uint8Array(16))
+  b[6] = (b[6] & 0x0f) | 0x40
+  b[8] = (b[8] & 0x3f) | 0x80
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('')
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`
+}
+
+const STOPPED = 'The server stopped answering. Check the terminal running it, then try again.'
+
+/** Opens the step stream for one request. Returns a function that stops it.
+ *  Always a POST: the sentence (and a key, if there is one) travels in the body, never in an address. */
+export function streamSearch(q: string, onEvent: (e: TraceEvent) => void, onError: (message: string) => void, brain?: BrainSetting | null, pairedRun?: string): () => void {
+  if (brain?.kind === 'device') return streamDevice(q, brain, onEvent, onError, pairedRun)
+  const body = brain && brain.kind !== 'local' ? toBody(q, brain) : { q }
+  return streamPost(body, onEvent, onError, undefined, pairedRun, !!brain && brain.kind !== 'local')
+}
+
+/** Plain search of the same sentence as typed, for the comparison card. null when it cannot be had. */
+export async function plainSearch(q: string, pairedRun?: string): Promise<{ seconds: number; hits: Hit[] } | null> {
+  try {
+    const r = await fetch('/api/plain', { method: 'POST', headers: { 'content-type': 'application/json', ...(pairedRun ? { 'x-paired-run': pairedRun } : {}) }, body: JSON.stringify({ q }) })
+    return r.ok ? await r.json() : null
+  } catch {
+    return null
+  }
+}
+
+function streamPost(body: unknown, onEvent: (e: TraceEvent) => void, onError: (message: string) => void, signal?: AbortSignal, pairedRun?: string, ownModel = false): () => void {
   const ac = new AbortController()
   signal?.addEventListener('abort', () => ac.abort())
   let ended = false
   ;(async () => {
     try {
-      const r = await fetch('/api/search', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ac.signal })
+      const headers: Record<string, string> = { 'content-type': 'application/json' }
+      if (pairedRun) headers['x-paired-run'] = pairedRun
+      const r = await fetch('/api/search', { method: 'POST', headers, body: JSON.stringify(body), signal: ac.signal })
       if (!r.ok || !r.body) {
         const d = await r.json().catch(() => null)
         const detail = typeof d?.detail === 'string' ? d.detail : Array.isArray(d?.detail) ? d.detail.map((x: { msg: string }) => x.msg).join('; ') : `the server answered ${r.status}`
-        onError(`Your model settings were refused: ${detail}`)
+        onError(r.status === 429 ? `Too many searches just now: ${detail}. Wait a moment, then try again.`
+          : r.status === 503 ? `The server is still starting: ${detail}. Try again in a few seconds.`
+          : ownModel ? `Your model settings were refused: ${detail}` : `The server refused the search: ${detail}`)
         return
       }
       const reader = r.body.getReader()
@@ -85,9 +114,9 @@ function streamPost(body: unknown, onEvent: (e: TraceEvent) => void, onError: (m
           if (e.kind === 'end') ended = true
         }
       }
-      if (!ended) onError('The server stopped answering. Check the terminal running it, then try again.')
+      if (!ended) onError(STOPPED)
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') onError('The server stopped answering. Check the terminal running it, then try again.')
+      if ((err as Error).name !== 'AbortError') onError(STOPPED)
     }
   })()
   return () => ac.abort()
@@ -117,7 +146,7 @@ export async function refineSearch(q: string, liked: string[], gender?: string |
 // The page talks to it directly: a server on the internet cannot reach a visitor's computer. Only the resulting plan is sent to the server,
 // which puts it through the same checks as its own models' answers.
 
-const DEVICE_HELP = 'Is the app running, and does it allow this page? (see "Let this page talk to your app" in Settings, top right)'
+const DEVICE_HELP = 'Is the app running, and does it allow this page? (see "Let this page talk to your app" under AI model, top right)'
 
 /** The model names the app on this device has. Throws a plain message on any failure. */
 export async function deviceModels(baseUrl: string): Promise<string[]> {
@@ -135,6 +164,17 @@ export async function deviceModels(baseUrl: string): Promise<string[]> {
 }
 
 let promptCache: Promise<{ system: string; schema: unknown }> | null = null
+
+/** A small model can overshoot the plan's size limits. The server trims too (understand.Plan); trimming here keeps the request well under the
+ *  16 KB body limit: at most 12 pieces of 200 characters, 10 colours and owned items of 120, a 300-character main query; notes dropped. */
+function clipPlan(plan: Record<string, unknown>): Record<string, unknown> {
+  const str = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : v)
+  const list = (v: unknown, n: number, each: number) => (Array.isArray(v) ? v.slice(0, n).map((x) => str(x, each)) : v)
+  const pieces = Array.isArray(plan.pieces) ? plan.pieces.slice(0, 12).map((p) => (p && typeof p === 'object'
+    ? { ...p, search_text: str((p as Record<string, unknown>).search_text, 200), colours: list((p as Record<string, unknown>).colours, 10, 120) } : p)) : plan.pieces
+  const { notes: _notes, ...rest } = plan
+  return { ...rest, main_query: str(plan.main_query, 300), occasion: str(plan.occasion, 120), season: str(plan.season, 120), pieces, already_has: list(plan.already_has, 10, 120) }
+}
 
 /** Ask the device model for a plan, with the server's own instructions and answer shape. Resolves to the plan, or throws a plain message. */
 async function askDevice(q: string, b: BrainSetting, signal: AbortSignal): Promise<Record<string, unknown>> {
@@ -165,7 +205,7 @@ async function askDevice(q: string, b: BrainSetting, signal: AbortSignal): Promi
 }
 
 /** A search whose sentence-reading step runs on the visitor's device. While the device model thinks, the page already shows step 2 as running. */
-function streamDevice(q: string, b: BrainSetting, onEvent: (e: TraceEvent) => void, onError: (message: string) => void): () => void {
+function streamDevice(q: string, b: BrainSetting, onEvent: (e: TraceEvent) => void, onError: (message: string) => void, pairedRun?: string): () => void {
   const ac = new AbortController()
   let stopStream: (() => void) | null = null
   ;(async () => {
@@ -174,12 +214,12 @@ function streamDevice(q: string, b: BrainSetting, onEvent: (e: TraceEvent) => vo
     const model = `${b.model} · ${providerOf(b.provider).label.replace(/ \(.*\)$/, '')}`
     let device: Record<string, unknown>
     try {
-      device = { plan: await askDevice(q, b, ac.signal), model, seconds: (performance.now() - t0) / 1000 }
+      device = { plan: clipPlan(await askDevice(q, b, ac.signal)), model, seconds: (performance.now() - t0) / 1000 }
     } catch (e) {
       if ((e as Error).name === 'AbortError') return
       device = { model, seconds: Math.min((performance.now() - t0) / 1000, 600), error: String((e as Error).message).slice(0, 300) }
     }
-    stopStream = streamPost({ q, device }, onEvent, onError, ac.signal)
+    stopStream = streamPost({ q, device }, onEvent, onError, ac.signal, pairedRun, true)
   })()
   return () => { ac.abort(); stopStream?.() }
 }

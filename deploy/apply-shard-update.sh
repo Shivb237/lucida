@@ -1,19 +1,33 @@
 #!/bin/bash
 # Run ON a shard host, as root. Same idea as apply-router-update.sh for the shard workers. Safe to run again.
+# Usage: apply-shard-update.sh <bucket-name> [<shard-token-secret-arn>]   (given, the token is (re)written into /etc/genkart/shard.env; never printed).
+# Update the shard hosts and the router host with the same ARN: once a worker has the token, callers without it cannot /ingest.
 set -euo pipefail
 export AWS_DEFAULT_REGION=ap-south-1
-B="${1:-}"; [ -n "$B" ] || { echo "usage: $0 <bucket-name> (the bucket name was empty)"; exit 2; }
+B="${1:-}"; [ -n "$B" ] || { echo "usage: $0 <bucket-name> [<shard-token-secret-arn>] (the bucket name was empty)"; exit 2; }
+SECRET="${2:-}"
 cd /opt/genkart
 for f in genkart-shard-src.tgz "genkart-shard@.service" genkart-logrotate.conf genkart-tmpfiles.conf shard-agent.json; do
   aws s3 cp "s3://$B/shards/code/$f" . --only-show-errors
 done
-tar -xzf genkart-shard-src.tgz 2>/dev/null
+tar --no-same-owner -xzf genkart-shard-src.tgz 2>/dev/null
+if [ -n "$SECRET" ]; then
+  TOKEN="$(aws secretsmanager get-secret-value --secret-id "$SECRET" --query SecretString --output text)"
+  [ -n "$TOKEN" ] || { echo 'EMPTY SHARD TOKEN'; exit 1; }
+  mkdir -p /etc/genkart
+  install -m 0640 -o root -g genkart /dev/null /etc/genkart/shard.env
+  printf 'GENKART_SHARD_TOKEN=%s\n' "$TOKEN" > /etc/genkart/shard.env
+  unset TOKEN
+  echo "shard token written (/etc/genkart/shard.env)"
+fi
 cp "genkart-shard@.service" /etc/systemd/system/
 cp genkart-logrotate.conf /etc/logrotate.d/genkart
 cp genkart-tmpfiles.conf /etc/tmpfiles.d/genkart.conf
 systemd-tmpfiles --create /etc/tmpfiles.d/genkart.conf
 [ -d /var/log/genkart ] || { echo 'LOG FOLDER MISSING: /var/log/genkart'; exit 1; }   # systemd cannot open a log file in a missing folder (status 209/STDOUT)
-chown -R genkart:genkart /opt/genkart
+# code and venv belong to root (the unit mounts them read-only); genkart owns only the shard folder, where the workers append their write-ahead logs
+chown -R root:root /opt/genkart
+chown -R genkart:genkart /opt/genkart/shards
 # the new code refuses shard files that need pickle (it can run code): check them BEFORE restarting, so a bad file stops the update instead of taking all four workers down
 for f in /opt/genkart/shards/n4/shard-*.npz; do
   PYTHONPATH=/opt/genkart/src /opt/genkart/.venv/bin/python -c "import sys,numpy as np; np.load(sys.argv[1], allow_pickle=False).files" "$f" 2>/dev/null \

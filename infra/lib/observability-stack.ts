@@ -11,6 +11,8 @@ import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 
 export interface ObservabilityStackProps extends cdk.StackProps {
+  /** The /genkart/* log groups, owned by the data stack (see there why). */
+  readonly logGroups: Record<string, logs.ILogGroup>;
   readonly ingestQueue: sqs.IQueue;
   readonly deadLetterQueue: sqs.IQueue;
   /** The computers, for their health-check alarms. If given, this stack depends on the compute stack: deploy the computers FIRST. */
@@ -23,25 +25,19 @@ type FilterSpec = { id: string; group: string; pattern: string; metric: string; 
 
 /**
  * What you look at to know the system is healthy:
- *  - four log groups (the agents on the machines write into them), kept 7 days
- *  - metric filters: turn numbers inside the JSON log lines into CloudWatch metrics (the patterns live in infra/cloudwatch/metric-filters.json,
+ *  - metric filters on the four log groups the agents write into (the groups belong to the data stack, so they exist before any machine boots):
+ *    they turn numbers inside the JSON log lines into CloudWatch metrics (the patterns live in infra/cloudwatch/metric-filters.json,
  *    which scripts/test_metric_filters.py checks against real-shaped lines BEFORE deploying)
  *  - one dashboard, and alarms
- * This stack names no computer, so deploying it can never rebuild one. Alarms on the computers' own health checks come with the final rebuild.
+ * It names the computers (one status-check alarm per machine), so it depends on the compute stack: deploy GenkartCompute first. It only
+ * reads their instance ids, so deploying it can never rebuild a machine.
  */
 export class ObservabilityStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ObservabilityStackProps) {
     super(scope, id, props);
     const NS = 'GenKart';
 
-    const groups: Record<string, logs.LogGroup> = {};
-    for (const g of ['router', 'encoder', 'ingest', 'shard']) {
-      groups[g] = new logs.LogGroup(this, `Logs-${g}`, {
-        logGroupName: `/genkart/${g}`,
-        retention: logs.RetentionDays.ONE_WEEK,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,   // a learning project: destroying the stack removes the logs too
-      });
-    }
+    const groups = props.logGroups;
 
     const specs: FilterSpec[] = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'cloudwatch', 'metric-filters.json'), 'utf8'));
     for (const f of specs) {

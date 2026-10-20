@@ -22,15 +22,20 @@ class Fake:
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         url = str(request.url)
-        body = json.loads(request.content)
         self.calls.append(url)
+        if url.endswith("/health"):
+            return httpx.Response(503 if url.removesuffix("/health") in self.down else 200, json={"ok": True})
+        body = json.loads(request.content)
         if url.endswith("/encode_images"):
             if any("missing" in p for p in body["paths"]):
                 return httpx.Response(422, json={"detail": "not a readable file"})
             return httpx.Response(200, json={"vectors": [[0.1, 0.2] for _ in body["paths"]]})
         host = url.split("/ingest")[0]
+        self.tokens = getattr(self, "tokens", []) + [request.headers.get("x-genkart-token")]
         if host in self.down:
             return httpx.Response(503, json={})
+        if getattr(self, "want_token", None) and request.headers.get("x-genkart-token") != self.want_token:
+            return httpx.Response(401, json={"detail": "missing or wrong shard token"})
         for it in body["items"]:
             self.added.setdefault(host, {})[it["id"]] = it          # idempotent by id, like the real shard
         return httpx.Response(200, json={"added": 1})
@@ -116,3 +121,89 @@ def test_a_down_replica_is_retried_with_backoff_not_at_once_and_a_permanent_erro
     clock.t += 3
     w.step()
     assert w.stats["acked"] == 1 and set(fake.added["http://a2"]) == {"4"}
+
+
+def test_a_down_replica_pauses_receiving_instead_of_burning_the_retry_budget(tmp_path):
+    fake = Fake(down={"http://a2"})
+    q, w, clock = _setup(tmp_path, fake)
+    q.send(_msg(4))
+    w.step()                                                             # the write to a2 fails: a2 is marked down
+    assert w.down == {"http://a2"}
+    for _ in range(5):
+        clock.t += 100                                                   # long past every backoff: the message is visible again
+        assert w.step() == 0                                             # paused: nothing received while a2 is down
+    assert q.stats()["waiting"] == 1 and q.stats()["dead"] == 0 and w.stats["paused"] == 5
+    fake.down.clear()
+    assert w.step() == 1 and w.stats["acked"] == 1 and not w.down
+
+
+def test_products_for_one_shard_go_in_one_request_of_at_most_32_and_carry_the_token(tmp_path, monkeypatch):
+    monkeypatch.setenv("GENKART_SHARD_TOKEN", "tok")
+    fake = Fake()
+    clock = Clock()
+    q = JobQueue(str(tmp_path / "q.db"), clock=clock, max_receives=3)
+    w = IngestWorker(q, "http://enc", [["http://a1"]], batch=40, visibility_s=10, client=httpx.Client(transport=httpx.MockTransport(fake.handler)))
+    for i in range(40):
+        q.send(_msg(i))
+    assert w.step() == 40 and w.stats["acked"] == 40
+    ingests = [u for u in fake.calls if u.endswith("/ingest")]
+    assert len(ingests) == 2 and len(fake.added["http://a1"]) == 40            # 32 + 8, not 40 requests
+    assert set(fake.tokens) == {"tok"}
+
+
+def test_one_refused_product_in_a_batch_does_not_hold_up_the_others(tmp_path):
+    fake = Fake()
+    real = fake.handler
+
+    def handler(request):
+        if request.url.path == "/ingest" and any(it["id"] == "6" for it in json.loads(request.content)["items"]):
+            return httpx.Response(422, json={"detail": "bad vector"})
+        return real(request)
+
+    clock = Clock()
+    q = JobQueue(str(tmp_path / "q.db"), clock=clock, max_receives=3)
+    w = IngestWorker(q, "http://enc", [["http://a1"]], batch=8, visibility_s=10, client=httpx.Client(transport=httpx.MockTransport(handler)))
+    for i in (2, 4, 6):
+        q.send(_msg(i))
+    w.step()
+    assert set(fake.added["http://a1"]) == {"2", "4"} and w.stats["acked"] == 2 and not w.down
+
+
+def test_a_photo_fetched_from_s3_is_deleted_once_embedded(tmp_path):
+    from genkart.ingest_worker import S3Photos
+
+    class S3:
+        def download_file(self, bucket, key, dest):
+            open(dest, "wb").write(b"jpg")
+
+    photos = S3Photos(S3(), str(tmp_path / "photos"))
+    fake = Fake()
+    clock = Clock()
+    q = JobQueue(str(tmp_path / "q.db"), clock=clock, max_receives=3)
+    w = IngestWorker(q, "http://enc", [["http://a1"]], client=httpx.Client(transport=httpx.MockTransport(fake.handler)), resolve_image=photos)
+    q.send(_msg(2, image="s3://bucket/p/2.jpg"))
+    w.step()
+    assert w.stats["acked"] == 1 and list((tmp_path / "photos").iterdir()) == []
+    keep = tmp_path / "keep.jpg"
+    keep.write_bytes(b"x")
+    photos.cleanup(str(keep))                                            # a local path from the producer is never deleted
+    assert keep.exists()
+
+
+def test_a_replica_refusing_the_token_pauses_the_queue_instead_of_burning_every_retry(tmp_path):
+    fake = Fake()
+    fake.want_token = "right"
+    q, w, clock = _setup(tmp_path, fake)
+    w.headers = {"x-genkart-token": "wrong"}
+    for i in range(4):
+        q.send(_msg(i))
+    w.step()                                       # the first batch fails once and marks the replicas down
+    for _ in range(5):
+        clock.t += 60                              # well past every backoff: a worker that did not pause would burn receives here
+        assert w.step() == 0
+    assert q.stats()["dead"] == 0 and w.stats.get("paused", 0) == 5
+    w.headers = {"x-genkart-token": "right"}       # the token is fixed: the replicas answer the empty probe, and the queue drains
+    clock.t += 60
+    while w.step():
+        clock.t += 60
+    assert q.stats()["waiting"] == 0 and q.stats()["dead"] == 0 and set(fake.added["http://a1"]) == {"0", "2"}

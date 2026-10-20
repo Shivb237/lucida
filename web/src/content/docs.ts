@@ -1,6 +1,6 @@
 // The project's documentation, as data, in plain words. Every number is computed from the logged runs (virtual:evidence) or the recorded runs, never typed in.
 // Rule: say what it means first; each item is at most three lines on a normal screen; a measured claim names the file in runs/ it came from.
-import evidence from 'virtual:evidence'
+import evidence, { type ClaimId } from 'virtual:evidence'
 import { RECORDED } from '../recorded'
 import type { StageId } from '../trace'
 
@@ -9,6 +9,8 @@ export type Fact = { text: string; source: string }
 export type StepDoc = {
   id: StageId
   title: string
+  /** One plain sentence for the journey: what the step does, in everyday words. */
+  short: string
   what: string
   why: string
   measured: Fact[]
@@ -17,7 +19,6 @@ export type StepDoc = {
   helpedWhy: string
   code: string[]
 }
-export type Decision = { date: string; decision: string; why: string; source?: string }
 
 const n2 = (x: number) => x.toFixed(2)
 const n3 = (x: number) => x.toFixed(3)
@@ -25,6 +26,11 @@ const sg = (x: number, d = 2) => `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(d
 const pc = (x: number, d = 0) => `${(x * 100).toFixed(d)}%`
 const med = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : 0 }
 const sourceFile = (f: string) => `runs/${f}`
+type Agreement = NonNullable<Ev['agreement']['test5']>
+const nWord = (n: number) => ['zero', 'one', 'two', 'three', 'four', 'five'][n] ?? String(n)
+const fk = (x: number) => x.toFixed(2).replace('-', '−')
+/** "weighted kappa 0.61 [0.45, 0.75], 132 options": the second-rater agreement, as logged. */
+const kappa = (a: Agreement) => `weighted kappa ${fk(a.weightedKappa.mean)} [${fk(a.weightedKappa.ci95[0])}, ${fk(a.weightedKappa.ci95[1])}], ${a.nItems} options`
 
 export function recordedUnderstandMedian(): number {
   return med(RECORDED.runs.flatMap((r) => r.events.filter((e) => e.kind === 'step' && e.stage === 'understand' && e.status === 'done').map((e) => (e.kind === 'step' ? e.seconds ?? 0 : 0))))
@@ -33,9 +39,11 @@ export function recordedUnderstandMedian(): number {
 export function buildSteps(ev: Ev = evidence): StepDoc[] {
   const g = ev.guard, b3 = ev.findings.blind3, b4 = ev.findings.blind4, b5 = ev.blind5, gr = ev.findings.graph, oc = ev.findings.outfit, u = ev.understanding
   const sc = ev.scale, dr = ev.drawing, cq = ev.claudeVsQwen, ck = ev.checksEval
+  const a5 = ev.agreement?.test5 ?? null
   return [
     {
       id: 'request', title: 'Your request',
+      short: 'A safety check reads your words before anything else.',
       what: 'A safety check reads your sentence first. It blanks phone numbers and similar details, applies fixed rules, and asks the local AI model about unclear wording. A refused request stops here.',
       why: 'A public search box takes anything. Refusing early costs nothing; refusing late wastes a search.',
       measured: g ? [
@@ -48,11 +56,12 @@ export function buildSteps(ev: Ev = evidence): StepDoc[] {
     },
     {
       id: 'understand', title: 'Read your sentence',
+      short: 'A small AI model turns your sentence into pieces to search.',
       what: 'A small AI model on your own computer turns the sentence into a plan: the pieces to search, who it is for, the occasion, the season, the budget, what you already own. Plain code then checks the plan against your words.',
       why: 'Real requests are whole outfits for events. One search for a whole sentence finds one kind of product. A plan lets each piece be searched on its own.',
       measured: [
         ...(u ? [{ text: `On ${u.n} messy rewrites of labelled searches, the match score (0 to 1) was ${n3(u.original)} for the clean original, ${n3(u.raw)} for the messy text as it was, and ${n3(u.understood)} with the plan. So the plan wins back about ${pc((u.understood - u.raw) / (u.original - u.raw))} of what messy wording loses.`, source: sourceFile('m4.summary.json') }] : []),
-        ...(b5 ? [{ text: `On ${b5.n_prompts} fresh requests, one person rated results 0 to 2 without knowing which method made them: plain sentence ${n2(b5.mean.B)}, local plan ${n2(b5.mean.C)}. Plan minus plain: ${sg(b5.C_minus_B.mean)} (range ${sg(b5.C_minus_B.ci95[0])} to ${sg(b5.C_minus_B.ci95[1])}). It did not help.`, source: sourceFile('blind-test5.summary.json') }] : []),
+        ...(b5 ? [{ text: `On ${b5.n_prompts} fresh requests, ${a5 ? `${nWord(a5.raters)} people (${kappa(a5)}) rated results 0 to 2 without knowing which method made them. The author's ratings` : 'one person rated results 0 to 2 without knowing which method made them'}: plain sentence ${n2(b5.mean.B)}, local plan ${n2(b5.mean.C)}. Plan minus plain: ${sg(b5.C_minus_B.mean)} (range ${sg(b5.C_minus_B.ci95[0])} to ${sg(b5.C_minus_B.ci95[1])}). It did not help.`, source: sourceFile('blind-test5.summary.json') }] : []),
         ...(cq && b5 ? [{ text: `A paid Claude plan scored the same as the local one (${sg(b5.D_minus_C.mean)}) and cost $${cq.claude_cost_usd.toFixed(2)} in calls. The local model stays.`, source: sourceFile('blind-test5.summary.json') }] : []),
       ],
       fails: ['It can drop colour, fabric or theme words, and can slip on a word ("brocade" became "broad").', `It is the slowest step: about ${n2(recordedUnderstandMedian())} s in the recorded runs, most of the whole request.`],
@@ -61,6 +70,7 @@ export function buildSteps(ev: Ev = evidence): StepDoc[] {
     },
     {
       id: 'expand', title: 'Add missing ideas',
+      short: 'A map of which clothes suit which occasion checks the pieces.',
       what: 'A small map of how clothes and occasions go together, counted from Kaggle product labels, checks each piece. It swaps a generic piece for what that occasion usually needs, and adds a missing one, such as shoes.',
       why: 'An AI model can invent a piece or miss one. The map is simple enough to read and question: a short word list plus counts from labels.',
       measured: gr ? [
@@ -73,6 +83,7 @@ export function buildSteps(ev: Ev = evidence): StepDoc[] {
     },
     {
       id: 'search', title: 'Find products',
+      short: 'Each piece is matched against product photos, the big collection first.',
       what: 'Each piece becomes numbers (with a fashion-tuned AI model) and is compared with every product photo. The big general collection is searched first. If its best match is weak, three specialist collections are searched too. Duplicates are merged.',
       why: 'One collection cannot hold Indian occasion wear. Matching words to photos also ranked better than matching words to titles.',
       measured: [
@@ -87,6 +98,7 @@ export function buildSteps(ev: Ev = evidence): StepDoc[] {
     },
     {
       id: 'compose', title: 'Pick an outfit',
+      short: 'One product is picked per piece, favouring colours that go together.',
       what: 'For each piece, one product is chosen from the closest few, favouring colours that go together (the colour is read from the photo).',
       why: 'The closest match for each piece can clash as a set. A colour score lets a nearly-as-close neutral replace a loud one.',
       measured: oc ? [
@@ -99,6 +111,7 @@ export function buildSteps(ev: Ev = evidence): StepDoc[] {
     },
     {
       id: 'outfit', title: 'Your outfit',
+      short: 'You get one product per piece, each with a reason you can check.',
       what: 'The picks, each with a reason taken from data: its score, where it came from, the map note, and the colour read from its photo.',
       why: 'An AI-written story about a pick would sound sure and prove nothing. A reason that can be recomputed can be checked.',
       measured: [{ text: 'No number here: this step only reports what the earlier steps found. The drawn preview is off, because drawing first scored worse.', source: sourceFile('m2.summary.json') }],
@@ -109,28 +122,52 @@ export function buildSteps(ev: Ev = evidence): StepDoc[] {
   ]
 }
 
-export function buildDecisions(ev: Ev = evidence): Decision[] {
-  const sc = ev.scale, dr = ev.drawing, b4 = ev.findings.blind4, b5 = ev.blind5, aw = ev.aws, oc = ev.findings.outfit
-  const o = aw.overload?.variants
+/** One decision as a one-line card: what we chose, the measured reason, and where the evidence is. A reason tied to a claim is that claim's own computed sentence. */
+export type DecisionCard = { decision: string; reason: string; href?: string; claim?: ClaimId; verdict?: string | null; verdictLabel?: string | null }
+
+export function buildDecisions(ev: Ev = evidence): DecisionCard[] {
+  const aw = ev.aws, o = aw.overload?.variants
+  const byId = new Map(ev.claims.map((c) => [c.id, c]))
+  const fromClaim = (claim: ClaimId, decision: string): DecisionCard => {
+    const c = byId.get(claim)
+    return { decision, claim, reason: c?.answer[1] ?? c?.answer[0] ?? 'Not computed yet.', href: `#/evidence/${claim}`, verdict: c?.verdict ?? null, verdictLabel: c?.verdictLabel ?? null }
+  }
   return [
-    { date: '2026-10-11', decision: 'Drop "draw the outfit first".', why: dr.genResnet && dr.text ? `Drawing first scored ${n2(dr.genResnet.ndcg10?.mean ?? 0)}; matching the words scored ${n2(dr.text.ndcg10?.mean ?? 0)} (20 searches, free local image tool).` : 'It scored worse than matching the words.', source: sourceFile('m2.summary.json') },
-    { date: '2026-10-11', decision: 'Do not repeat the old "+30% accuracy" claim.', why: 'It came from 3 hand-checked searches. Every number now comes from a logged run.' },
-    { date: '2026-10-13', decision: 'Keep the fashion-tuned model for search.', why: `On the big test it scored ${n3(sc.marqo.ndcg10?.mean ?? 0)}, against ${n3(sc.siglipBase.ndcg10?.mean ?? 0)} for a general model and ${n3(sc.bm25.ndcg10?.mean ?? 0)} for keywords.`, source: sourceFile('scale-marqo-fashionsiglip.summary.json') },
-    { date: '2026-10-14', decision: 'Add three specialist product collections.', why: b4 ? `The first collection has almost no sarees, kurtas or lehengas. A person's score rose from ${n2(b4.methods.A.mean)} to ${n2(b4.methods.B.mean)}.` : 'The first collection lacks Indian ethnic wear.', source: sourceFile('blind-test4.summary.json') },
-    { date: '2026-10-14', decision: 'Do not use the IndoFashion dataset.', why: 'It has no clear licence and its authors scraped shops. The rule is public, licensed or made-up data only.' },
-    { date: '2026-10-14', decision: 'Keep the colour check, but do not claim it helps.', why: oc ? `Colour-matched scored ${n2(oc.methods.coherent.mean)}, the same as best match (${n2(oc.methods.baseline.mean)}).` : 'No measured effect.', source: sourceFile('outfit-ratings.summary.json') },
-    { date: '2026-10-14', decision: 'Keep the local AI model for reading sentences, not Claude.', why: b5 ? `Claude plans scored the same as local ones (${sg(b5.D_minus_C.mean)}). An AI judge said Claude was better on another set${ev.judge5 ? `, but it agrees with the human on only ${pc(ev.judge5.agreement)} of ratings` : ''}, so only human ratings decide.` : 'No measured gain.', source: sourceFile('blind-test5.summary.json') },
-    { date: '2026-10-14', decision: 'Split search across several programs, even though one is not slower at this size.', why: 'It lets us measure how a split system behaves: switching to backups, slow parts, incomplete answers, adding products through a queue.', source: sourceFile('router-e2e.summary.json') },
-    { date: '2026-10-15', decision: 'Run on AWS in Mumbai, on plain virtual machines.', why: 'Mumbai is closest to Indian shoppers. The author ran every AWS command and holds the credentials. The recording does not need the machines running.' },
-    { date: '2026-10-16', decision: 'Say "busy" past 12 searches at once, and drop work nobody waits for.', why: o ? `At 32 people at once, answered searches per second went from ${n2(o.baseline.hardest_level.goodput_per_s)} to ${n2(o.v2.hardest_level.goodput_per_s)}. "Busy" came back in about ${Math.round(o.v2.hardest_level.shed_p50_ms ?? 0)} ms.` : 'Measured on AWS.', source: sourceFile('aws-overload-experiment.summary.json') },
-    { date: '2026-10-16', decision: 'The public site shows recordings only. Interaction needs your own model or key, on your own computer.', why: "Nothing can reach the author's computer or keys, and no AWS password is in the site." },
+    fromClaim('model', 'Search with a fashion-trained model.'),
+    fromClaim('drawing', 'Match your words, not a drawing.'),
+    fromClaim('collections', 'Add three specialist collections.'),
+    fromClaim('plan', 'Keep the AI plan, but do not claim it helps.'),
+    fromClaim('graph', 'Keep the clothes map; its effect is small.'),
+    fromClaim('colour', 'Keep the colour check, but do not claim it helps.'),
+    fromClaim('checks', 'Check every pick against plain rules.'),
+    fromClaim('guard', 'Check every request before searching.'),
+    fromClaim('likes', 'Learn from likes only, not dislikes.'),
+    fromClaim('judge', 'Only human ratings decide.'),
+    fromClaim('data', 'Merge near-copies before any test.'),
+    { decision: 'Say "busy" past 12 searches at once.', reason: o ? `On AWS, "busy" came back in about ${Math.round(o.v2.hardest_level.shed_p50_ms ?? 0)} ms. No search failed.` : 'Measured on AWS.', href: '#/system' },
+  ]
+}
+
+/** Choices with no test behind them: rules, licences and where it runs. */
+export function buildOtherDecisions(ev: Ev = evidence): DecisionCard[] {
+  const b5 = ev.blind5
+  return [
+    { decision: 'Keep the local AI model, not Claude.', reason: b5 ? `Claude's plans rated the same as the local ones (${sg(b5.D_minus_C.mean)} out of 2), and cost money.` : 'No measured gain.', href: '#/evidence/plan', claim: 'plan' },
+    { decision: 'Do not repeat the old "+30% accuracy" claim.', reason: 'It came from 3 hand-checked searches. Every number now comes from a logged run.' },
+    { decision: 'Do not use the IndoFashion dataset.', reason: 'It has no clear licence, and its authors scraped shops.' },
+    { decision: 'Split search across several programs.', reason: 'It is not faster at this size, but it lets us test failures.', href: '#/system' },
+    { decision: 'Run on plain AWS machines in Mumbai.', reason: 'Mumbai is closest to Indian shoppers. The machines were deleted on 2026-10-16.', href: '#/system' },
+    { decision: 'The public site shows recordings only.', reason: "Nothing on it can reach the author's computer or keys." },
   ]
 }
 
 export function buildLimits(ev: Ev = evidence): string[] {
   const j = ev.guard
+  const second = ([['test 4', ev.agreement?.test4], ['test 5', ev.agreement?.test5]] as const).flatMap(([t, a]) => (a ? [{ t, a }] : []))
   return [
-    'One person scored the results. They also wrote the requests, but did not know which method made which result. The ranges show chance, not that person\'s taste.',
+    second.length
+      ? `The author scored every result, without knowing which method made which, and also wrote the requests. A second person also scored ${second.map(({ t, a }) => `${t} (${kappa(a)})`).join(' and ')}. The ranges show chance, not the raters' taste.`
+      : 'One person scored the results. They also wrote the requests, but did not know which method made which result. The ranges show chance, not that person\'s taste.',
     ev.judge5 ? `An AI judge agrees with the human on only ${pc(ev.judge5.agreement)} of ${ev.judge5.n} ratings. It is a rough hint and decides nothing.` : 'An AI judge was tried. It is a rough hint and decides nothing.',
     'Test sets 3, 4 and 5 are used up. A change made after seeing their results needs a new set.',
     "Gaps remain in the products: children's ethnic wear, men's kurta and dhoti sets.",

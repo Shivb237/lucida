@@ -1,5 +1,6 @@
 # Top-level dependencies, exact versions (resolved on 2026-10-11 for Python 3.14 on Apple Silicon).
-# requirements.txt is the full frozen lock (pip freeze) and is what to install from.
+# requirements.txt is the full lock with hashes, made from this file by scripts/lock.sh (pip-compile --generate-hashes), and is what to install from.
+# The smaller locks (space/requirements-space.in, deploy/requirements-*.in) are constrained by requirements.txt, so a package has one version everywhere.
 torch==2.14.1
 torchvision==0.29.1
 open_clip_torch==3.3.0
@@ -10,7 +11,7 @@ pillow==12.3.0
 numpy==2.5.4
 pandas==3.0.6
 PyYAML==6.0.3
-pytest
+pytest==9.1.1
 transformers==5.19.0
 # milestone 2 (local image generation): diffusers itself is in requirements-generation.txt (it cannot be resolved together with huggingface_hub 2.2.0);
 # the packages it needs are declared here

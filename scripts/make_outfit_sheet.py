@@ -112,10 +112,11 @@ page = open("data/preview/blind_sheet4.html").read()
 head = page[:page.index("<section>")]
 tail = page[page.rindex("</section>") + len("</section>"):]
 head = (head.replace("Blind test 2: Indian occasions", "Blind test 3: complete outfits")
-       .replace("genkart-blind-v2", "genkart-blind-v3")
        .replace("</style>", ".board{display:flex;gap:6px;flex-wrap:wrap}.board figure{flex:1 1 0;min-width:90px;max-width:220px}</style>")
        .replace("For each request, rate every option as a whole.", "Each outfit is one photo per piece. Rate the whole outfit: do the pieces go well together and fit the request?"))
-tail = tail.replace("genkart-blind-v2", "genkart-blind-v3")
+# Own localStorage key so these ratings do not mix with make_blind_sheet5.py's genkart-blind-v3 (the key is in tail, the script after the last section).
+assert "genkart-blind-v2" in tail, "blind_sheet4.html no longer has the key this script replaces"
+tail = tail.replace("genkart-blind-v2", "genkart-blind-outfit-v1")
 pathlib.Path("data/preview/outfit_sheet.html").write_text(head + "".join(blocks) + tail)
 S = summary
 print(f"prompts used {S['n_prompts']} | coherent outfit differs from baseline on {S['n_prompts']-S['coherent_equals_baseline']} of them")

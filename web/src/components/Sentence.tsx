@@ -46,7 +46,7 @@ export function annotate(text: string, plan: Plan | null): Segment[] {
 
 export function Sentence({ text, plan, animate }: { text: string; plan: Plan | null; animate: boolean }) {
   return (
-    <div className="sentence" aria-label={text}>
+    <div className="sentence" role="group" aria-label={text}>
       {annotate(text, plan).map((s, i) => (
         <div className="word" key={`${s.text}-${i}`}>
           <span className="voice w">{s.text}</span>
@@ -54,8 +54,8 @@ export function Sentence({ text, plan, animate }: { text: string; plan: Plan | n
             <div className={`tag${animate ? ' dev' : ''}`} style={{ width: '100%' }}>
               <div className="hatch" />
               <div className="leader" />
-              <div className="lg dim" style={{ fontSize: 12 }}>{s.label}</div>
-              <div className="mono" style={{ fontSize: 14, lineHeight: '20px' }}>{s.value}</div>
+              <div className="lg dim" style={{ fontSize: 13 }}>{s.label}</div>
+              <div className="mono" style={{ fontSize: 16, lineHeight: '24px' }}>{s.value}</div>
             </div>
           )}
         </div>

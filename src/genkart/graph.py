@@ -147,7 +147,8 @@ def expand_plan(g: nx.DiGraph, plan, text: str, strength: float = 0.5):
     for piece in plan.pieces:
         role = {"top": "top", "bottom": "bottom", "dress": "dress", "footwear": "footwear", "accessory": "accessory", "outerwear": "top"}.get(piece.kind)
         best = strong(role) if role else None
-        same_type = bool(best) and _singular(piece.search_text.lower().split()[-1]) == _singular(best[0].lower().split()[-1])
+        words = piece.search_text.lower().split()           # can be empty (a model may answer an empty search_text)
+        same_type = bool(best) and bool(words) and _singular(words[-1]) == _singular(best[0].lower().split()[-1])
         if role and not own(piece) and best and not same_type:   # keep the model's piece when it already names the graph's garment
             old = piece.search_text
             piece = piece.model_copy(update={"search_text": f"{prefix} {best[0].lower()}".strip()})

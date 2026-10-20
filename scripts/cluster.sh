@@ -1,11 +1,16 @@
 #!/bin/zsh
 # Start / stop / status of the local cluster: encoder (9000), shard workers, router (9100). PIDs in data/run/.
 # Replicas: REPLICAS=2 (default) runs each shard twice: replica A on 9101-9104, replica B on 9111-9114. REPLICAS=1 runs one worker per shard.
-# SHARDS_DIR=data/shards/n4h to use the shard files with held-out products. Usage: [REPLICAS=1] [SHARDS_DIR=..] scripts/cluster.sh start|stop|status
+# SHARDS_DIR=data/shards/n4h to use the shard files with held-out products.
+# MAX_INFLIGHT: the router's load-shedding limit. 0 (the default HERE) = no limit: this is the experiment cluster, and scripts/chaos.py's
+# load phase (up to 64 clients at once) must measure the system, not 429 "busy" answers. The router's own default (12) is what the AWS
+# host runs; MAX_INFLIGHT=12 scripts/cluster.sh start reproduces it.
+# Usage: [REPLICAS=1] [SHARDS_DIR=..] [MAX_INFLIGHT=n] scripts/cluster.sh start|stop|status
 cd "$(dirname "$0")/.."
 mkdir -p data/run
 REPLICAS=${REPLICAS:-2}
 SHARDS_DIR=${SHARDS_DIR:-data/shards/n4}
+MAX_INFLIGHT=${MAX_INFLIGHT:-0}
 case "$1" in
   start)
     export GENKART_ADMIN=1   # local fault-injection route for the chaos scripts; never set on AWS
@@ -20,13 +25,16 @@ case "$1" in
       fi
       URLS="${URLS:+$URLS,}$GROUP"
     done
-    (cd services/router && SHARD_URLS="$URLS" nohup node src/index.ts > ../../data/run/router.log 2>&1 & echo $! > ../../data/run/router.pid)
-    echo "started with $REPLICAS replica(s) per shard; wait for: scripts/cluster.sh status" ;;
+    # the compiled router (dist/) runs on any Node 22+; without node_modules (no `npm ci` yet) Node 24 LTS (or 22.18+) runs the TypeScript itself
+    ROUTER_MAIN=src/index.ts
+    if [ -x services/router/node_modules/.bin/tsc ]; then (cd services/router && npm run -s build) && ROUTER_MAIN=dist/index.js; fi
+    (cd services/router && SHARD_URLS="$URLS" MAX_INFLIGHT="$MAX_INFLIGHT" nohup node $ROUTER_MAIN > ../../data/run/router.log 2>&1 & echo $! > ../../data/run/router.pid)
+    echo "started with $REPLICAS replica(s) per shard, MAX_INFLIGHT=$MAX_INFLIGHT (0 = no limit); wait for: scripts/cluster.sh status" ;;
   stop)
     for f in data/run/*.pid(N); do
       pid="$(cat $f)"
       # a saved number can belong to an unrelated program after a reboot: kill it only if its command line is one of ours
-      if ps -p "$pid" -o command= 2>/dev/null | grep -Eq "genkart\.|src/index\.ts"; then kill "$pid"; else echo "skip $f: pid $pid is not a genkart process"; fi
+      if ps -p "$pid" -o command= 2>/dev/null | grep -Eq "genkart\.|src/index\.ts|dist/index\.js"; then kill "$pid"; else echo "skip $f: pid $pid is not a genkart process"; fi
       rm -f "$f"
     done; echo stopped ;;
   status)

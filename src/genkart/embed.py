@@ -44,8 +44,9 @@ class _HFSigLIP:
 
 
 # Exact Hugging Face revisions (commit hashes) of the model files that produced every logged result, read from the local download cache
-# on 2026-10-15. The transformers models are loaded at exactly this revision. open_clip offers no revision argument for hf-hub models,
-# so for those two the hash is documentation only: if a result ever changes, compare the downloaded model's hash with this one first.
+# on 2026-10-15. Every model is loaded at exactly this revision: the transformers ones through `revision=`, the open_clip ones by downloading
+# that snapshot first (huggingface_hub.snapshot_download) and loading it from the folder ("local-dir:"), since open_clip's hf-hub loader has no
+# revision argument. A changed model upstream therefore cannot change a result; a missing revision fails loudly instead.
 REVISIONS = {
     "siglip-base": "41f575766f40e752fdd1383e9565b7f02388c1c4",
     "marqo-fashionsiglip": "c56244cc94f92419e8369fa71efdaf403b124ce8",
@@ -78,13 +79,44 @@ def _load_transformers(name: str):
     return model.to(device).eval(), preprocess, tokenizer, device
 
 
-def load(name: str):
+# What open_clip reads from a model folder (the Marqo repo also holds ONNX exports and a second copy of the weights, which are not downloaded).
+# The tokenizer then comes from the model's own folder instead of the hf_tokenizer_name repo (timm/ViT-B-16-SigLIP) its config names; the two
+# tokenizers gave identical token ids on all 852 logged scale queries plus the built-in examples (checked 2026-10-18).
+OPEN_CLIP_FILES = ["open_clip_config.json", "open_clip_model.safetensors", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "spiece.model"]
+
+
+def snapshot(name: str) -> str:
+    """Local folder of the model files at exactly REVISIONS[name] (downloaded once; with HF_HUB_OFFLINE=1 read from the cache only).
+    The cache names each snapshot folder after its commit hash, which is checked, so a wrong folder can never be used silently."""
+    import pathlib
+
+    from huggingface_hub import snapshot_download
+
+    path = snapshot_download(repo_of(name), revision=REVISIONS[name], allow_patterns=OPEN_CLIP_FILES)
+    if pathlib.Path(path).name != REVISIONS[name]:
+        raise RuntimeError(f"{repo_of(name)}: got snapshot {pathlib.Path(path).name}, expected revision {REVISIONS[name]}")
+    missing = [f for f in ("open_clip_config.json", "open_clip_model.safetensors") if not (pathlib.Path(path) / f).is_file()]
+    if missing:      # open_clip only warns when a folder has no weights, then builds a model with random ones: every search would be noise
+        raise RuntimeError(f"{repo_of(name)}@{REVISIONS[name]}: {', '.join(missing)} not in the snapshot")
+    return path
+
+
+def load(name: str, text_only: bool = False):
+    """(model, preprocess, tokenizer, device). text_only=True (open_clip models): the image half of the model is dropped right after loading,
+    for a process that only ever encodes text (the web server; the photo vectors were all computed ahead of time). encode_images then fails
+    loudly instead of quietly using memory nobody needs. The transformers models ignore it (none of them is served)."""
     if MODELS[name].startswith("transformers:"):
         return _load_transformers(name)
+    import gc
+
     import open_clip
 
-    model, _, preprocess = open_clip.create_model_and_transforms(MODELS[name])
-    tokenizer = open_clip.get_tokenizer(MODELS[name])
+    spec = f"local-dir:{snapshot(name)}"                 # the pinned revision, not whatever the hub's main branch holds today
+    model, _, preprocess = open_clip.create_model_and_transforms(spec)
+    tokenizer = open_clip.get_tokenizer(spec)
+    if text_only and hasattr(model, "visual"):
+        model.visual = None                               # the image tower's weights go with it (about half the model)
+        gc.collect()
     device = pick_device()
     return model.to(device).eval(), preprocess, tokenizer, device
 

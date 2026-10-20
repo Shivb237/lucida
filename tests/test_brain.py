@@ -114,8 +114,9 @@ def test_the_call_limit_stops_runaway_use(monkeypatch):
     try:
         chain = BrainChain(Brain("openai", "m", KEY, f"http://127.0.0.1:{srv.server_port}/v1"))
         chain.invoke({"system": "s", "request": "r"})
-        with pytest.raises(BrainError, match="already made 1 calls"):
+        with pytest.raises(BrainError, match="already made 1 calls") as e:
             chain.invoke({"system": "s", "request": "r"})
+        assert "GENKART_BYO_MAX_CALLS" in str(e.value) and "whoever runs it" in str(e.value)      # says who can lift it: not the visitor
     finally:
         srv.shutdown()
 
@@ -183,11 +184,18 @@ def test_anthropic_path_forces_the_plan_tool_and_hands_the_key_only_to_the_sdk(m
             seen["call"] = kw
             return type("R", (), {"content": [Block]})
 
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            seen["closed"] = True
+
     monkeypatch.setattr(anthropic, "Anthropic", FakeAnthropic)
     plan = BrainChain(Brain("anthropic", "claude-test", KEY)).invoke({"system": "SYS", "request": "red kurta"})
     assert plan.gender == "men" and seen["key"] == KEY and seen["kw"]["max_retries"] == 0
     assert seen["call"]["tool_choice"] == {"type": "tool", "name": "answer"} and seen["call"]["max_tokens"] == 600
     assert KEY not in json.dumps(seen["call"], default=str)           # not in anything sent as the message
+    assert seen["closed"] is True                                     # the client (and its connection pool) is closed after the one call
 
 
 def test_anthropic_failure_does_not_leak_the_key(monkeypatch):
@@ -199,6 +207,12 @@ def test_anthropic_failure_does_not_leak_the_key(monkeypatch):
 
         def create(self, **kw):
             raise RuntimeError(f"401 invalid x-api-key {KEY}")
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
 
     monkeypatch.setattr(anthropic, "Anthropic", Boom)
     with pytest.raises(BrainError) as e:

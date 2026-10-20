@@ -1,0 +1,4 @@
+# The ingest worker on the router host (genkart.ingest_worker with SQS and S3). Versions from the main lock (-c); compiled by scripts/lock.sh.
+-c ../requirements.txt
+boto3
+httpx

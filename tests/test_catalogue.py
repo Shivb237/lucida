@@ -91,3 +91,58 @@ def test_childrens_items_are_their_own_group():
     assert title_gender("Men's Patent Oxford Shoes") == "Men"
     assert not title_gender_ok("Little Boy's Patent Oxford Shoes", "men") and title_gender_ok("Little Boy's Patent Oxford Shoes", "boys")
     assert title_gender_ok("Toddler Raincoat", "girls") and not title_gender_ok("Toddler Raincoat", "women")
+
+
+def test_the_same_item_in_two_specialist_catalogues_is_shown_once_when_clusters_are_shared():
+    """Catalogue.load uses one four-catalogue clustering, so equal cluster ids in two catalogues mean one item; tests' own labels do not, so it is opt-in."""
+    q = _unit([[0, 0, 1]])[0]
+
+    def cat(shared):
+        general = _src("marqo", [10**12 + 1], [[1, 0, 0]], ["Scarf"], [""])
+        kaggle = Source("kaggle", VectorIndex([1, 2], _unit([[0, 0, 1], [0, 0.3, 1]]), {}), ["Kurta", "Saree"], np.array(["", ""]), Clusters([1, 2], np.array([50, 51])))
+        mens = Source("mens3", VectorIndex([300001], _unit([[0, 0.01, 1]]), {}), ["Kurta (another shop)"], np.array([""]), Clusters([300001], np.array([50])))
+        return Catalogue(general, [kaggle, mens], shared_clusters=shared)
+
+    assert [h.product_id for h in cat(True).search(q, k=3, theta=0.5)] == [1, 2]
+    assert [h.product_id for h in cat(False).search(q, k=3, theta=0.5)] == [1, 300001, 2]
+    assert [h.product_id for h in cat(True).search_all(q, k=3)] == [1, 2, 10**12 + 1]
+
+
+def test_data_paths_do_not_depend_on_the_current_folder(tmp_path, monkeypatch):
+    from genkart import catalogue
+
+    monkeypatch.chdir(tmp_path)
+    assert catalogue.ROOT == __import__("pathlib").Path(__file__).resolve().parents[1]
+    labels, skip = catalogue.marqo_clean([5, 6], folder=tmp_path / "none")      # no cluster files: every product is its own cluster
+    assert len(set(labels.tolist())) == 2 and skip == frozenset()
+
+
+def test_top_rows_is_exactly_the_full_sort_on_random_data_with_many_ties():
+    """The partial sort (partition to a cutoff, keep every row at or above it, sort only those) gives the same rows in the same order as the
+    full lexsort it replaced, including ties at the cutoff, scores masked to -9, m past the end and NaN."""
+    from genkart.catalogue import top_rows
+
+    rng = np.random.default_rng(3)
+    for trial in range(300):
+        n = int(rng.integers(1, 400))
+        scores = (rng.integers(0, 12, n) / 10).astype(np.float32) if trial % 2 else rng.normal(size=n).astype(np.float32)   # odd trials: heavy ties
+        if trial % 3 == 0:
+            scores = np.where(rng.random(n) < 0.5, scores, -9).astype(np.float32)
+        if trial % 50 == 7:
+            scores[rng.integers(0, n)] = np.nan
+        tie = rng.permutation(n * 5)[:n].astype(np.uint64)
+        for m in (0, 1, 3, int(rng.integers(1, n + 1)), n, n + 5, 300):
+            assert top_rows(scores, tie, m).tolist() == np.lexsort((tie, -scores))[:m].tolist(), (trial, m)
+
+
+def test_a_catalogue_search_with_ties_returns_what_the_full_sort_returned():
+    from genkart.catalogue import top_rows
+
+    ids = list(range(1000, 1600))
+    vecs = np.tile(np.array([[1.0, 0.0], [0.0, 1.0], [0.7, 0.7]], dtype=np.float32), (200, 1))      # 200 exact copies of each of three vectors
+    src = Source("marqo", VectorIndex(ids, vecs, {}), [f"t{i}" for i in ids], np.array([""] * 600), Clusters(ids, np.arange(600)))
+    q = np.array([1.0, 0.0], dtype=np.float32)
+    hits = src.search(q, k=250, gender=None)
+    full = np.lexsort((src._ids_u64, -(vecs @ q)))[:300]
+    assert [h.product_id for h in hits] == [ids[i] for i in full][:250]
+    assert top_rows(vecs @ q, src._ids_u64, 300).tolist() == full.tolist()

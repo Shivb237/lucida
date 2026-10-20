@@ -1,9 +1,9 @@
 """Build the project map for the Docs page: web/src/content/map.json.
 
 Every code file gets its own one-line description (the first docstring or comment line in the file, so the map cannot drift from the code)
-and the files it imports, taken from a local code graph: a JSON file with "nodes" and "links" (an import graph of this repo, built on this computer) whose path is the one argument.
-The finished map is committed (web/src/content/map.json); this script only needs re-running when files are added.
-Usage: .venv/bin/python scripts/build_map.py path/to/graph.json
+and the files it imports: read from each file's own import lines, or (optional argument) taken from a local code graph JSON with "nodes" and "links".
+The finished map is committed (web/src/content/map.json); re-run it when files are added or removed.
+Usage: python3 scripts/build_map.py [path/to/graph.json]
 """
 import ast
 import json
@@ -59,17 +59,59 @@ def describe(path: pathlib.Path) -> str:
     return ""
 
 
+TS_IMPORT = re.compile(r"""(?:^|\n)\s*(?:import|export)\b[^'"]*?from\s+['"](\.{1,2}/[^'"]+)['"]|import\(\s*['"](\.{1,2}/[^'"]+)['"]\s*\)""")
+
+
+def scan_imports() -> dict[str, set[str]]:
+    """No graph given: read each file's own import lines (Python `genkart.x`, TypeScript relative paths). Same answer, no extra tool."""
+    imports: dict[str, set[str]] = {}
+    for _, _, _, prefix, exts in AREAS:
+        for p in (ROOT / prefix).rglob("*"):
+            if not p.is_file() or p.suffix not in exts or "node_modules" in p.parts:
+                continue
+            rel, text, found = str(p.relative_to(ROOT)), p.read_text(errors="ignore"), set()
+            if p.suffix == ".py":
+                try:
+                    tree = ast.parse(text)
+                except SyntaxError:
+                    continue
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Import):
+                        names = [a.name for a in node.names]
+                    elif isinstance(node, ast.ImportFrom):   # `from genkart.x import y`, `from genkart import x`, and relative `from .x import y` inside the package
+                        mod = "genkart" + ("." + node.module if node.module else "") if node.level and rel.startswith("src/genkart/") else node.module or ""
+                        names = [mod] + ([f"{mod}.{a.name}" for a in node.names] if mod == "genkart" else [])
+                    else:
+                        continue
+                    for n in names:
+                        if n.startswith("genkart.") and (ROOT / "src/genkart" / f"{n.split('.')[1]}.py").is_file():
+                            found.add(f"src/genkart/{n.split('.')[1]}.py")
+            else:
+                for m in TS_IMPORT.finditer(text):
+                    target = (p.parent / (m.group(1) or m.group(2))).resolve()
+                    for cand in (target, target.with_suffix(".ts"), target.with_suffix(".tsx"), target / "index.ts"):
+                        if cand.is_file():
+                            found.add(str(cand.relative_to(ROOT)))
+                            break
+            found.discard(rel)
+            if found:
+                imports[rel] = found
+    return imports
+
+
 def main() -> None:
     if GRAPH is None:
-        raise SystemExit("usage: build_map.py path/to/graph.json")
-    graph = json.load(open(GRAPH))
-    node_file = {n["id"]: n.get("source_file") for n in graph["nodes"]}
-    imports: dict[str, set[str]] = {}
-    for l in graph["links"]:
-        if l.get("relation") in ("imports", "imports_from"):
-            a, b = node_file.get(l["source"]), node_file.get(l["target"])
-            if a and b and a != b:
-                imports.setdefault(a, set()).add(b)
+        imports = scan_imports()
+        graph = {"nodes": [None] * len({f for e in imports.items() for f in [e[0], *e[1]]}), "links": [None] * sum(len(v) for v in imports.values())}
+    else:
+        graph = json.load(open(GRAPH))
+        node_file = {n["id"]: n.get("source_file") for n in graph["nodes"]}
+        imports = {}
+        for l in graph["links"]:
+            if l.get("relation") in ("imports", "imports_from"):
+                a, b = node_file.get(l["source"]), node_file.get(l["target"])
+                if a and b and a != b:
+                    imports.setdefault(a, set()).add(b)
     areas = []
     for aid, title, what, prefix, exts in AREAS:
         files = []

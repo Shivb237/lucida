@@ -1,4 +1,5 @@
-"""Thumbnails of the Kaggle, Myntra and men's-western photos for the hosted Lab image: data/images-space/<product id>.jpg (longest side 400 px).
+"""Thumbnails of the Kaggle, Myntra and men's-western photos for the hosted Lab image: <output folder>/<product id>.jpg (longest side 400 px;
+scripts/make_space.sh passes space-build/data/images).
 The Marqo photos are fetched by the image build itself (scripts/space_fetch_photos.py). Ids are disjoint across catalogues, so one flat folder works.
 Reads the four search indexes for the product ids and src/genkart/catalogue.py:image_path for where each original photo is on this computer.
 Usage: python scripts/make_space_photos.py <output folder>      (about 67,000 photos; a few minutes)

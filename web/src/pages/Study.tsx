@@ -2,13 +2,14 @@
 // Steps: consent -> 20 searches (one rating each; for a random half the AI drawing is shown beside the products) -> thanks, with a code to delete the answers.
 // Nothing personal is asked or stored. Answers go to the server one at a time, and one that cannot be saved is kept and retried, never silently lost.
 import { useEffect, useRef, useState } from 'react'
+import { randomId } from '../api'
 import type { Hit } from '../trace'
 import { Picture, SourceChip } from '../components/Sheet'
 
 type Item = { query_id: string; query: string; drawing: string; hits: Hit[] }
 type Phase = 'loading' | 'off' | 'consent' | 'rating' | 'done' | 'error'
 
-const uuid = () => crypto.randomUUID()
+const uuid = randomId
 const shuffle = <T,>(a: T[]) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]] } return b }
 
 async function post(path: string, body: unknown): Promise<void> {
@@ -30,6 +31,7 @@ export function StudyPage() {
   const [code] = useState(uuid)                 // a random code made once in this browser: the only thing that ties answers together
   const shownAt = useRef(0)
   const pending = useRef<Record<string, unknown>[]>([])      // answers not yet saved: retried before the next one
+  const inFlight = useRef(false)                             // a second click before the first answer is sent does nothing (no double answers)
 
   useEffect(() => {
     let alive = true
@@ -44,30 +46,37 @@ export function StudyPage() {
   }, [])
 
   const begin = () => {
+    if (inFlight.current) return
+    inFlight.current = true
     setBusy(true); setMsg(null)
     post('/api/study/consent', { participant: code, consent_version: version }).then(() => {
       const arms = shuffle([...Array(Math.ceil(items.length / 2)).fill('with'), ...Array(Math.floor(items.length / 2)).fill('without')]) as ('with' | 'without')[]
       setOrder(shuffle(items).map((item, i) => ({ item, arm: arms[i] })))
       setAt(0); shownAt.current = performance.now(); setPhase('rating')
-    }).catch((e: Error) => setMsg(e.message)).finally(() => setBusy(false))
+    }).catch((e: Error) => setMsg(e.message)).finally(() => { inFlight.current = false; setBusy(false) })
   }
 
   const rate = async (rating: number) => {
+    if (inFlight.current) return
+    inFlight.current = true
     const cur = order[at]
+    pending.current = pending.current.filter((a) => a.query_id !== cur.item.query_id)     // a retry replaces the unsaved answer, never adds a second one
     pending.current.push({ participant: code, consent_version: version, query_id: cur.item.query_id, arm: cur.arm, rating, position: at, seconds: (performance.now() - shownAt.current) / 1000 })
     setBusy(true); setMsg(null)
     try {
       while (pending.current.length) { await post('/api/study/answer', pending.current[0]); pending.current.shift() }      // oldest first; a failure leaves the rest queued
     } catch (e) {
-      setMsg(`${(e as Error).message} Your answer is kept: press a rating again to retry.`); setBusy(false); return
+      setMsg(`${(e as Error).message} Your answer is kept: press a rating again to retry.`); setBusy(false); inFlight.current = false; return
     }
-    setBusy(false)
+    setBusy(false); inFlight.current = false
     if (at + 1 >= order.length) { setPhase('done') } else { setAt(at + 1); shownAt.current = performance.now() }
   }
 
   const withdraw = (who: string) => {
+    if (inFlight.current) return
+    inFlight.current = true
     setBusy(true); setMsg(null)
-    post('/api/study/withdraw', { participant: who.trim().toLowerCase() }).then(() => setWithdrawn(who.trim())).catch((e: Error) => setMsg(e.message)).finally(() => setBusy(false))
+    post('/api/study/withdraw', { participant: who.trim().toLowerCase() }).then(() => setWithdrawn(who.trim())).catch((e: Error) => setMsg(e.message)).finally(() => { inFlight.current = false; setBusy(false) })
   }
 
   const cur = order[at]
@@ -76,7 +85,7 @@ export function StudyPage() {
       <h1 className="voice" style={{ fontSize: 'clamp(34px, 5vw, 56px)', lineHeight: 1.08, margin: '40px 0 12px' }}>A short study: does a drawing help?</h1>
       {phase === 'loading' && <p role="status">Loading the study…</p>}
       {phase === 'off' && <p>The study is not running on this server.</p>}
-      {phase === 'error' && <p role="alert" className="study-err">{msg}</p>}
+      {phase === 'error' && <p role="alert" className="err-line"><span className="tile cross" aria-hidden="true" />{msg}</p>}
 
       {phase === 'consent' && (
         <section aria-label="Consent" className="study-card">
@@ -90,7 +99,7 @@ export function StudyPage() {
           </ul>
           <label className="study-check"><input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> I am 18 or older and I agree to take part.</label>
           <p><button type="button" className="btn-expose" disabled={!agree || busy} onClick={begin}>{busy ? 'Starting…' : 'Start the study'}</button></p>
-          {msg && <p role="alert" className="study-err">{msg}</p>}
+          {msg && <p role="alert" className="err-line"><span className="tile cross" aria-hidden="true" />{msg}</p>}
           <details className="study-withdraw">
             <summary>I already took part and want my answers deleted</summary>
             <p><label>Your code <input value={withdrawCode} onChange={(e) => setWithdrawCode(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autoComplete="off" spellCheck={false} /></label>{' '}
@@ -126,7 +135,7 @@ export function StudyPage() {
             {[1, 2, 3, 4, 5].map((n) => <button key={n} type="button" className="btn-line" onClick={() => rate(n)}>{n}</button>)}
             <span className="study-ends"><span>1 = not at all</span><span>5 = very well</span></span>
           </fieldset>
-          {msg && <p role="alert" className="study-err">{msg}</p>}
+          {msg && <p role="alert" className="err-line"><span className="tile cross" aria-hidden="true" />{msg}</p>}
         </section>
       )}
 

@@ -18,6 +18,37 @@ data/
 
 # Throwaway runs
 runs/smoke*
+# Local-only scratch, failed, or superseded run records. They stay on disk; do not add them to a new public commit.
+runs/aws-cw-test.jsonl
+runs/aws-cw-test2.jsonl
+runs/aws-dash.jsonl
+runs/aws-demo-2026-10-16.jsonl
+runs/aws-healthy.jsonl
+runs/aws-rebuilt.jsonl
+runs/aws-trace.jsonl
+runs/judge-validate.BAD-trial2-freetext.jsonl
+runs/judge-validate.BAD-unparsed-trial.jsonl
+runs/messy_prompts.ABORTED-runaway-loop.jsonl
+runs/m4-heldout.pre-fix.summary.json
+
+# AWS screenshots stay local until their provenance and redaction have been reviewed.
+/web/public/aws/thumbs/
+
+# Private research and local review material: publish only after explicit review.
+/data
+/benchmark/
+/docs/
+/DESIGN.md
+/PRODUCT.md
+/REPORT.md
+/RATING_GUIDE.md
+
+# Local AI-tool instructions and configuration are never project artifacts.
+/.codex/
+/.claude/
+/.agents/
+/AGENTS.md
+/CLAUDE.md
 
 # OS
 .DS_Store

@@ -23,6 +23,8 @@ export const RECORDED = data as unknown as RecordedSet
 export type Pace = 'recorded' | 'fast'
 
 /** The public Viewer has no photos of its own: with VITE_PHOTO_BASE set (the hosted Lab's address) the Marqo ones load from there, the rest stay placeholders. */
+/** A static build (VITE_VIEWER=1) or ?mode=viewer never looks for a server of its own: it replays recorded runs only. */
+export const VIEWER_ONLY = import.meta.env.VITE_VIEWER === '1' || new URLSearchParams(window.location.search).get('mode') === 'viewer'
 export const PHOTO_BASE = ((import.meta.env.VITE_PHOTO_BASE as string | undefined) ?? '').replace(/\/$/, '')
 /** The run the front door plays: one whose every outfit photo can be shown (so the first thing a visitor sees has no sketches); without photos, the old default. */
 export function bestRun(): RecordedRun {
