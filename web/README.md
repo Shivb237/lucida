@@ -15,13 +15,13 @@ The Lucida site: React 19, Vite 8 and TypeScript. One page frame, hash routes, n
 
 ```sh
 npm ci
-npm run dev        # http://localhost:5173, proxies /api to the server on :8000
+npm run dev        # http://localhost:5173, proxies /api to the server on :7860 (set GENKART_API to override)
 npm run lint       # oxlint
 npm run build      # type check, then the production build in dist/
 npm run preview    # serve dist/ locally
 ```
 
-The server is the Python app in `../src/genkart` (see the repository README).
+The server is the Python app in `../src/genkart` (see the repository README). Start it with `bash ../space/start.sh` (port 7860) or directly: `.venv/bin/uvicorn genkart.server:app --app-dir src --port 7860`.
 
 ## Environment variables
 

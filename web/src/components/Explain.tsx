@@ -6,8 +6,15 @@ import { STEPS, type StageId, type StepState } from '../trace'
 export type Steps = Record<StageId, StepState>
 const f = (n: number, d = 1) => n.toFixed(d)
 
-const LIVE: Partial<Record<StageId, (who: string) => { title: string; body: string }>> = {
-  understand: (who) => ({ title: 'Waiting for your AI provider', body: `${who} is reading your sentence. Providers usually answer within a few seconds. I wait up to about a minute, then search your sentence as typed. You can stop waiting any time.` }),
+const LIVE: Partial<Record<StageId, (who: string, seconds: number) => { title: string; body: string }>> = {
+  understand: (who, seconds) => ({
+    title: 'Waiting for your AI provider',
+    body: `${who} is reading your sentence. Providers usually answer within a few seconds. I wait up to about a minute, then search your sentence as typed. You can stop waiting any time.${
+      seconds > 12
+        ? ' If the wait is unusually long, check your internet connection and that your provider is reachable.'
+        : ''
+    }`,
+  }),
   expand: () => ({ title: 'Opening the clothes map', body: 'This step opens the map of how clothes and occasions go together. The first search after the server wakes up can take much longer than later ones.' }),
   search: () => ({ title: 'Matching products', body: 'Your words are being matched against about 100,000 product photos. The first search after the server wakes up also loads the search model.' }),
 }
@@ -18,7 +25,7 @@ export function LiveWhy({ steps, startedAt, now, who, onStop }: { steps: Steps; 
   const seconds = cur && startedAt[cur.id] != null ? Math.max(0, (now - startedAt[cur.id]!) / 1000) : 0
   const make = cur && LIVE[cur.id]
   if (!cur || !make || seconds < 2) return null
-  const t = make(who)
+  const t = make(who, seconds)
   return (
     <div className="why-live">
       <svg className="why-arrow" aria-hidden="true" viewBox="0 0 60 44" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 5">

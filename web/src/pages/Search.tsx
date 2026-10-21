@@ -9,6 +9,7 @@ import { ComposePanel, GraphSheet, LiveStrip, PlanCard, RecordTable, SearchPanel
 import { CostPanel, type Resources } from '../components/CostPanel'
 import { CompareCard, type Plain } from '../components/CompareCard'
 import { Hero, Learned, SearchBoard, type BoardHit } from '../components/Hero'
+import { FollowUp } from '../components/FollowUp'
 import { LiveWhy } from '../components/Explain'
 import { ContactSheet, Print, type Mode } from '../components/Sheet'
 import { Sentence } from '../components/Sentence'
@@ -22,6 +23,224 @@ import { fmt, openModelDialog, scrollToId } from '../ui'
 
 // "Search again, toward what you liked" only shows after a live run, so it loads then
 const RefinePanel = lazy(() => import('../components/Refine').then((m) => ({ default: m.RefinePanel })))
+
+type LiveSnapshot = {
+  shown: string; retrievalQuery: string; steps: Record<StageId, StepState>; liked: Set<string>; plainLive: { q: string; value: Plain | null } | null
+  resources: Resources | null; rid: string; t0: number | null; endAt: number | null; now: number; startedAt: Partial<Record<StageId, number>>; conversation: string[]; intent: IntentState
+}
+
+type IntentPart = { key: string; text: string }
+type IntentState = { original: string; active: IntentPart[]; superseded: string[]; latest: string }
+
+const MAX_QUERY_CHARS = 300
+const colours = ['black', 'white', 'ivory', 'cream', 'beige', 'tan', 'khaki', 'camel', 'nude', 'brown', 'grey', 'gray', 'red', 'orange', 'yellow', 'green', 'blue', 'teal', 'turquoise', 'purple', 'pink', 'maroon', 'burgundy', 'lavender', 'violet', 'navy', 'olive', 'mustard', 'rust', 'gold', 'silver']
+// Mirrors checks.py _KIND_WORDS; kept broad so updateIntent recognises garment changes in follow-up instructions.
+// After retrievalText() normalises the user's text (sari→saree, t-shirt normalisation, etc.) these singular forms match well.
+const garments = [
+  // dresses / full garments
+  'dress', 'gown', 'jumpsuit', 'saree', 'sari', 'lehenga', 'anarkali',
+  // Indian tops
+  'kurta', 'kurti',
+  // western tops
+  'shirt', 't-shirt', 'tee', 'top', 'blouse',
+  // bottoms – western
+  'skirt', 'trousers', 'pants', 'jeans', 'shorts', 'legging',
+  // bottoms – Indian
+  'churidar', 'salwar', 'palazzo', 'dhoti', 'pyjama', 'pajama',
+  // outerwear
+  'jacket', 'blazer', 'suit', 'cardigan', 'shrug', 'waistcoat', 'coat',
+  // footwear
+  'shoes', 'heels', 'sneakers', 'sandals', 'boots', 'loafers', 'slippers', 'flats', 'jutti', 'mojari',
+]
+const formality = ['casual', 'formal', 'smart casual', 'dressy', 'relaxed']
+
+// Maps every garment word to its outfit-slot category, mirroring checks.py _KIND_WORDS.
+// Active parts use "piece:<category>" keys so each outfit role is tracked independently,
+// allowing "make the top green" to leave the bottom unchanged, and "add a coat" to be
+// purely additive without touching an existing top or dress slot.
+const garmentCategory: Record<string, string> = {
+  dress: 'dress', gown: 'dress', jumpsuit: 'dress', saree: 'dress', sari: 'dress', lehenga: 'dress', anarkali: 'dress',
+  kurta: 'top', kurti: 'top', shirt: 'top', top: 'top', blouse: 'top', tee: 'top',
+  skirt: 'bottom', trousers: 'bottom', pants: 'bottom', jeans: 'bottom', shorts: 'bottom', legging: 'bottom',
+  churidar: 'bottom', salwar: 'bottom', palazzo: 'bottom', dhoti: 'bottom', pyjama: 'bottom', pajama: 'bottom',
+  jacket: 'outerwear', blazer: 'outerwear', suit: 'outerwear', cardigan: 'outerwear', shrug: 'outerwear', waistcoat: 'outerwear', coat: 'outerwear',
+  shoes: 'footwear', heels: 'footwear', sneakers: 'footwear', sandals: 'footwear', boots: 'footwear',
+  loafers: 'footwear', slippers: 'footwear', flats: 'footwear', jutti: 'footwear', mojari: 'footwear',
+}
+
+/** Every garment word that occupies a given outfit slot — used for same-category superseding. */
+const garmentsInCategory = (cat: string): string[] => garments.filter((g) => garmentCategory[g] === cat)
+
+const cleanText = (text: string) => text.replace(/\s+/g, ' ').replace(/\s+([,.;:])/g, '$1').trim()
+// These are catalogue/search spellings, not inferred attributes; the visible conversation keeps the shopper's wording.
+const retrievalText = (text: string) => cleanText(text.replace(/\bsaris?\b/gi, 'saree').replace(/\bt[ -]?shirts?\b/gi, 't-shirt').replace(/\btrousers?\b/gi, 'trousers'))
+const hasWord = (text: string, word: string) => new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(text)
+const wordsIn = (text: string, words: string[]) => words.filter((word) => hasWord(text, word))
+const removeText = (text: string, removed: string[]) => cleanText(removed.reduce((value, term) => term ? value.replace(new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), ' ') : value, text))
+
+/**
+ * Update the intent state for one follow-up instruction.
+ *
+ * Active parts use typed slot keys:
+ *   piece:<category>  – an outfit piece (top / bottom / dress / outerwear / footwear).
+ *                       When the instruction names a colour alongside a garment, the colour
+ *                       is embedded in the piece text ("green saree", "blue shirt").
+ *   colour            – a global colour constraint when no specific piece is targeted.
+ *   formality         – a formality modifier (casual, formal, …).
+ *   modifier          – an unkeyed vibe instruction; replaces itself each turn to stay compact.
+ *
+ * Same-category rule: a new garment ALWAYS supersedes any earlier garment in the same outfit
+ * slot — both in active and in the original query — regardless of whether the user said
+ * "change" or "show me". This means "show me a saree" silently does not preserve a dress.
+ * Cross-category instructions are additive by default: "add a coat" does not touch the top.
+ *
+ * Undo, stream-recovery, and the 300-char limit are unchanged; standaloneQuery is intact.
+ */
+const updateIntent = (intent: IntentState, instruction: string): IntentState => {
+  const latest = cleanText(instruction)
+
+  // ── Explicit removal: "without X" / "no X" / "not X" / "remove X" / "drop X" ────────
+  const removal = latest.match(/^(?:without|no|not|remove|drop)\s+(?:the\s+)?(.+)$/i)
+  if (removal?.[1]) {
+    const removed = cleanText(removal[1])
+    const active = intent.active.flatMap((part) => {
+      const text = removeText(part.text, [removed, ...wordsIn(removed, colours), ...wordsIn(removed, garments), ...wordsIn(removed, formality)])
+      return text ? [{ ...part, text }] : []
+    })
+    return { original: intent.original, active, superseded: [...new Set([...intent.superseded, removed].filter(Boolean))], latest }
+  }
+
+  // ── Parse structured patterns ────────────────────────────────────────────────────────
+  // "change X to Y" / "switch X to Y" / "replace X with Y"
+  const replacement = latest.match(/^(?:change|switch|replace)\s+(?:the\s+)?(.+?)\s+(?:to|for|with)\s+(.+)$/i)
+  // "blue instead of green" colour shorthand
+  const colourSwap = latest.match(new RegExp(`\\b(${colours.join('|')})\\b\\s+instead of\\s+(?:the\\s+)?(${colours.join('|')})\\b`, 'i'))
+
+  const oldText  = replacement?.[1] ? cleanText(replacement[1]) : colourSwap?.[2] ?? ''
+  const newText  = replacement?.[2] ? cleanText(replacement[2]) : colourSwap?.[1] ?? latest
+  const newColours   = wordsIn(newText, colours)
+  const newGarments  = wordsIn(newText, garments)
+  const newFormality = wordsIn(newText, formality)
+  // Garment explicitly named as the OLD item ("replace the jeans with a saree" → 'jeans')
+  const oldGarment = wordsIn(oldText, garments)[0]
+
+  let nextActive = [...intent.active]
+  const sup = new Set<string>(intent.superseded)   // accumulates; Set deduplicates automatically
+
+  // ── Group new garments by outfit-slot category ───────────────────────────────────────
+  const slotMap = new Map<string, string[]>()   // category → garment words in this instruction
+  for (const g of newGarments) {
+    const cat = garmentCategory[g]
+    if (cat) { const a = slotMap.get(cat) ?? []; a.push(g); slotMap.set(cat, a) }
+  }
+
+  // ── Retire the explicitly named old item's slot ──────────────────────────────────────
+  // Handles cross-category replacement ("replace the jeans with a saree"):
+  // the bottom slot is retired even though the saree occupies the dress slot.
+  if (oldGarment) {
+    const oldCat = garmentCategory[oldGarment]
+    if (oldCat) {
+      const existSlot = nextActive.find((p) => p.key === `piece:${oldCat}`)
+      if (existSlot) { sup.add(existSlot.text); nextActive = nextActive.filter((p) => p.key !== `piece:${oldCat}`) }
+      for (const g of wordsIn(intent.original, garmentsInCategory(oldCat))) sup.add(g)
+      for (const c of wordsIn(oldText, colours)) sup.add(c)
+    }
+  }
+
+  // ── Process each garment slot ────────────────────────────────────────────────────────
+  if (slotMap.size > 0) {
+    // Retire the global colour key when this instruction embeds a colour in the piece text
+    if (newColours.length > 0) {
+      const existColour = nextActive.find((p) => p.key === 'colour')
+      if (existColour) { sup.add(existColour.text); nextActive = nextActive.filter((p) => p.key !== 'colour') }
+    }
+
+    for (const [cat, catGarments] of slotMap) {
+      // Same-category rule: retire any earlier same-slot active part
+      const existSlot = nextActive.find((p) => p.key === `piece:${cat}`)
+      if (existSlot) { sup.add(existSlot.text); nextActive = nextActive.filter((p) => p.key !== `piece:${cat}`) }
+      // Same-category rule: retire same-slot garment words from the original query
+      for (const g of wordsIn(intent.original, garmentsInCategory(cat))) sup.add(g)
+      // Supersede the original's colour only when it unambiguously belonged to this slot:
+      // original has exactly one garment AND that garment is the same category as the new piece
+      if (newColours.length > 0) {
+        const origGarments = garments.filter((g) => hasWord(intent.original, g))
+        if (origGarments.length === 1 && garmentCategory[origGarments[0]] === cat) {
+          for (const c of wordsIn(intent.original, colours)) sup.add(c)
+        } else {
+          // Multi-garment original: only retire colours explicitly named in the old reference
+          for (const c of wordsIn(oldText, colours)) sup.add(c)
+        }
+      }
+      // Compose: embed colour(s) with garment in a single piece search phrase
+      nextActive.push({ key: `piece:${cat}`, text: cleanText([...newColours, ...catGarments].join(' ')) })
+    }
+
+  // ── Colour-only change (no garment named in this instruction) ────────────────────────
+  } else if (newColours.length > 0) {
+    // Retire the global colour key regardless of which path handles the colour
+    const existColour = nextActive.find((p) => p.key === 'colour')
+    if (existColour) { sup.add(existColour.text); nextActive = nextActive.filter((p) => p.key !== 'colour') }
+
+    const activePieces = nextActive.filter((p) => p.key.startsWith('piece:'))
+
+    if (oldGarment && garmentCategory[oldGarment]) {
+      // Attribute change on an explicitly named piece ("change the top colour to blue", "make the dress green")
+      const tgt = garmentCategory[oldGarment]!
+      const existSlot = nextActive.find((p) => p.key === `piece:${tgt}`)
+      if (existSlot) {
+        // Replace the embedded colour inside the existing piece text
+        const oldEmbedded = wordsIn(existSlot.text, colours)
+        for (const c of oldEmbedded) sup.add(c)
+        nextActive = nextActive.filter((p) => p.key !== `piece:${tgt}`)
+        nextActive.push({ key: `piece:${tgt}`, text: cleanText(`${newColours.join(' ')} ${removeText(existSlot.text, oldEmbedded)}`) })
+      } else {
+        // Piece not yet in active; create it from the named garment + new colour
+        nextActive.push({ key: `piece:${tgt}`, text: cleanText(`${newColours.join(' ')} ${oldGarment}`) })
+        for (const g of wordsIn(intent.original, garmentsInCategory(tgt))) sup.add(g)
+      }
+      for (const c of wordsIn(oldText, colours)) sup.add(c)
+
+    } else if (activePieces.length === 1) {
+      // Unambiguous: update the single active piece's embedded colour
+      const [p] = activePieces
+      const oldEmbedded = wordsIn(p.text, colours)
+      for (const c of oldEmbedded) sup.add(c)
+      for (const c of wordsIn(intent.original, colours)) sup.add(c)
+      nextActive = nextActive.filter((x) => x.key !== p.key)
+      nextActive.push({ key: p.key, text: cleanText(`${newColours.join(' ')} ${removeText(p.text, oldEmbedded)}`) })
+
+    } else {
+      // Multiple active pieces or no active pieces: apply as a global colour constraint
+      for (const c of wordsIn(intent.original, colours)) sup.add(c)
+      nextActive.push({ key: 'colour', text: newColours.join(' ') })
+    }
+  }
+
+  // ── Formality change ─────────────────────────────────────────────────────────────────
+  if (newFormality.length > 0) {
+    const existFmt = nextActive.find((p) => p.key === 'formality')
+    if (existFmt) { sup.add(existFmt.text); nextActive = nextActive.filter((p) => p.key !== 'formality') }
+    for (const f of wordsIn(intent.original, formality)) sup.add(f)
+    nextActive.push({ key: 'formality', text: newFormality.join(' ') })
+  }
+
+  // ── Unkeyed modifier: replaces itself each turn to keep the query compact ─────────────
+  if (newColours.length === 0 && slotMap.size === 0 && newFormality.length === 0) {
+    nextActive = nextActive.filter((p) => p.key !== 'modifier')
+    nextActive.push({ key: 'modifier', text: latest })
+  }
+
+  return { original: intent.original, active: nextActive, superseded: [...sup].filter(Boolean), latest }
+}
+
+/** Build a standalone query from the current intent. Concatenates the original (minus
+ *  superseded terms) with each active part's text. Returns null when the result would
+ *  exceed the 300-character backend limit rather than silently truncating a constraint. */
+const standaloneQuery = (intent: IntentState): string | null => {
+  const query = cleanText([removeText(intent.original, intent.superseded), ...intent.active.map((part) => part.text)].filter(Boolean).join('; '))
+  return query && query.length <= MAX_QUERY_CHARS ? query : null
+}
 
 /** Move focus to the result's heading without a scroll jump (the page scrolls there on its own), so keyboard and screen reader users land on the outfit. */
 const focusResult = () => window.setTimeout(() => document.getElementById('result-h')?.focus({ preventScroll: true }), 140)
@@ -44,6 +263,10 @@ function Notice({ id, style, children }: { id: string; style?: React.CSSProperti
 export function SearchPage({ health, viewer, brain }: { health: Health | null | undefined; viewer: boolean; brain: BrainSetting }) {
   const [query, setQuery] = useState('')
   const [shown, setShown] = useState('')
+  const [retrievalQuery, setRetrievalQuery] = useState('')
+  const [conversation, setConversation] = useState<string[]>([])
+  const [intent, setIntent] = useState<IntentState>({ original: '', active: [], superseded: [], latest: '' })
+  const [history, setHistory] = useState<LiveSnapshot[]>([])
   const [mode, setMode] = useState<Mode>('idle')
   const [steps, setSteps] = useState<Record<StageId, StepState>>(emptySteps)
   const [running, setRunning] = useState(false)
@@ -69,6 +292,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const [ready, setReady] = useState<Ready | null>(null)      // what the server is still loading (GET /api/ready); null: not asked or no answer
   const stop = useRef<(() => void) | null>(null)
   const paired = useRef('')                                   // one id for a live search and its paired plain search
+  const activeRun = useRef(0)                                 // ignores a late event from a stopped or superseded stream
 
   useEffect(() => { if (health) getExamples().then(setExamples) }, [health])
   // the Lab asks the server whether it is still loading, every 2 s until it is ready: no guessing "the first search loads it"
@@ -126,60 +350,92 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
 
   useEffect(() => {
     if (mode !== 'live' || running || steps.request.status === 'waiting') return
-    if (!health?.hosted) fetch('/api/resources').then((r) => (r.ok ? r.json() : null)).then(setResources).catch(() => setResources(null))
+    const run = activeRun.current
+    if (!health?.hosted) fetch('/api/resources').then((r) => (r.ok ? r.json() : null)).then((v) => { if (run === activeRun.current) setResources(v) }).catch(() => { if (run === activeRun.current) setResources(null) })
     if (steps.request.status === 'done') {
-      const asked = shown
-      plainSearch(asked, paired.current).then((v) => setPlainLive({ q: asked, value: v }))
+      const asked = retrievalQuery
+      const pair = paired.current
+      plainSearch(asked, pair).then((v) => { if (run === activeRun.current && pair === paired.current) setPlainLive({ q: asked, value: v }) })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, running])
 
-  const apply = (e: TraceEvent) => {
+  const apply = (e: TraceEvent, run?: number) => {
+    if (run !== undefined && run !== activeRun.current) return
     setRid(e.request_id)
     if (e.kind === 'end') { setEndAt(performance.now()); setRunning(false); return }
     if (e.status === 'started') setStartedAt((s) => ({ ...s, [e.stage]: performance.now() }))
     setSteps((s) => ({ ...s, [e.stage]: { status: e.status, seconds: e.seconds, payload: e.payload } }))
     const name = STEPS.find((s) => s.id === e.stage)?.name
-    if (e.status === 'done') setAnnounce(`${name} finished in ${fmt(e.seconds, 2)} seconds`)
+    if (e.status === 'done') setAnnounce(e.seconds != null && e.seconds > 0 ? `${name} finished in ${fmt(e.seconds, 2)} seconds` : `${name} finished`)
     if (e.status === 'failed') setAnnounce(`${name} failed`)
   }
 
   // Stop and Skip unmount themselves (they show only while a run is running): if one held focus, focus goes to the result heading, not to the page top
   const keepFocus = () => { const a = document.activeElement; if (a instanceof HTMLElement && a.closest('.run-controls, .live-strip, .why-live')) focusResult() }
-  const stopRun = () => { keepFocus(); stop.current?.(); stop.current = null; setRunning(false); setEndAt(performance.now()) }   // a way out of any run, however long it is taking
+  const stopRun = () => { keepFocus(); activeRun.current += 1; stop.current?.(); stop.current = null; setRunning(false); setEndAt(performance.now()) }   // a way out of any run, however long it is taking
   const skipToResult = () => {                                                                  // a replay at its recorded pace takes seconds: show the end now
     if (!picked_run) return
     keepFocus()
     stop.current?.()
-    withPhotos(picked_run, photos.current).events.forEach(apply)
+    const run = activeRun.current
+    withPhotos(picked_run, photos.current).events.forEach((e) => apply(e, run))
   }
 
-  const start = (m: Mode, q: string) => {
+  const start = (m: Mode, q: string, display = q) => {
     stop.current?.()
+    const run = ++activeRun.current
     const t = performance.now()
     // the result (the outfit) is the scroll target, not step 1
     window.setTimeout(() => scrollToId('result'), 120)
     setPlainLive(null); setLiked(new Set())
-    setMode(m); setShown(q); setSteps(emptySteps()); setRunning(true); setError(null); setT0(t); setNow(t); setEndAt(null); setStartedAt({})
+    setMode(m); setShown(display); setRetrievalQuery(q); setSteps(emptySteps()); setRunning(true); setError(null); setT0(t); setNow(t); setEndAt(null); setStartedAt({})
+    return run
   }
   const runLive = (q: string) => {
     if (!q.trim()) { setHint(true); document.getElementById('req')?.focus(); return }      // nothing typed: say what to write, send nothing
     setHint(false)
     if (!health) { setError('The server is not running, so nothing was searched. Start it, or watch a recorded run.'); return }
+    const original = cleanText(q)
+    const retrieval = retrievalText(original)
+    if (retrieval.length > MAX_QUERY_CHARS) { setError(`Searches can be at most ${MAX_QUERY_CHARS} characters. Shorten this request without dropping a needed constraint.`); return }
+    const nextIntent: IntentState = { original: retrieval, active: [], superseded: [], latest: retrieval }
+    setConversation([q.trim()]); setIntent(nextIntent); setHistory([])
     paired.current = pairedRunId()       // made before start(): if it threw after, the page would show a run that never began
-    start('live', q.trim())
-    stop.current = streamSearch(q.trim(), apply, (msg) => { setError(msg); setRunning(false) }, brain, paired.current)
+    const run = start('live', retrieval, original)
+    stop.current = streamSearch(retrieval, (e) => apply(e, run), (msg) => { if (run === activeRun.current) { setError(msg); setRunning(false); setEndAt(performance.now()) } }, brain, paired.current)
+  }
+  const restore = (snapshot: LiveSnapshot) => {
+    setShown(snapshot.shown); setRetrievalQuery(snapshot.retrievalQuery); setSteps(snapshot.steps); setLiked(snapshot.liked); setPlainLive(snapshot.plainLive)
+    setResources(snapshot.resources); setRid(snapshot.rid); setT0(snapshot.t0); setEndAt(snapshot.endAt); setNow(snapshot.now); setStartedAt(snapshot.startedAt); setConversation(snapshot.conversation); setIntent(snapshot.intent); setMode('live'); setRunning(false)
+  }
+  const followUp = (turn: string) => {
+    if (running || !conversation.length) return
+    const nextIntent = updateIntent(intent, retrievalText(turn))
+    const nextQuery = standaloneQuery(nextIntent)
+    if (!nextQuery) { setError(`This refinement cannot fit within the ${MAX_QUERY_CHARS}-character search limit without dropping a constraint.`); return }
+    const snapshot: LiveSnapshot = { shown, retrievalQuery, steps, liked, plainLive, resources, rid, t0, endAt, now, startedAt, conversation, intent }
+    setHistory((all) => [...all, snapshot]); setConversation((all) => [...all, turn.trim()]); setIntent(nextIntent)
+    paired.current = pairedRunId()
+    const run = start('live', nextQuery, turn)
+    stop.current = streamSearch(nextQuery, (e) => apply(e, run), (msg) => { if (run === activeRun.current) { restore(snapshot); setError(msg); setEndAt(performance.now()) } }, brain, paired.current)
+  }
+  const undoFollowUp = () => {
+    const snapshot = history.at(-1)
+    if (!snapshot || running) return
+    stop.current?.(); stop.current = null
+    setHistory((all) => all.slice(0, -1)); restore(snapshot); setError(null)
   }
   const runRecorded = (run: RecordedRun) => {
     setPickedRun(run)
     if (wakeHostedLab()) setPhotoWait(true)
-    start('recorded', run.prompt)
+    const runId = start('recorded', run.prompt)
     focusResult()
-    stop.current = playRecorded(withPhotos(run, photos.current), pace, apply, () => setRunning(false))
+    stop.current = playRecorded(withPhotos(run, photos.current), pace, (e) => apply(e, runId), () => { if (runId === activeRun.current) setRunning(false) })
   }
   const runDemo = () => {
-    start('demo', DEMO_QUERY)
-    stop.current = playDemo(apply, () => setRunning(false))
+    const run = start('demo', DEMO_QUERY)
+    stop.current = playDemo((e) => apply(e, run), () => { if (run === activeRun.current) setRunning(false) })
   }
 
   const clock: Clock = { t0, endAt: endAt ?? (running ? null : now || null), now, startedAt }
@@ -195,6 +451,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const req = steps.request.payload as RequestPayload
   const refused = steps.request.status === 'failed' && req.refused === true
   const finished = !running && mode !== 'idle'
+  const hasFollowUp = live && ((finished && !!search && !refused) || history.length > 0)
   const examplesShown = examples.length ? examples : RECORDED.runs.map((r) => r.prompt)
   const hosted = !!health?.hosted
   const reader = hosted && brain.kind === 'local' ? 'no AI here, so your words are searched as typed' : describe(brain)
@@ -215,7 +472,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   }
 
   return (
-    <main id="main" tabIndex={-1} className="wrap search-page">
+    <main id="main" tabIndex={-1} className={`wrap search-page${hasFollowUp ? ' has-follow-up' : ''}`}>
       {mode !== 'idle' && <LiveStrip steps={steps} mode={mode} clock={clock} running={running} onStop={stopRun} />}
       <p className="sr-only" aria-live="polite">{announce}</p>
 
@@ -317,13 +574,42 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
                   <span className="mono" style={{ display: 'block', marginTop: 6, fontSize: 13 }}>reason: {req.category}</span>
                 </div>
               ) : items.length > 0 ? (
-                <Print items={items} alreadyHas={outfit?.already_has ?? []} mode={mode} />
+                <>
+                  <Print items={items} alreadyHas={outfit?.already_has ?? []} mode={mode} />
+                  {/* Surface any gender-inference note from the search step so users understand
+                      why they received women's or men's products when no gender was stated. */}
+                  {live && (() => {
+                    const genderNote = search?.checks?.find((c) => c.includes('kept to') && c.includes("'s products"))
+                    return genderNote ? (
+                      <p className="lg dim" style={{ marginTop: 10 }} role="status">{genderNote}</p>
+                    ) : null
+                  })()}</>
               ) : steps.outfit.status === 'skipped' ? (
-                <p className="err-line"><span className="tile not_built" aria-hidden="true" />No outfit could be built: {(steps.outfit.payload as OutfitPayload).reason}.</p>
+                <>
+                  <p className="err-line"><span className="tile not_built" aria-hidden="true" />No outfit could be built: {(steps.outfit.payload as OutfitPayload).reason}.</p>
+                  {search?.checks && search.checks.length > 0 && (
+                    <div className="checks-note" role="note" aria-label="Why the outfit could not be built">
+                      <strong>Why no outfit was built</strong> — these checks on the search results explain the gap:
+                      <ul>{search.checks.map((c, i) => <li key={i}>{c}</li>)}</ul>
+                      <p style={{ margin: '8px 0 0', color: 'var(--z4)', fontSize: 15 }}>
+                        If the item you requested is not in the catalogue under that name, try a broader term — for example "ethnic dress" instead of a specific garment name — or use the Follow Up box below to refine.
+                      </p>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="result-wait"><span className={`tile ${running ? 'hatch started' : 'waiting'}`} aria-hidden="true" />{running ? 'Your outfit appears here when the six steps finish.' : 'This run stopped before an outfit was picked.'}</div>
               )}
               {!refused && req.note && <p className="lg dim" style={{ marginTop: 14 }}>{req.note}</p>}
+              {/* When the AI reading step was unavailable the whole sentence was searched as typed,
+                  which may miss garments the user named explicitly. Show this only for live runs. */}
+              {live && under?.fell_back && !refused && (
+                <p className="lg dim" style={{ marginTop: 12 }} role="status">
+                  The AI reading step was unavailable — your words were searched as typed.
+                  {' '}If you asked for multiple garments, some may be missing.
+                  {hasFollowUp && ' Use the Follow Up box below to add a missing piece.'}
+                </p>
+              )}
             </section>
 
             {!refused && (
@@ -339,7 +625,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
               <section className="worth" aria-labelledby="worth-h">
                 <h2 id="worth-h" className="sec-h">Was each step worth it?</h2>
                 <CompareCard
-                  plain={recorded ? withPhotos(picked_run!, photos.current).plain ?? null : plainLive && plainLive.q === shown ? plainLive.value : 'loading'}
+                  plain={recorded ? withPhotos(picked_run!, photos.current).plain ?? null : plainLive && plainLive.q === retrievalQuery ? plainLive.value : 'loading'}
                   outfit={items} planSeconds={STEPS.reduce((n, s) => n + (steps[s.id].status === 'done' ? steps[s.id].seconds ?? 0 : 0), 0)}
                   ratings={recorded && picked_run ? { plain: picked_run.author_rating_of_raw_search, plan: picked_run.author_rating_of_plan } : undefined} />
                 {steps.search.status === 'done' && (live || RECORDED.resources) && (
@@ -351,11 +637,13 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
               </section>
             )}
             {live && finished && search && search.pieces.length > 0 && (
-              <Suspense fallback={null}><RefinePanel query={shown} liked={liked} gender={plan?.gender ?? null} /></Suspense>
+              <Suspense fallback={null}><RefinePanel query={retrievalQuery} liked={liked} gender={plan?.gender ?? null} /></Suspense>
             )}
           </div>
         </div>
       )}
+
+      {hasFollowUp && <FollowUp busy={running} canUndo={history.length > 0} onFollow={followUp} onUndo={undoFollowUp} />}
 
     </main>
   )

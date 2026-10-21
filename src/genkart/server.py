@@ -44,7 +44,7 @@ from starlette.datastructures import MutableHeaders
 from genkart import guard, resources, study
 from genkart.brain import Brain, BrainError, list_models, parse as parse_brain, scrub
 from genkart.catalogue import ALLOWED, Hit
-from genkart.understand import Piece, Plan
+from genkart.understand import Piece, Plan, finish as _finish_plan
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OLLAMA = "http://127.0.0.1:11434"
@@ -62,9 +62,21 @@ PAIRED_S = 30.0      # a search and its plain comparison carrying the same x-pai
 log = logging.getLogger("genkart.server")
 
 
-def log_failure(rid: str, stage: str, exc: BaseException) -> None:
-    """One JSON line per failed step: which request, which stage, which kind of error. The message itself is not logged (it may hold a key)."""
-    log.warning(json.dumps({"event": "step_failed", "request_id": rid, "stage": stage, "error_type": type(exc).__name__}))
+def log_failure(rid: str, stage: str, exc: BaseException, *, latency_s: float | None = None, recovery: str = "failed") -> None:
+    """One privacy-safe JSON line per failed step: never include the request, provider key, or exception message."""
+    category = "timeout" if isinstance(exc, (TimeoutError, httpx.TimeoutException)) else "provider" if stage == "understand" else "pipeline"
+    event = {"event": "step_failed", "request_id": rid, "stage": stage, "category": category, "error_type": type(exc).__name__, "recovery": recovery}
+    if latency_s is not None:
+        event["latency_ms"] = round(latency_s * 1000)
+    log.warning(json.dumps(event))
+
+
+def log_fallback(rid: str, stage: str, category: str, latency_s: float | None, recovery: str) -> None:
+    """Record an expected degraded path without retaining the provider's message or the shopper's request."""
+    event = {"event": "step_failed", "request_id": rid, "stage": stage, "category": category, "error_type": "unusable_response", "recovery": recovery}
+    if latency_s is not None:
+        event["latency_ms"] = round(latency_s * 1000)
+    log.warning(json.dumps(event))
 
 
 # ---------------------------------------------------------------------------------------------------------------- services
@@ -335,12 +347,33 @@ def _hit_json(h: Hit) -> dict:
     return {"id": str(h.product_id), "source": h.source, "title": h.title, "score": round(h.score, 4), "image": f"/api/image/{h.product_id}"}
 
 
+# Mirrors the suit/co-ord additions to checks._KIND_WORDS["dress"]. Used in _reason to
+# flag the rare case where a complete-outfit product is placed in a top/bottom slot because
+# it was the only available candidate after better-matched products were set aside.
+_COMPLETE_OUTFIT_RE = re.compile(r"\b(?:co-?ords?(?:\s+sets?)?|suits?)\b", re.IGNORECASE)
+
+
 def _reason(piece: Piece, pick: Hit, best: Hit, colour_name: str | None, notes: list[str]) -> list[str]:
     out = []
     if pick.product_id == best.product_id:
         out.append(f"Closest match to \"{piece.search_text}\" (score {pick.score:.3f}, {pick.source}).")
     else:
         out.append(f"Chosen over the closest match (score {best.score:.3f}) so the colours go together; this one scores {pick.score:.3f}.")
+    # Honest caveat: when the product has no catalogue title its garment type and other
+    # attributes cannot be verified from metadata — only inferred from the photo embedding.
+    if not pick.title:
+        out.append("No product title in this collection: garment type and attributes are unverified (inferred from the photo only).")
+    # Warn when a product that appears to be a complete outfit or set (suit, co-ord) ends up
+    # in a single top/bottom slot as a last resort (all preferred single-garment products
+    # were set aside). This combination would be incoherent; the note makes the limitation
+    # visible so the user can refine the search.
+    if pick.title and piece.kind in ("top", "bottom") and _COMPLETE_OUTFIT_RE.search(pick.title):
+        out.append(
+            f"This product's title suggests it may be a complete outfit or set rather than a "
+            f"single {piece.kind}. It was the closest available match after products with "
+            "explicit single-garment titles were set aside. The outfit shown may be incoherent; "
+            "try rephrasing the search to request individual garments."
+        )
     # graph notes read "graph: 'old' -> 'new' (...)" (a replaced piece) or "graph: added role 'garment' (...)" (a filled role, gender prefix not included)
     core = re.sub(r"^(men's|women's|boys'|girls'|unisex)\s+", "", piece.search_text)
     out.extend(f"Knowledge graph: {n.removeprefix('graph: ')}" for n in notes
@@ -385,10 +418,15 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
 
     # 2. understand
     yield step("understand", "started")
+    # Start the timer immediately so all paths — including the Ollama-down and no-BYO
+    # fallbacks — have a real latency to report.  The Ollama-up check in the elif below
+    # makes a network call with a 1 s timeout, so the measured time there is meaningful.
+    t_understand = time.perf_counter()
     fallback_reason = None
     if device is not None:
         if device.error or device.plan is None:
-            plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
+            log_fallback(rid, "understand", "provider", device.seconds, "whole_sentence_search")
+            plan = _finish_plan(Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)]), q)
             yield step("understand", "failed", device.seconds, error=f"your device model ({device.label}) gave no usable plan: {device.error or 'no answer'}. The whole sentence is searched as it is.",
                        plan=plan.model_dump(), fell_back=True)
         else:
@@ -404,23 +442,22 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
             yield step("understand", "done", device.seconds, plan=plan.model_dump(), model=f"{device.label} (on your device)", fell_back=fell_back)
     elif brain is not None and svc.understand_byo is None:
         fallback_reason = "this server cannot use your own model"
-        plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
-        yield step("understand", "failed", error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True)
+        plan = _finish_plan(Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)]), q)
+        yield step("understand", "failed", time.perf_counter() - t_understand, error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True)
     elif brain is None and not svc.ollama_up():
         fallback_reason = ("this hosted Lab has no built-in AI model (add your own API key in the mode menu to use one)" if os.environ.get("GENKART_HOSTED") == "1"
                            else (svc.ollama_why() if svc.ollama_why else "") or f"Ollama is not running or {MODEL} is not installed")
-        plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
-        yield step("understand", "failed", error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True)
+        plan = _finish_plan(Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)]), q)
+        yield step("understand", "failed", time.perf_counter() - t_understand, error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True)
     else:
-        t_understand = time.perf_counter()
         try:
             res = svc.understand_byo(q, brain) if brain else svc.understand(q)
             plan, secs, usage = res[0], res[1], (res[2] if len(res) > 2 else None)
             fell_back = len(plan.pieces) == 1 and plan.pieces[0].kind == "other" and plan.pieces[0].search_text == q and not plan.notes
             yield step("understand", "done", secs, plan=plan.model_dump(), model=brain.label() if brain else MODEL, fell_back=fell_back, **({"usage": usage} if usage else {}))
         except Exception as e:
-            log_failure(rid, "understand", e)
-            plan = Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)])
+            log_failure(rid, "understand", e, latency_s=time.perf_counter() - t_understand, recovery="whole_sentence_search")
+            plan = _finish_plan(Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)]), q)
             msg = str(e) if isinstance(e, BrainError) else f"{type(e).__name__}: {e}"      # a brain error is already plain words; the class name is noise to a visitor
             yield step("understand", "failed", time.perf_counter() - t_understand, error=(scrub(msg, brain.key) if brain else msg) + (". The whole sentence is searched as it is." if brain else ""), plan=plan.model_dump(), fell_back=True)
 
@@ -435,8 +472,9 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
     except LookupError as e:
         yield step("expand", "skipped", reason=str(e))
     except Exception as e:
-        log_failure(rid, "expand", e)
-        yield step("expand", "failed", error=f"{type(e).__name__}: {e}")
+        latency = time.perf_counter() - t0
+        log_failure(rid, "expand", e, latency_s=latency, recovery="continue_without_graph")
+        yield step("expand", "failed", latency, error=f"{type(e).__name__}: {e}")
 
     # 4. search, one query per piece (at most MAX_PIECES: every piece is a search, and the outfit step's work grows with each one)
     yield step("search", "started")
@@ -444,12 +482,13 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
     if len(pieces) > MAX_PIECES:
         plan.notes.append(f"limit: {len(pieces) - MAX_PIECES} piece(s) past the first {MAX_PIECES} were not searched")
         pieces = pieces[:MAX_PIECES]
+    t_search = time.perf_counter()
     try:
         found = svc.search([p.search_text for p in pieces], plan.gender if plan.gender != "unknown" else None, 2 * k)     # twice as many, so the checks below have room
         if len(found.pieces) != len(pieces) or len(found.seconds) != len(pieces):
             raise ValueError(f"search answered {len(found.pieces)} pieces for {len(pieces)} asked")
     except Exception as e:
-        log_failure(rid, "search", e)
+        log_failure(rid, "search", e, latency_s=time.perf_counter() - t_search, recovery="no_results")
         yield step("search", "failed", error=f"{type(e).__name__}: {e}")
         yield step("compose", "skipped", reason="nothing was found")
         yield step("outfit", "skipped", reason="nothing was found")
@@ -467,7 +506,7 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
             colour_memo[key] = svc.colour(h, kind)
         return colour_memo[key]
 
-    candidates, check_notes = checks.apply([p.kind for p in pieces], [p.colours for p in pieces], found.pieces, plan.gender, q, colour, k)
+    candidates, check_notes = checks.apply([p.kind for p in pieces], [p.search_text for p in pieces], [p.colours for p in pieces], found.pieces, plan.gender, q, colour, k)
     yield step("search", "done", sum(found.seconds), backend=found.backend, info=found.info, checks=check_notes,
                pieces=[{"kind": p.kind, "text": p.search_text, "seconds": round(s, 4), "hits": [_hit_json(h) for h in hs]}
                        for p, hs, s in zip(pieces, candidates, found.seconds, strict=True)])
@@ -502,7 +541,7 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
                        "colours": [getattr(c, "name", None) for c in colours], "picks": [str(h.product_id) for h in chosen], "exact": coh.exact}
             yield step("compose", "done", time.perf_counter() - t0, **compose)
         except Exception as e:      # the outfit still comes out: the best match of each piece, without the colour step
-            log_failure(rid, "compose", e)
+            log_failure(rid, "compose", e, latency_s=time.perf_counter() - t0, recovery="closest_matches")
             chosen, colours, compose = [c[0] for c in candidates], [None] * len(candidates), None
             yield step("compose", "failed", time.perf_counter() - t0, error=f"{type(e).__name__}: {e}. Each piece's closest match is shown instead.")
 
@@ -916,12 +955,13 @@ def create_app(services: Callable[[], Services] = default_services, root: pathli
 
         def stream() -> Iterator[str]:
             rid = None
+            started = time.perf_counter()
             try:
                 for e in run_pipeline(q.strip(), svc(), brain=brain, device=device):
                     rid = e.get("request_id", rid)
                     yield f"data: {json.dumps(e)}\n\n"
             except Exception as e:  # noqa: BLE001  a bug past the steps' own guards: the page still gets its end event
-                log_failure(rid or "-", "stream", e)
+                log_failure(rid or "-", "stream", e, latency_s=time.perf_counter() - started, recovery="stream_ended")
                 yield f"data: {json.dumps({'kind': 'end', 'request_id': rid, 'error': type(e).__name__})}\n\n"
             finally:
                 release()

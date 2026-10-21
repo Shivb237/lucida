@@ -88,6 +88,8 @@ Request: "diwali party look, ethnic but comfy"
 {"main_query":"comfortable ethnic wear","gender":"unknown","occasion":"diwali party","season":null,"budget_inr":null,"pieces":[{"kind":"top","search_text":"kurta","colours":[]},{"kind":"bottom","search_text":"churidar or pyjama","colours":[]},{"kind":"footwear","search_text":"ethnic juttis","colours":[]}],"already_has":[]}
 Request: "co-ord set for a beach trip with friends"
 {"main_query":"co-ord set","gender":"unknown","occasion":"beach trip","season":null,"budget_inr":null,"pieces":[{"kind":"dress","search_text":"beach co-ord set","colours":[]}],"already_has":[]}
+Request: "kurta and jeans recommendation"
+{"main_query":"kurta with jeans","gender":"unknown","occasion":null,"season":null,"budget_inr":null,"pieces":[{"kind":"top","search_text":"kurta","colours":[]},{"kind":"bottom","search_text":"jeans","colours":[]}],"already_has":[]}
 """
 SYSTEMS = {"v1": SYSTEM_V1, "v2": SYSTEM_V2}
 
@@ -198,6 +200,96 @@ def make_chain(model: str = "qwen3:4b-instruct", temperature: float = 0.0, seed:
     return prompt | llm.with_structured_output(Plan, method="json_schema")
 
 
+# Ownership-phrasing patterns compiled at module level.
+# Applied only when BOTH an ownership phrase AND a compatibility question appear.
+_OWN_PHRASE = re.compile(
+    r"\b(?:i\s+(?:have|own|already\s+have|'?m\s+wearing)|wearing\s+my|i\s+already\s+own)\s+(?:a\s+)?",
+    re.IGNORECASE,
+)
+# A bare "my" signals ownership ONLY when a compatibility question is also present.
+# "my kurta and jeans" (no question) → both requested; not ownership.
+_MY_PREFIX = re.compile(r"\bmy\s+(?:[a-z]+\s+){0,2}", re.IGNORECASE)
+_COMPAT_Q = re.compile(
+    r"\b(?:what|which|suggest|recommend)\b.{0,50}\b(?:go|goes|work|works|match|matches|pair|pairs|suits?|wear)\s+(?:with|for)\b",
+    re.IGNORECASE,
+)
+
+
+def _garments_from_text(text: str) -> "tuple[list[Piece], list[str]] | None":
+    """Deterministic multi-garment recovery for bare fallback plans.
+
+    Returns (pieces, already_has) when two or more distinct non-dress outfit slots are
+    found, or None to keep the whole-sentence fallback unchanged.
+
+    Enhancements over the initial version:
+    - Colour words from checks.COLOUR_FAMILY that appear before each garment in the
+      text are prepended to its search_text ("black kurta", "blue jeans").
+    - When an explicit ownership phrase precedes a garment AND a compatibility question
+      is also present in the query, that garment goes into already_has instead of
+      pieces.  Without the compatibility question "my kurta and jeans" is treated as a
+      request for both garments.
+
+    Conservative rules:
+    - At least two distinct non-dress slots must remain as pieces after ownership removal.
+    - Any dress-category match (saree, lehenga, co-ord …) → return None.
+    """
+    from genkart.checks import _KIND_RE, COLOUR_FAMILY  # type: ignore[attr-defined]
+
+    low = text.lower()
+    colour_keys = set(COLOUR_FAMILY.keys())
+
+    # ── Ownership context ─────────────────────────────────────────────────────
+    has_compat_q = bool(_COMPAT_Q.search(low))
+    own_ends: list[int] = []   # end positions of ownership-prefix spans
+    for m in _OWN_PHRASE.finditer(low):
+        own_ends.append(m.end())
+    if has_compat_q:
+        for m in _MY_PREFIX.finditer(low):
+            own_ends.append(m.end())
+
+    def _is_owned(garment_start: int) -> bool:
+        # garment immediately follows an ownership prefix (allow tiny gap for word boundary)
+        return any(abs(garment_start - oe) <= 3 for oe in own_ends)
+
+    # ── Garment matches ───────────────────────────────────────────────────────
+    raw_hits: list[tuple[int, int, str, str]] = []   # (start, end, slot, word)
+    seen: set[str] = set()
+    for slot in ("top", "bottom", "dress", "outerwear", "footwear", "accessory"):
+        if slot in seen:
+            continue
+        m = _KIND_RE[slot].search(low)
+        if m:
+            raw_hits.append((m.start(), m.end(), slot, m.group(0)))
+            seen.add(slot)
+
+    raw_hits.sort()
+
+    if any(slot == "dress" for _, _, slot, _ in raw_hits):
+        return None   # dress-category = potentially complete outfit; don't split
+
+    # ── Classify hits and build pieces ────────────────────────────────────────
+    pieces_out: list[Piece] = []
+    owned_out: list[str] = []
+    prev_end = 0
+
+    for start, end, slot, word in raw_hits:
+        # Colours in the text segment before this garment
+        segment = low[prev_end:start]
+        colour_words = [w for w in re.findall(r"[a-z]+", segment) if w in colour_keys]
+        search_text = " ".join(colour_words + [word])
+        prev_end = end
+
+        if has_compat_q and _is_owned(start):
+            owned_out.append(search_text)
+        else:
+            pieces_out.append(Piece(kind=slot, search_text=search_text))
+
+    if len(pieces_out) < 2:
+        return None   # not enough pieces to warrant a split
+
+    return pieces_out, owned_out
+
+
 def finish(plan: Plan, text: str) -> Plan:
     """The checks every model's answer goes through, whichever model gave it: keep only what the shopper wrote, add the gender, never return nothing to search."""
     plan = qualify(ground(plan, text), text)
@@ -205,6 +297,28 @@ def finish(plan: Plan, text: str) -> Plan:
         plan.main_query = text
     if not plan.pieces:  # added 2026-10-13 after two empty plans on the held-out prompts: always keep something searchable
         plan.pieces = [Piece(kind="other", search_text=plan.main_query)]
+    # When the plan is still a bare whole-sentence fallback (one kind="other" piece
+    # whose search_text is the full query), try to recover explicit garments from the
+    # text.  Two or more recognised non-dress slots are enough to split; anything
+    # ambiguous (dress-category item, single garment, no garment found) stays as-is.
+    if len(plan.pieces) == 1 and plan.pieces[0].kind == "other":
+        result = _garments_from_text(text)
+        if result:
+            recovered, already_has = result
+            plan.pieces = recovered
+            if already_has:
+                # dedup while preserving order
+                existing = list(plan.already_has)
+                for item in already_has:
+                    if item not in existing:
+                        existing.append(item)
+                plan.already_has = existing
+            plan.notes.append(
+                "garments read from text: "
+                + ", ".join(f"{p.search_text} [{p.kind}]" for p in recovered)
+                + (f"; already owns: {', '.join(already_has)}" if already_has else "")
+                + " (model unavailable — multi-garment recovery)"
+            )
     return plan
 
 

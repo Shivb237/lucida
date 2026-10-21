@@ -19,7 +19,13 @@ from genkart.catalogue import Hit, title_gender
 _KIND_WORDS = {
     "top": r"shirts?|t-?shirts?|tees?|tops?|blouses?|kurtas?|kurtis?|polos?|sweaters?|sweatshirts?|hoodies?|tunics?|jerseys?|tank|camisoles?|henleys?",
     "bottom": r"trousers?|pants?|jeans|shorts|skirts?|leggings|churidars?|pyjamas?|pajamas?|salwars?|palazzos?|dhotis?|chinos|joggers|track ?pants",
-    "dress": r"dress(?:es)?|gowns?|sarees?|saris?|lehengas?|jumpsuits?|anarkalis?",
+    # 'dress' covers both single-piece full garments (saree, lehenga, anarkali) and
+    # multi-piece complete outfits whose contents would conflict with a separate top/bottom:
+    #   suits? — business suit, trouser suit, bathing suit (all dress-slot appropriate)
+    #   co-?ords?(?:\s+sets?)? — co-ord, coord, co-ord set (matching two-piece sets)
+    # Adding these here means fits_kind() returns False for them in top/bottom slots, so
+    # they are not combined with a separate top or bottom that duplicates their contents.
+    "dress": r"dress(?:es)?|gowns?|sarees?|saris?|lehengas?|jumpsuits?|anarkalis?|co-?ords?(?:\s+sets?)?|suits?",
     "outerwear": r"jackets?|coats?|blazers?|cardigans?|shrugs?|waistcoats?|nehru",
     "footwear": r"shoes?|sneakers?|sandals?|boots?|heels|loafers?|oxfords?|slippers?|flip ?flops?|mojaris?|juttis?|flats|trainers",
     "accessory": r"bags?|belts?|watch(?:es)?|scarf|scarves|dupattas?|caps?|hats?|earrings?|necklaces?|bracelets?|sunglasses|ties?|socks",
@@ -27,6 +33,15 @@ _KIND_WORDS = {
 _KIND_RE = {k: re.compile(rf"\b(?:{v})\b", re.IGNORECASE) for k, v in _KIND_WORDS.items()}
 _CHILD = {"Boys", "Girls", "Kids"}
 _CHILD_REQUEST = re.compile(r"\b(boys?|girls?|kids?|child|children|son|daughter|toddler|baby|infant|nephew|niece|\d{1,2}[ -]?(?:year|yr)s?[ -]?old)\b", re.IGNORECASE)
+# These are specific products, not broad slots. A titleless photo can be useful for a general "dress" search, but cannot honestly verify "saree".
+# Only add entries here when the catalogue reliably carries titled products for the garment (saree, lehenga, kurta, and anarkali are all
+# confirmed in the _KIND_WORDS regex, meaning the catalogue recognises them by name in product titles).
+_EXACT_PRODUCT = {
+    "saree": re.compile(r"\b(?:sarees?|saris?)\b", re.IGNORECASE),
+    "lehenga": re.compile(r"\blehengas?\b", re.IGNORECASE),
+    "kurta": re.compile(r"\bkurtas?\b", re.IGNORECASE),
+    "anarkali": re.compile(r"\banarkalis?\b", re.IGNORECASE),
+}
 
 # a named colour -> the photo colour names (genkart.colour.Colour.name) that count as that colour
 COLOUR_FAMILY = {
@@ -49,16 +64,54 @@ def fits_kind(title: str, kind: str) -> bool:
     return not named or kind not in _KIND_RE or kind in named
 
 
-def apply(kinds: list[str], colours: list[list[str]], lists: list[list[Hit]], gender: str, text: str,
+def exact_products(text: str) -> list[tuple[str, re.Pattern]]:
+    """Specific product words that catalogue titles can actually prove; do not invent image labels for the titleless collection."""
+    return [(name, rx) for name, rx in _EXACT_PRODUCT.items() if rx.search(text)]
+
+
+def apply(kinds: list[str], texts: list[str], colours: list[list[str]], lists: list[list[Hit]], gender: str, text: str,
           colour_of: Callable[[Hit, str], object | None], k: int) -> tuple[list[list[Hit]], list[str]]:
     """The checks above on every piece's candidates. Returns the lists to use (at most k each) and one plain sentence per change made."""
     notes: list[str] = []
     out = []
-    for kind, hs in zip(kinds, lists, strict=True):                                   # 1. slot fit
+    for kind, piece_text, hs in zip(kinds, texts, lists, strict=True):                 # 1. slot fit
+        # kind="other" means the planner was unavailable and the whole sentence is the
+        # search text.  Applying exact-product title verification to a full sentence
+        # (e.g. "black kurta and blue jeans") would require every product title to
+        # contain "kurta" — which Marqo's US-store catalogue cannot satisfy — so the
+        # check returns an empty slot and the outfit is skipped without a useful result.
+        # Exact-product verification only makes sense for a purpose-built, single-item
+        # search_text; skip it here and rely on the slot-fit check alone.
+        required = exact_products(piece_text) if kind != "other" else []
+        if required:
+            verified = [h for h in hs if h.title and all(rx.search(h.title) for _, rx in required)]
+            if not verified:
+                names = "/".join(name for name, _ in required)
+                notes.append(f"{kind}: no titled catalogue product verifies the requested {names}; unverified photos were not shown as a match")
+                out.append([])
+                continue
+            if len(verified) < len(hs):
+                notes.append(f"{kind}: set aside {len(hs) - len(verified)} product(s) that do not verify the requested {'/'.join(name for name, _ in required)} in their title")
+            hs = verified
         kept = [h for h in hs if fits_kind(h.title, kind)]
         if kept and len(kept) < len(hs):
-            notes.append(f"{kind}: set aside {len(hs) - len(kept)} product(s) whose title names a different kind of garment")
-        out.append(kept or hs)
+            n_set_aside = len(hs) - len(kept)
+            # Produce a more specific note when the filtered products appear to be complete
+            # outfits or sets (suits, co-ords) placed in a single-garment slot — the common
+            # cause of incoherent combinations like "suit set + separate top".
+            outfit_conflict = kind in ("top", "bottom") and any(
+                "dress" in kinds_named(h.title)
+                for h in hs if h.title and not fits_kind(h.title, kind)
+            )
+            if outfit_conflict:
+                notes.append(
+                    f"{kind}: set aside {n_set_aside} product(s) that appear to be complete "
+                    f"outfits or sets (suit, co-ord) — these belong in the dress slot, not a single {kind} slot"
+                )
+            else:
+                notes.append(f"{kind}: set aside {n_set_aside} product(s) whose title names a different kind of garment")
+        # A title that explicitly names the wrong slot is stronger evidence than its embedding score. Keep titleless products only when there is no contrary title evidence.
+        out.append(kept if kept else ([] if any(kinds_named(h.title) for h in hs) else hs))
     if gender not in ("boys", "girls") and not _CHILD_REQUEST.search(text):          # 2a. no children's items unless asked
         for i, hs in enumerate(out):
             kept = [h for h in hs if title_gender(h.title) not in _CHILD]

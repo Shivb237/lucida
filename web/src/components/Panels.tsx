@@ -129,7 +129,9 @@ export function RecordTable({ steps, mode, rid, clock }: { steps: Steps; mode: s
                 <div className="record-name">{i + 1}. {s.name}</div>
                 <div className="lg dim">{STATUS_WORD[v.status]}</div>
               </div>
-              <div className="mono record-sec">{v.status === 'done' ? fmt(v.seconds, 2) : v.status === 'started' ? <span className="ticking">{fmt(runningFor(clock, s.id), 1)}</span> : '—'}</div>
+              {/* Show measured time for done steps and for failed steps whose duration is known.
+                  Skipped and waiting steps have no meaningful duration so they show —. */}
+              <div className="mono record-sec">{(v.status === 'done' || (v.status === 'failed' && v.seconds != null)) ? fmt(v.seconds, 2) : v.status === 'started' ? <span className="ticking">{fmt(runningFor(clock, s.id), 1)}</span> : '—'}</div>
             </li>
           )
         })}
@@ -150,7 +152,10 @@ export function TimeStrip({ steps, mode, clock }: { steps: Steps; mode: string; 
   const load = search && search.backend === 'in-process' ? (search.info as LocalInfo).load_seconds : undefined
   const bands: { label: string; seconds: number }[] = []
   if (load) bands.push({ label: 'load', seconds: load })
-  STEPS.forEach((s, i) => { const v = steps[s.id]; if (v.status === 'done' && v.seconds) bands.push({ label: String(i + 1), seconds: v.seconds }) })
+  // Use != null (not truthy) so steps with seconds=0.0 (e.g. outfit) are included.
+  // A 0-second band has flex:0 so it is invisible in the strip itself but still named in
+  // the "too thin to label" summary and the aria-label, keeping the time strip complete.
+  STEPS.forEach((s, i) => { const v = steps[s.id]; if (v.status === 'done' && v.seconds != null) bands.push({ label: String(i + 1), seconds: v.seconds }) })
   STEPS.forEach((s, i) => { if (steps[s.id].status === 'started') bands.push({ label: String(i + 1), seconds: Math.max(runningFor(clock, s.id), 0.05) }) })   // the step running now grows as time passes
   const total = bands.reduce((a, b) => a + b.seconds, 0)
   const wall = wallSeconds(steps, mode, clock)

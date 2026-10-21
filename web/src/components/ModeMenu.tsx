@@ -236,6 +236,16 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
                   <button type="button" className="btn-line" disabled={!ready} onClick={submit}>{isDevice ? 'Use my device model' : isKey ? 'Use this model' : 'Use the model on this computer'}</button>
                   {using && <button type="button" className="mp-forget" onClick={() => { onBrain(LOCAL); setDraft(LOCAL) }}>{brain.kind === 'device' ? 'Stop using it' : 'Forget the key'}</button>}
                 </div>
+                {!ready && (() => {
+                  const why =
+                    isKey && draft.key.trim().length < 8 ? 'Paste your API key above first.' :
+                    isKey && !draft.model.trim() ? 'Load your models or type a model name above.' :
+                    isDevice && !/^https?:\/\//.test(draft.baseUrl.trim()) ? 'Enter a valid server address above.' :
+                    isDevice && !draft.model.trim() ? 'Load models or type a model name above.' :
+                    isKey && draft.provider === 'custom' && !/^https?:\/\//.test(draft.baseUrl.trim()) ? 'Enter a server address above.' :
+                    null
+                  return why ? <p className="mp-note" style={{ marginTop: 6, color: 'var(--z3)' }}>{why}</p> : null
+                })()}
                 <p className="mp-now" aria-live="polite">In use now: {describe(brain)}</p>
               </div>
             )}

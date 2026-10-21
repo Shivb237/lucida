@@ -41,7 +41,7 @@ export type StepEvent = {
   seconds: number | null
   payload: Record<string, unknown>
 }
-export type EndEvent = { kind: 'end'; request_id: string }
+export type EndEvent = { kind: 'end'; request_id: string; error?: string }
 export type TraceEvent = StepEvent | EndEvent
 
 export type StepState = { status: Status; seconds: number | null; payload: Record<string, unknown> }

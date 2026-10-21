@@ -110,6 +110,11 @@ function streamPost(body: unknown, onEvent: (e: TraceEvent) => void, onError: (m
           buf = buf.slice(cut + 2)
           if (!line.startsWith('data:')) continue
           const e = JSON.parse(line.slice(5)) as TraceEvent
+          if (e.kind === 'end' && e.error) {
+            ended = true
+            onError('The search ended before it could return a result. Your previous result is still available.')
+            continue
+          }
           onEvent(e)
           if (e.kind === 'end') ended = true
         }

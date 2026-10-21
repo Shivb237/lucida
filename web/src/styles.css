@@ -371,7 +371,12 @@ h2.step-h { margin: 0; }
 /* Docs: the short half is always visible, the long half folds away */
 .story-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .story-more { margin-top: 12px; }
-.story-more summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 600; font-size: 17px; }
+.story-more > summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; }
+.story-more > summary::-webkit-details-marker { display: none; }
+.story-more > summary::marker { display: none; }
+.story-more > summary::before { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); transition: transform 160ms; flex: none; }
+.story-more[open] > summary::before { transform: rotate(45deg); }
+@media (prefers-reduced-motion: reduce) { .story-more > summary::before { transition: none; } }
 .cmd-row { padding: 12px 0; border-bottom: 1px solid var(--z8); }
 .cmd-row code { display: block; font-size: 15px; line-height: 22px; word-break: break-all; margin-bottom: 4px; }
 @media (max-width: 700px) { .story-grid.two { grid-template-columns: 1fr; } }
@@ -460,6 +465,7 @@ h2.step-h { margin: 0; }
 .exact { margin-top: 18px; border-top: 1px solid var(--z6); }
 .exact > summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; }
 .exact > summary::-webkit-details-marker { display: none; }
+.exact > summary::marker { display: none; }
 .exact > summary::before { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); transition: transform 160ms; flex: none; }
 .exact[open] > summary::before { transform: rotate(45deg); }
 .exact-body { padding-bottom: 8px; }
@@ -467,9 +473,14 @@ h2.step-h { margin: 0; }
 @media (max-width: 700px) { .plain { font-size: 18px; line-height: 28px; } }
 .short { margin: 22px 0 0; padding-left: 1.2em; max-width: 70ch; font-size: 18px; line-height: 28px; }
 .short li { margin-top: 8px; }
-/* small fold-away note under a result */
+/* small fold-away note under a result — same chevron treatment as .fold and .exact */
 .cmp-exact { margin-top: 12px; font-size: 16px; line-height: 24px; color: var(--z2a); max-width: 80ch; }
-.cmp-exact > summary { display: flex; align-items: center; font-weight: 600; font-size: 16px; }
+.cmp-exact > summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: 16px; list-style: none; }
+.cmp-exact > summary::-webkit-details-marker { display: none; }
+.cmp-exact > summary::marker { display: none; }
+.cmp-exact > summary::before { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); transition: transform 160ms; flex: none; }
+.cmp-exact[open] > summary::before { transform: rotate(45deg); }
+@media (prefers-reduced-motion: reduce) { .cmp-exact > summary::before { transition: none; } }
 .cmp-exact .cost-note:first-of-type { margin-top: 4px; }
 
 /* the waking-up page (Viewer only) */
@@ -517,7 +528,14 @@ h2.step-h { margin: 0; }
 .study-rate .btn-line { min-width: 56px; font-size: 18px; }
 .study-ends { display: flex; gap: 18px; width: 100%; font-size: 13px; color: var(--z4); }
 .study-code code { font-size: 17px; word-break: break-all; background: var(--z2); color: var(--paper); padding: 8px 10px; display: inline-block; }
-.study-withdraw { margin-top: 20px; } .study-withdraw summary { display: flex; align-items: center; } .study-withdraw input { width: min(100%, 420px); }
+.study-withdraw { margin-top: 20px; }
+.study-withdraw > summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; list-style: none; }
+.study-withdraw > summary::-webkit-details-marker { display: none; }
+.study-withdraw > summary::marker { display: none; }
+.study-withdraw > summary::before { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); transition: transform 160ms; flex: none; }
+.study-withdraw[open] > summary::before { transform: rotate(45deg); }
+@media (prefers-reduced-motion: reduce) { .study-withdraw > summary::before { transition: none; } }
+.study-withdraw input { width: min(100%, 420px); }
 @media (max-width: 700px) { .study-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* "Load my models" in the mode menu */
@@ -528,7 +546,14 @@ h2.step-h { margin: 0; }
 /* the key-safety reassurance in the mode menu */
 .mp-assure { display: flex; gap: 8px; align-items: center; margin: -4px 0 0; font-size: 15px; line-height: 22px; color: var(--z4); }
 .mp-safe { font-size: 16px; line-height: 24px; }
-.mp-safe summary { display: flex; align-items: center; font-weight: 700; }
+/* summary uses display:flex so the browser's default ::marker is hidden; add an explicit
+   chevron to restore the disclosure affordance on all devices including touch. */
+.mp-safe > summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; list-style: none; }
+.mp-safe > summary::-webkit-details-marker { display: none; }
+.mp-safe > summary::marker { display: none; }
+.mp-safe > summary::before { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); transition: transform 160ms; flex: none; }
+.mp-safe[open] > summary::before { transform: rotate(45deg); }
+@media (prefers-reduced-motion: reduce) { .mp-safe > summary::before { transition: none; } }
 .mp-safe ul { margin: 8px 0 0; padding-left: 20px; }
 .mp-safe li { margin-bottom: 6px; }
 
@@ -589,6 +614,7 @@ h2.step-h { margin: 0; }
 
 /* ---------------------------------------------------------------- the Search page, rebuilt: hero, how it works, picker, results, stepper, rail */
 .search-page { padding-top: 40px; padding-bottom: 24px; }
+.search-page.has-follow-up { padding-bottom: 112px; }
 .sec-h { margin: 0; font-size: 26px; line-height: 32px; font-weight: 800; border-bottom: 2px solid var(--ink); padding-bottom: 8px; flex: 1 1 auto; }
 .sec-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 8px; }
 .sec-top .sec-h { border-bottom: 0; padding-bottom: 0; }
@@ -604,6 +630,7 @@ h2.step-h { margin: 0; }
 .fold { margin-top: 28px; border-top: 1px solid var(--z6); }
 .fold > summary { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; list-style: none; }
 .fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::marker { display: none; }
 .fold > summary::before { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); flex: none; }
 .fold[open] > summary::before { transform: rotate(45deg); }
 .fold-body { padding: 4px 0 8px; }
@@ -670,6 +697,18 @@ h2.step-h { margin: 0; }
 .lab-top .notice { margin-bottom: 18px; }
 .lab-status { margin: 12px 0 0; font-size: 17px; line-height: 27px; }
 .lab-status .lg { margin-right: 6px; }
+
+/* The follow-up is a small control rail, not another results card; space at the page end keeps it off the last product. */
+.follow-up { position: fixed; z-index: 4; left: 50%; bottom: 18px; display: flex; align-items: center; gap: 8px; width: min(620px, calc(100vw - 32px)); padding: 8px; background: rgba(248, 248, 245, 0.96); border: 1px solid var(--z7); box-shadow: 0 8px 24px rgba(20, 20, 22, 0.14); transform: translateX(-50%); }
+.follow-up input { min-width: 0; flex: 1; height: 44px; padding: 0 12px; border: 0; background: transparent; color: var(--ink); font: 500 17px var(--sans); }
+.follow-up input:focus { outline: 0; }
+.follow-send, .follow-undo { min-height: 44px; padding: 0 14px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); font-stretch: 87.5%; font-weight: 700; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.follow-undo { background: transparent; color: var(--ink); border-color: var(--z6); }
+.follow-send:hover:not(:disabled) { background: var(--mag-deep); border-color: var(--mag-deep); }
+.follow-undo:hover:not(:disabled) { color: var(--mag); border-color: var(--mag); }
+/* Live character counter — visually quiet, turns magenta in the last 10 characters */
+.follow-count { flex: none; font-size: 12px; color: var(--z5); white-space: nowrap; line-height: 1; padding: 0 2px; }
+.follow-count-limit { color: var(--mag); font-weight: 700; }
 .search-board { margin: 4px 0 0; padding: 20px; min-width: 0; overflow: hidden; transform: rotate(.4deg); }
 .search-board h2 { margin: 0; font-size: 22px; line-height: 28px; }
 .board-images { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
@@ -744,6 +783,7 @@ details[open] > summary .step-name::after { transform: translateY(0) rotate(-135
 }
 @media (max-width: 760px) {
   .search-page { padding-top: 24px; }
+  .search-page.has-follow-up { padding-bottom: 124px; }
   .hero-h { font-size: 38px; }
   .hero-why { font-size: 18px; line-height: 28px; }
   .hero-actions .btn-expose { width: 100%; margin-top: 0; }
@@ -762,6 +802,9 @@ details[open] > summary .step-name::after { transform: translateY(0) rotate(-135
   .steps::before { display: none; }
   .step-body .sentence .w { font-size: 34px; line-height: 42px; }
   .print-row { gap: 28px; }
+  .follow-up { bottom: 10px; gap: 4px; width: calc(100vw - 20px); padding: 6px; }
+  .follow-up input { padding: 0 8px; font-size: 16px; }
+  .follow-send, .follow-undo { padding: 0 10px; }
 }
 
 /* How it works page: the two ways to use the site */

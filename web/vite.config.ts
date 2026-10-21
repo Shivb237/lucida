@@ -792,5 +792,5 @@ function cspMeta(): Plugin {
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',   // GitHub Pages serves a project at /<repo-name>/: the workflow sets VITE_BASE
   plugins: [react(), genkartLocal(), cspMeta()],
-  server: { proxy: { '/api': process.env.GENKART_API ?? 'http://localhost:8000' } },   // GENKART_API points the dev page at a server on another port
+  server: { proxy: { '/api': process.env.GENKART_API ?? 'http://localhost:7860' } },   // GENKART_API overrides the target; space/start.sh runs on :7860 by default
 })

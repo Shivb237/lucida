@@ -35,7 +35,7 @@ export function CostPanel({ steps, mode, brain, live, recorded }: { steps: Recor
   const understandMoney = onDevice ? { text: '$0', note: 'the model runs on your own device' } : byKey
     ? usage && pIn != null && pOut != null && Number.isFinite(pIn) && Number.isFinite(pOut)
       ? { text: usd((usage.input_tokens * pIn + usage.output_tokens * pOut) / 1e6), note: `${usage.input_tokens} in + ${usage.output_tokens} out tokens` }
-      : usage ? { text: 'give a price', note: `${usage.input_tokens} in + ${usage.output_tokens} out tokens; enter your provider's price per million tokens under AI model` } : { text: '—', note: 'the provider sent no token counts' }
+      : usage ? { text: '—', note: `${usage.input_tokens} in + ${usage.output_tokens} out tokens — add your provider's price per million tokens under AI model to see the cost` } : { text: '—', note: 'the provider sent no token counts' }
     : { text: '$0', note: 'the model runs on this computer' }
   const model = res?.ollama[0]
   const understandMem = onDevice ? { text: 'none here', note: 'it runs on your own device' } : byKey ? { text: 'none here', note: 'it runs at your provider' } : model ? { text: mem(model.size_mb), note: `${model.name}, kept in memory by Ollama` } : { text: '—', note: 'Ollama reported no loaded model' }

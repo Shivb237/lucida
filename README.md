@@ -25,7 +25,7 @@ GenKart v1 (Flipkart GRiD 5.0, Level 2, 2023) turned a request into an AI-genera
   .venv/bin/python scripts/build_scale_sample.py
   .venv/bin/python scripts/run_eval.py marqo-fashionsiglip --name scale-marqo-fashionsiglip --sample data/sample_scale --manifest data/raw/MANIFEST_scale.json
   .venv/bin/python scripts/build_index.py marqo-fashionsiglip
-  GENKART_CATALOGUES=marqo .venv/bin/uvicorn genkart.server:app --app-dir src --port 8000   # Marqo catalogue only
+  GENKART_CATALOGUES=marqo .venv/bin/uvicorn genkart.server:app --app-dir src --port 7860   # Marqo catalogue only
   ```
   The sentence-reading step uses a local model (Ollama) or your own API key; the key goes from your browser to the server for that one request and is never stored. The Kaggle, Myntra and men's-western catalogues need their own downloads and index scripts (`scripts/build_kaggle_index.py`, `build_myntra2_index.py`, `build_mens3_index.py`).
 - **Hosted Lab** (Google Cloud Run, all four catalogues): `scripts/make_space.sh` assembles `space-build/` (a Docker app: page and server on one address; the Marqo thumbnails are fetched from their dataset while the image is built and baked in, and the Kaggle, Myntra and men's-western photos are copied in as small thumbnails by `scripts/make_space_photos.py`; 20 searches per minute per visitor). Build it with Cloud Build and deploy it with `gcloud run services replace space/cloudrun.yaml` (the service's settings are kept in that file; steps and post-deploy checks in `space/README.md`). It sleeps when idle: the first request after a quiet spell took about 36 to 48 seconds in three measurements. There is no built-in language model there; a visitor's own API key is the only way to use the sentence-reading step.
@@ -87,8 +87,8 @@ Every run writes `runs/<name>.jsonl` (one line per query) and `runs/<name>.summa
 The page (working name: Lucida) runs one request through the whole pipeline and shows every step with its real time: a local language model (Ollama, `qwen3:4b-instruct`) turns the sentence into a plan, a knowledge graph adds related ideas, each piece is searched over four catalogues, and the pieces are matched into one outfit with colour read from the photos. It needs the data built by the milestone 3 and 5 scripts (catalogues, saved indexes under `data/index/`, Kaggle labels), all local and git-ignored; product photos are never stored in the repository.
 ```bash
 ollama serve                                                      # if it is not already running; model: ollama pull qwen3:4b-instruct
-.venv/bin/uvicorn genkart.server:app --app-dir src --port 8000   # web server (the first search loads the model and catalogues, about 8 s)
-cd web && npm ci && npm run dev                                   # page at http://localhost:5173
+bash space/start.sh                                               # web server on :7860 (PORT= overrides); or uvicorn directly: .venv/bin/uvicorn genkart.server:app --app-dir src --port 7860
+cd web && npm ci && npm run dev                                   # page at http://localhost:5173, proxies /api to :7860
 scripts/cluster.sh start                                          # optional: encoder + 4 shards x 2 replicas + router; the page then searches through it
 ```
 - **Search**: the real pipeline. Steps that cannot run say so (Ollama off, no graph data) and the rest still runs on the raw sentence. "Play the demo replay" shows a finished run with made-up data drawn as technical flats, labelled DEMO DATA.
