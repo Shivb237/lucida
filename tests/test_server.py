@@ -19,8 +19,22 @@ def make_services(plan=None, ollama=True, search_fail=False, expand_missing=Fals
     def search(texts, gender, k):
         if search_fail:
             raise RuntimeError("index missing")
-        per = hits or [[Hit("kaggle", BIG, "Kurta A", 0.14), Hit("marqo", 2, "Kurta B", 0.13)] for _ in texts]
-        return SearchOut("in-process", per[: len(texts)], [0.01] * len(texts), {"encode_seconds": 0.02})
+        if hits is not None:
+            return SearchOut("in-process", hits[: len(texts)], [0.01] * len(texts), {"encode_seconds": 0.02})
+        # Return hits whose titles satisfy exact_products checks and fits_kind slot filtering.
+        # The mock returns title-appropriate hits per piece so checks.apply() doesn't empty a slot.
+        # Uses the closed-over `plan.pieces` to identify the slot for each search text.
+        from genkart.checks import _EXACT_PRODUCT
+        def _hits_for(piece_kind, text):
+            for name, rx in _EXACT_PRODUCT.items():
+                if rx.search(text):
+                    return [Hit("kaggle", BIG, f"Women's Red {name.capitalize()}", 0.14),
+                            Hit("kaggle", 2, f"{name.capitalize()} Set", 0.13)]
+            if piece_kind == "footwear":
+                return [Hit("marqo", 3, "Men's Oxford Shoes", 0.12), Hit("marqo", 4, "Leather Loafers", 0.11)]
+            return [Hit("kaggle", BIG, "Kurta A", 0.14), Hit("marqo", 2, "Kurta B", 0.13)]
+        per = [_hits_for(p.kind, t) for p, t in zip(plan.pieces, texts)]
+        return SearchOut("in-process", per, [0.01] * len(texts), {"encode_seconds": 0.02})
 
     def expand(p, text):
         if expand_missing:
@@ -63,7 +77,7 @@ def test_graph_notes_become_reasons_on_the_picked_piece():
     top = out["items"][0]
     assert any("Knowledge graph" in r and "men's kurta" in r for r in top["reasons"])
     assert any("Colour read from the photo: neutral" in r for r in top["reasons"])  # beige reads as "neutral" in colour.py
-    assert out["items"][1]["pick"]["id"] in {str(BIG), "2"}
+    assert out["items"][1]["pick"]["id"] in {"3", "4"}   # footwear picks from shoe-titled hits
 
 
 def test_ollama_down_says_so_and_still_searches_the_raw_sentence():
