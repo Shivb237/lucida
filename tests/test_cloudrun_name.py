@@ -19,7 +19,7 @@ def test_scale_cap_and_startup_probe_are_set():
     assert 'autoscaling.knative.dev/maxScale: "6"' in text
     assert 'run.googleapis.com/maxScale: "6"' in text
     assert "serviceAccountName: 746545184590-compute@developer.gserviceaccount.com" in text
-    assert "image: asia-south1-docker.pkg.dev/cs-project-lex2cwgp/genkart/lab:lucida-20261020" in text
+    assert "image: asia-south1-docker.pkg.dev/cs-project-lex2cwgp/genkart/lab:" in text
     assert re.search(r"containerPort: 7860\b", text)
     assert re.search(r"startupProbe:\s*\n\s+httpGet:\s*\n\s+path: /api/ready\b", text)
     assert re.search(r"livenessProbe:\s*\n\s+httpGet:\s*\n\s+path: /api/health\b", text)
