@@ -284,8 +284,8 @@ def _garments_from_text(text: str) -> "tuple[list[Piece], list[str]] | None":
         else:
             pieces_out.append(Piece(kind=slot, search_text=search_text))
 
-    if len(pieces_out) < 2:
-        return None   # not enough pieces to warrant a split
+    if len(pieces_out) < 1:
+        return None   # no recoverable piece found; keep whole-sentence fallback
 
     return pieces_out, owned_out
 
