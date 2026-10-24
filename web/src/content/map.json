@@ -1,1618 +1,1626 @@
 {
- "graph": {
-  "nodes": 152,
-  "links": 302
- },
- "areas": [
-  {
-   "id": "pipeline",
-   "title": "Pipeline and services (Python)",
-   "what": "The steps of a search, the web server, and the processes the cluster is made of.",
-   "files": [
-    {
-     "path": "src/genkart/admission.py",
-     "does": "A gate in front of slow work: at most `concurrency` jobs run at once, the rest wait, and a waiting job LEAVES the queue the moment its deadline passes.",
-     "lines": 44,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/brain.py",
-     "does": "Bring your own model: understand the request with the visitor's own API key instead of the local model.",
-     "lines": 226,
-     "uses": [
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "src/genkart/catalogue.py",
-     "does": "One search over several catalogues: a general one and specialists.",
-     "lines": 240,
-     "uses": [
-      "src/genkart/dedup.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "src/genkart/checks.py",
-     "does": "Checks on the search candidates before an outfit is built, each one reported in plain words (nothing is changed silently).",
-     "lines": 87,
-     "uses": [
-      "src/genkart/catalogue.py"
-     ]
-    },
-    {
-     "path": "src/genkart/claude_client.py",
-     "does": "Claude API client with a HARD spend cap, for small paid checks only. The key comes from .env (ANTHROPIC_API_KEY), never printed or logged.",
-     "lines": 98,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/colour.py",
-     "does": "Dominant garment colour from a product photo, and a small colour-harmony rule set.",
-     "lines": 105,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/data.py",
-     "does": "Selecting an apparel sample from Marqo-GS-10M (a mixed-category Google Shopping ranking dataset).",
-     "lines": 51,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/dedup.py",
-     "does": "Duplicate products: the same photo or the same item listed again under another seller's title.",
-     "lines": 65,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/embed.py",
-     "does": "Text and image embeddings through open_clip (weights only: no remote code is executed).",
-     "lines": 143,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/encoder_service.py",
-     "does": "Encoder service: turns request text into the numbers the shards search with (Marqo-FashionSigLIP, the only process holding the model).",
-     "lines": 102,
-     "uses": [
-      "src/genkart/admission.py",
-      "src/genkart/embed.py",
-      "src/genkart/reqlog.py"
-     ]
-    },
-    {
-     "path": "src/genkart/feedback.py",
-     "does": "Personalisation by feedback (the Rocchio method): move the query toward products the shopper liked and away from ones they did not.",
-     "lines": 21,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/graph.py",
-     "does": "A small knowledge graph: occasion -> usage -> (gender, usage) -> garment types, by outfit role.",
-     "lines": 170,
-     "uses": [
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "src/genkart/guard.py",
-     "does": "Content-safety guard for shopper requests. Runs BEFORE the language model and the search.",
-     "lines": 123,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/index.py",
-     "does": "A small persistent vector index: product ids + unit-length embeddings + the facts needed to trust it later.",
-     "lines": 59,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/ingest_worker.py",
-     "does": "Ingest worker: takes new-product messages from the job queue, embeds the photo, adds the product to EVERY replica of its shard.",
-     "lines": 273,
-     "uses": [
-      "src/genkart/jobqueue.py",
-      "src/genkart/sqs_queue.py"
-     ]
-    },
-    {
-     "path": "src/genkart/jobqueue.py",
-     "does": "A small durable job queue with Amazon SQS semantics, backed by SQLite (survives restarts).",
-     "lines": 105,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/metrics.py",
-     "does": "Ranking metrics. Relevance comes from the dataset: each ranked product has a graded score (1-100, higher = better).",
-     "lines": 88,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/outfit.py",
-     "does": "Choose one product per piece so the outfit goes together, not just each piece in isolation.",
-     "lines": 87,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/colour.py"
-     ]
-    },
-    {
-     "path": "src/genkart/recording.py",
-     "does": "Recorded runs for the public Viewer: real pipeline traces made safe to publish.",
-     "lines": 84,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/reqlog.py",
-     "does": "One JSON log line per request, carrying the search's ticket number (the x-request-id header the router sends).",
-     "lines": 28,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/resources.py",
-     "does": "What running Lucida takes from THIS computer, measured now: memory of the web server, of the local model server (Ollama) and of any local",
-     "lines": 40,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/retrieval.py",
-     "does": "Retrieval baselines and brute-force cosine search.",
-     "lines": 50,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/server.py",
-     "does": "Web backend for the UI: one request runs the whole pipeline, and every step is streamed to the page as a small \"trace\" event.",
-     "lines": 1070,
-     "uses": [
-      "src/genkart/brain.py",
-      "src/genkart/catalogue.py",
-      "src/genkart/checks.py",
-      "src/genkart/colour.py",
-      "src/genkart/embed.py",
-      "src/genkart/feedback.py",
-      "src/genkart/graph.py",
-      "src/genkart/guard.py",
-      "src/genkart/outfit.py",
-      "src/genkart/resources.py",
-      "src/genkart/study.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "src/genkart/shard_worker.py",
-     "does": "One shard worker: holds a slice of the products and answers \"your best matches for this vector\".",
-     "lines": 180,
-     "uses": [
-      "src/genkart/reqlog.py",
-      "src/genkart/sharding.py"
-     ]
-    },
-    {
-     "path": "src/genkart/sharding.py",
-     "does": "Sharded search: split all catalogues' products over N shards by product id, scatter every query to all shards, gather and merge.",
-     "lines": 175,
-     "uses": [
-      "src/genkart/catalogue.py"
-     ]
-    },
-    {
-     "path": "src/genkart/sqs_queue.py",
-     "does": "The same queue calls as genkart.jobqueue.JobQueue, on Amazon SQS (FIFO queue + its dead-letter queue). IngestWorker works with either.",
-     "lines": 115,
-     "uses": [
-      "src/genkart/jobqueue.py"
-     ]
-    },
-    {
-     "path": "src/genkart/study.py",
-     "does": "The consented study: does a drawn preview change how people rate the SAME search results?",
-     "lines": 154,
-     "uses": [
-      "src/genkart/studystore.py"
-     ]
-    },
-    {
-     "path": "src/genkart/studystats.py",
-     "does": "What the consented study found: the same search results rated with and without the AI drawing beside them.",
-     "lines": 31,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/studystore.py",
-     "does": "Where the consented study keeps its answers. Two places, one small interface (save / has / delete a document by id, delete_many in one request):",
-     "lines": 133,
-     "uses": []
-    },
-    {
-     "path": "src/genkart/understand.py",
-     "does": "Turn a shopper's free-text request into a structured product search plan with a local language model (LangChain + Ollama).",
-     "lines": 223,
-     "uses": []
-    }
-   ]
+  "graph": {
+    "nodes": 152,
+    "links": 302
   },
-  {
-   "id": "scripts",
-   "title": "Scripts",
-   "what": "One command per experiment, data build, test run or cloud task. Each writes its result to runs/.",
-   "files": [
-    {
-     "path": "scripts/analyze_agreement.py",
-     "does": "How much do two human raters agree on a blind sheet, and do they reach the same headline conclusion?",
-     "lines": 156,
-     "uses": [
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/analyze_duplicates.py",
-     "does": "Do duplicate products (same image, different seller titles) distort our scores and the user's ratings?",
-     "lines": 191,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py",
-      "src/genkart/metrics.py",
-      "src/genkart/retrieval.py"
-     ]
-    },
-    {
-     "path": "scripts/analyze_judge.py",
-     "does": "How far can the LLM judge be trusted? Compares judge ratings with the user's 141 human ratings (test set 4) and writes runs/judge-validate.summary.json.",
-     "lines": 26,
-     "uses": [
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/analyze_judge5.py",
-     "does": "Judge vs human on test set 5 (options the judge never saw before; the judge setup was fixed before these ratings existed).",
-     "lines": 32,
-     "uses": [
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/aws_env.sh",
-     "does": "Sets the login profile and the bucket name so commands never see an empty $B. The bucket name is read from data/aws-bucket.txt (git-ignored,",
-     "lines": 12,
-     "uses": []
-    },
-    {
-     "path": "scripts/aws_loadtest.py",
-     "does": "Load test for the router. Standard library only, Python 3.9+ (the router host's default python3), so it runs on the AWS machine with no installs.",
-     "lines": 106,
-     "uses": []
-    },
-    {
-     "path": "scripts/aws_probe.py",
-     "does": "Send one search per second to the router and print one line each; append every line to a JSONL file (a logged run).",
-     "lines": 27,
-     "uses": []
-    },
-    {
-     "path": "scripts/aws_run.sh",
-     "does": "Run a shell command ON an EC2 machine from your Mac, through SSM Run Command (no black screen, no open port), wait, print what it printed.",
-     "lines": 21,
-     "uses": []
-    },
-    {
-     "path": "scripts/build_index.py",
-     "does": "Save the product-photo embeddings of one model as a persistent VectorIndex (data/index/<name>.npz + .meta.json).",
-     "lines": 36,
-     "uses": [
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/build_kaggle_index.py",
-     "does": "Embed the Kaggle fashion-product-images (small, 60x80 px, India-heavy, local only) with Marqo-FashionSigLIP and save a VectorIndex.",
-     "lines": 31,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/build_map.py",
-     "does": "Build the project map for the Docs page: web/src/content/map.json.",
-     "lines": 138,
-     "uses": []
-    },
-    {
-     "path": "scripts/build_mens3_index.py",
-     "does": "Embed the men's western basics (Kaggle prashantsharma526/e-commerce-mens-clothing-dataset, CC-BY-NC-SA-4.0, local research use only).",
-     "lines": 34,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/build_myntra2_index.py",
-     "does": "Embed the sharp Myntra-derived images (Kaggle hiteshsuthar101/myntra-fashion-product-dataset, local only) with Marqo-FashionSigLIP.",
-     "lines": 30,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/build_pilot_sample.py",
-     "does": "Build the apparel pilot sample from the downloaded Marqo-GS-10M shards.",
-     "lines": 72,
-     "uses": [
-      "src/genkart/data.py"
-     ]
-    },
-    {
-     "path": "scripts/build_scale_sample.py",
-     "does": "Milestone 3: build the scaled apparel sample from the 20 downloaded Marqo-GS-10M shards (pilot 2 + 18 new).",
-     "lines": 69,
-     "uses": [
-      "src/genkart/data.py"
-     ]
-    },
-    {
-     "path": "scripts/build_shards.py",
-     "does": "Split the combined catalogue into N shard files for the shard workers (data/shards/n<N>/shard-<i>.npz).",
-     "lines": 49,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/sharding.py"
-     ]
-    },
-    {
-     "path": "scripts/chaos.py",
-     "does": "Milestone 6, step 3: load, a slow shard, a dead shard, and what partial answers cost. Needs the cluster (scripts/cluster.sh start).",
-     "lines": 195,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/embed.py",
-      "src/genkart/metrics.py",
-      "src/genkart/sharding.py"
-     ]
-    },
-    {
-     "path": "scripts/chaos_replicas.py",
-     "does": "Milestone 6, step 3b: what two replicas per shard change (failover and hedging). Needs the cluster with REPLICAS=2.",
-     "lines": 88,
-     "uses": []
-    },
-    {
-     "path": "scripts/check_myntra2_alignment.py",
-     "does": "Does image file N belong to CSV row N in the sharp Myntra set? Tested numerically, not assumed.",
-     "lines": 42,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/check_router_e2e.py",
-     "does": "The running cluster (encoder + 4 shard workers + TypeScript router) against the single-process search, on real queries.",
-     "lines": 49,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/embed.py"
-     ]
-    },
-    {
-     "path": "scripts/check_sharding.py",
-     "does": "Is sharded search exactly the single-process search? Real catalogues, real queries, 2/4/8 shards.",
-     "lines": 48,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/embed.py",
-      "src/genkart/sharding.py"
-     ]
-    },
-    {
-     "path": "scripts/cluster.sh",
-     "does": "Start / stop / status of the local cluster: encoder (9000), shard workers, router (9100). PIDs in data/run/.",
-     "lines": 42,
-     "uses": []
-    },
-    {
-     "path": "scripts/compare_judged.py",
-     "does": "Paired comparison of Qwen3-plan options (C) vs Claude-plan options (D) on test set 4 using the LLM judge (validated: see runs/judge-validate.summary.json).",
-     "lines": 26,
-     "uses": []
-    },
-    {
-     "path": "scripts/compare_plans.py",
-     "does": "Claude vs local Qwen3 plans on test set 4 (50 prompts): checkable properties only (no relevance labels exist for these plans).",
-     "lines": 31,
-     "uses": []
-    },
-    {
-     "path": "scripts/compare_runs.py",
-     "does": "Print a results table from runs/*.summary.json and paired comparisons between runs (same queries, bootstrap CI of the difference).",
-     "lines": 35,
-     "uses": [
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/data_quality.py",
-     "does": "Data-quality pass over the scaled sample (40,513 products, 852 queries). Done late; it should have come first.",
-     "lines": 90,
-     "uses": [
-      "src/genkart/dedup.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/data_quality_4.py",
-     "does": "Duplicate and quality pass over all four catalogues: Marqo, Kaggle small, sharp Myntra (image-only), men's western basics.",
-     "lines": 148,
-     "uses": [
-      "src/genkart/dedup.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/data_quality_all.py",
-     "does": "Data-quality pass over the COMBINED catalogue: Marqo subset (40,513 products, titles) + Kaggle small (44,419 products, labels).",
-     "lines": 154,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/dedup.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/eval_checks.py",
-     "does": "How often the top picks break a plain rule, before and after the candidate checks (src/genkart/checks.py). A COUNT of rule breaks, not a quality rating.",
-     "lines": 64,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/checks.py",
-      "src/genkart/server.py"
-     ]
-    },
-    {
-     "path": "scripts/eval_feedback.py",
-     "does": "Milestone 8: does feedback help? A SIMULATED shopper, never a real one.",
-     "lines": 110,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/feedback.py",
-      "src/genkart/index.py",
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/eval_graph.py",
-     "does": "Milestone 5: does the knowledge graph predict garment types for products it has not seen? (sanity test on the Kaggle labels)",
-     "lines": 58,
-     "uses": [
-      "src/genkart/graph.py",
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/eval_guard.py",
-     "does": "Evaluate the content-safety guard (src/genkart/guard.py). No paid calls; the local Qwen3 model reviews only 'review' cases.",
-     "lines": 43,
-     "uses": [
-      "src/genkart/guard.py"
-     ]
-    },
-    {
-     "path": "scripts/eval_heldout.py",
-     "does": "Milestone 4: score prompt v1 vs v2 on the user's held-out prompts with a fixed checklist (no answer labels exist for these).",
-     "lines": 76,
-     "uses": [
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/eval_kaggle_attr.py",
-     "does": "Does text search find the right garment, gender and colour in the Kaggle catalogue (60x80 px photos)? Weak labels from the data itself.",
-     "lines": 77,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py",
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/evidence_paired.py",
-     "does": "Paired differences behind the Evidence page's first question (is the fashion model better than a general model, and than BM25?).",
-     "lines": 72,
-     "uses": [
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/export_drawings.py",
-     "does": "Publish the Stable Diffusion drawings of Milestone 2 with the site: data/generated/<query id>.png -> web/public/drawings/<query id>.jpg (512 px, small).",
-     "lines": 14,
-     "uses": []
-    },
-    {
-     "path": "scripts/export_viewer_photo_map.py",
-     "does": "Write web/src/recorded/photo-ids.json: the recorded products (published id -> real id) whose photos the hosted Lab serves.",
-     "lines": 8,
-     "uses": []
-    },
-    {
-     "path": "scripts/fetch_pilot_shards.py",
-     "does": "Download two parquet shards of Marqo-GS-10M (about 0.2 GB each) for the pilot sample, and record exactly what was fetched.",
-     "lines": 26,
-     "uses": []
-    },
-    {
-     "path": "scripts/fetch_scale_shards.py",
-     "does": "Milestone 3: download 18 more Marqo-GS-10M shards (about 3.9 GB) for the scaled sample, and record exactly what was fetched.",
-     "lines": 33,
-     "uses": []
-    },
-    {
-     "path": "scripts/gen_images.py",
-     "does": "Milestone 2, step 1: draw one image per query with local Stable Diffusion 1.5 (free, on the Apple GPU).",
-     "lines": 57,
-     "uses": []
-    },
-    {
-     "path": "scripts/ingest_aws_producer.py",
-     "does": "Put NEW (test) products on the AWS ingest queue, from your Mac, using YOUR AWS login (the \"genkart\" profile). Claude never runs this.",
-     "lines": 63,
-     "uses": []
-    },
-    {
-     "path": "scripts/ingest_experiment.py",
-     "does": "Milestone 6, step 4: ingest 500 held-out products through the queue while things break, then prove the cluster converged.",
-     "lines": 172,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/embed.py",
-      "src/genkart/jobqueue.py"
-     ]
-    },
-    {
-     "path": "scripts/ingest_producer.py",
-     "does": "Producer: puts the held-out products on the ingest queue. Honours backpressure (QueueFull -> wait and retry) and is safe to run twice",
-     "lines": 39,
-     "uses": [
-      "src/genkart/jobqueue.py"
-     ]
-    },
-    {
-     "path": "scripts/inspect_marqo.py",
-     "does": "Inspect the first rows of Marqo-GS-10M without downloading the whole dataset.",
-     "lines": 49,
-     "uses": []
-    },
-    {
-     "path": "scripts/judge_options.py",
-     "does": "LLM judge for blind-sheet options (test set 4). Claude sees the shopper's request and ONE picture per option (a row of 4 photos per search;",
-     "lines": 79,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/claude_client.py",
-      "src/genkart/embed.py",
-      "src/genkart/graph.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/judge_test5.py",
-     "does": "LLM judge for blind-sheet options (test set 5; derived from judge_options.py). Claude sees the shopper's request and ONE picture per option (a row of 4 photos per search;",
-     "lines": 64,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/claude_client.py",
-      "src/genkart/embed.py"
-     ]
-    },
-    {
-     "path": "scripts/lock.sh",
-     "does": "Rebuild every requirements lock from its .in file, with hashes, so an install can only get exactly the files that were checked:",
-     "lines": 52,
-     "uses": []
-    },
-    {
-     "path": "scripts/logs_query.py",
-     "does": "Run a CloudWatch Logs Insights query from the Mac and print the result as a table (no console clicking).",
-     "lines": 36,
-     "uses": []
-    },
-    {
-     "path": "scripts/make_blind_sheet.py",
-     "does": "Milestone 5: a BLIND photo sheet for test set 3 (the user's fresh prompts).",
-     "lines": 123,
-     "uses": [
-      "src/genkart/dedup.py",
-      "src/genkart/embed.py",
-      "src/genkart/graph.py",
-      "src/genkart/index.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/make_blind_sheet4.py",
-     "does": "Blind sheet for test set 4 (50 Indian-occasion prompts; a fair test, nothing tuned on it).",
-     "lines": 104,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/embed.py",
-      "src/genkart/graph.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/make_blind_sheet5.py",
-     "does": "Blind sheet for test set 5 (50 fresh prompts, written 2026-10-14, nothing tuned on them). Options per prompt, shuffled and unlabelled:",
-     "lines": 89,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/claude_client.py",
-      "src/genkart/embed.py",
-      "src/genkart/graph.py",
-      "src/genkart/guard.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/make_contact_sheet.py",
-     "does": "Milestone 5, step 1: a photo contact sheet of what the search really returns for each plan piece, for human judging.",
-     "lines": 112,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/make_figures.py",
-     "does": "Figures for the write-up, drawn ONLY from logged runs (nothing typed in by hand):",
-     "lines": 67,
-     "uses": []
-    },
-    {
-     "path": "scripts/make_guard_cases.py",
-     "does": "Writes data/fixtures/guard_cases.jsonl: hand-written guard test cases (label allow/refuse + kind). Written BEFORE running the guard.",
-     "lines": 33,
-     "uses": []
-    },
-    {
-     "path": "scripts/make_messy_prompts.py",
-     "does": "Milestone 4: write messy, realistic versions of real Marqo shopper searches with the local model (free).",
-     "lines": 69,
-     "uses": []
-    },
-    {
-     "path": "scripts/make_outfit_sheet.py",
-     "does": "Blind sheet for outfit coherence: does choosing pieces jointly (colour harmony) beat taking each piece's best match on its own?",
-     "lines": 126,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/colour.py",
-      "src/genkart/embed.py",
-      "src/genkart/graph.py",
-      "src/genkart/outfit.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/make_pilot_ratings_set.py",
-     "does": "Write benchmark/: a PILOT ratings set (prompts, blind human ratings, product ids only) from tracked run files.",
-     "lines": 110,
-     "uses": []
-    },
-    {
-     "path": "scripts/make_report.py",
-     "does": "Write REPORT.md from runs/*.summary.json. Every number is read from a file, none is typed here.",
-     "lines": 182,
-     "uses": []
-    },
-    {
-     "path": "scripts/make_router_fixtures.py",
-     "does": "Fixtures for the TypeScript router tests: per-shard answers and the Python reference's merged result (genkart.sharding.merge_route).",
-     "lines": 105,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/embed.py",
-      "src/genkart/sharding.py"
-     ]
-    },
-    {
-     "path": "scripts/make_space.sh",
-     "does": "Assemble the folder that is built into the hosted Lab's Docker image: space-build/. Nothing here is committed to this repository.",
-     "lines": 36,
-     "uses": []
-    },
-    {
-     "path": "scripts/make_space_photos.py",
-     "does": "Thumbnails of the Kaggle, Myntra and men's-western photos for the hosted Lab image: <output folder>/<product id>.jpg (longest side 400 px;",
-     "lines": 42,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "scripts/package_shard_code.sh",
-     "does": "Packs the code the AWS machines need into data/deploy/ (git-ignored): one .tgz per program, the CPU torch lock (requirements-torch-cpu.txt)",
-     "lines": 39,
-     "uses": []
-    },
-    {
-     "path": "scripts/ratings_from_paste.py",
-     "does": "Turn the text a rater pasted back ('Copy my ratings' on a blind sheet) into the flat {id: word} JSON the analysis scripts read.",
-     "lines": 86,
-     "uses": []
-    },
-    {
-     "path": "scripts/record_runs.py",
-     "does": "Record real pipeline runs for the public Viewer: web/src/recorded/runs.json (no photos, closed catalogues anonymised).",
-     "lines": 72,
-     "uses": [
-      "src/genkart/recording.py"
-     ]
-    },
-    {
-     "path": "scripts/redact_screenshot.py",
-     "does": "Blur the confidential parts of console and terminal screenshots before they are published.",
-     "lines": 55,
-     "uses": []
-    },
-    {
-     "path": "scripts/run_claude_plans.py",
-     "does": "Compare Claude with the local Qwen3 on the same job: turn a shopper request into a Plan (src/genkart/understand.py).",
-     "lines": 44,
-     "uses": [
-      "src/genkart/claude_client.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/run_eval.py",
-     "does": "Evaluate text-query retrieval on the apparel pilot sample and log every query.",
-     "lines": 131,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/metrics.py",
-      "src/genkart/retrieval.py"
-     ]
-    },
-    {
-     "path": "scripts/run_m2.py",
-     "does": "Milestone 2, step 2: does 'draw the outfit, then match the drawing' beat direct text-to-product retrieval?",
-     "lines": 129,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/metrics.py",
-      "src/genkart/retrieval.py"
-     ]
-    },
-    {
-     "path": "scripts/run_m4.py",
-     "does": "Milestone 4: does understanding a messy request (local LLM via LangChain) win back the search quality that messy wording loses?",
-     "lines": 132,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/index.py",
-      "src/genkart/metrics.py",
-      "src/genkart/retrieval.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "scripts/run_variant.sh",
-     "does": "Switch the router host to one overload-handling variant and load-test it, in one command (runs on the Mac, works on the router through SSM).",
-     "lines": 12,
-     "uses": []
-    },
-    {
-     "path": "scripts/setup_env.sh",
-     "does": "One command to build the project environment from nothing:   scripts/setup_env.sh [folder]     (default folder: .venv)",
-     "lines": 11,
-     "uses": []
-    },
-    {
-     "path": "scripts/space_fetch_photos.py",
-     "does": "Fetch the Marqo product photos for the hosted Lab while its image is BUILT (space/Dockerfile runs this; nothing is downloaded at start-up),",
-     "lines": 83,
-     "uses": []
-    },
-    {
-     "path": "scripts/study_export.py",
-     "does": "Download the study's answers from Firestore (yours: you run this, signed in with `gcloud auth login`) and summarise them honestly.",
-     "lines": 44,
-     "uses": [
-      "src/genkart/studystats.py"
-     ]
-    },
-    {
-     "path": "scripts/summarise_blind.py",
-     "does": "Recompute the blind-test and outfit-rating results from the raw human ratings and the answer keys, and log them under runs/.",
-     "lines": 89,
-     "uses": [
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "scripts/summarise_blind5.py",
-     "does": "Test set 5 results: per-method mean rating (good=2, okay=1, bad=0) from the user's blind ratings, paired by prompt, bootstrap 95% CIs over prompts.",
-     "lines": 20,
-     "uses": []
-    },
-    {
-     "path": "scripts/summarise_overload.py",
-     "does": "Summarise runs/aws-overload-experiment.jsonl (written by scripts/aws_loadtest.py via scripts/run_variant.sh): one table per variant, a side-by-side view",
-     "lines": 27,
-     "uses": []
-    },
-    {
-     "path": "scripts/teardown_check.sh",
-     "does": "After `cdk destroy`: list everything this project could have left running or costing money in ap-south-1 and print a verdict per category.",
-     "lines": 25,
-     "uses": []
-    },
-    {
-     "path": "scripts/test_metric_filters.py",
-     "does": "Check every CloudWatch metric-filter pattern in infra/cloudwatch/metric-filters.json against REAL-shaped log lines, using CloudWatch's own",
-     "lines": 57,
-     "uses": []
-    },
-    {
-     "path": "scripts/verify_fleet.sh",
-     "does": "Ask the three machines (through SSM) whether the startup script finished and everything is running. Usage: source scripts/aws_env.sh; scripts/verify_fleet.sh <routerId> <shardAId> <shardBId>",
-     "lines": 11,
-     "uses": []
-    },
-    {
-     "path": "scripts/wait_bootstrap.sh",
-     "does": "Wait until a freshly built machine has finished its startup script. Runs on the Mac, asks the machine through SSM every 30 s (up to 30 minutes).",
-     "lines": 13,
-     "uses": []
+  "areas": [
+    {
+      "id": "pipeline",
+      "title": "Pipeline and services (Python)",
+      "what": "The steps of a search, the web server, and the processes the cluster is made of.",
+      "files": [
+        {
+          "path": "src/genkart/admission.py",
+          "does": "A gate in front of slow work: at most `concurrency` jobs run at once, the rest wait, and a waiting job LEAVES the queue the moment its deadline passes.",
+          "lines": 44,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/brain.py",
+          "does": "Bring your own model: understand the request with the visitor's own API key instead of the local model.",
+          "lines": 226,
+          "uses": [
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "src/genkart/catalogue.py",
+          "does": "One search over several catalogues: a general one and specialists.",
+          "lines": 240,
+          "uses": [
+            "src/genkart/dedup.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "src/genkart/checks.py",
+          "does": "Checks on the search candidates before an outfit is built, each one reported in plain words (nothing is changed silently).",
+          "lines": 87,
+          "uses": [
+            "src/genkart/catalogue.py"
+          ]
+        },
+        {
+          "path": "src/genkart/claude_client.py",
+          "does": "Claude API client with a HARD spend cap, for small paid checks only. The key comes from .env (ANTHROPIC_API_KEY), never printed or logged.",
+          "lines": 98,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/colour.py",
+          "does": "Dominant garment colour from a product photo, and a small colour-harmony rule set.",
+          "lines": 105,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/data.py",
+          "does": "Selecting an apparel sample from Marqo-GS-10M (a mixed-category Google Shopping ranking dataset).",
+          "lines": 51,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/dedup.py",
+          "does": "Duplicate products: the same photo or the same item listed again under another seller's title.",
+          "lines": 65,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/embed.py",
+          "does": "Text and image embeddings through open_clip (weights only: no remote code is executed).",
+          "lines": 143,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/encoder_service.py",
+          "does": "Encoder service: turns request text into the numbers the shards search with (Marqo-FashionSigLIP, the only process holding the model).",
+          "lines": 102,
+          "uses": [
+            "src/genkart/admission.py",
+            "src/genkart/embed.py",
+            "src/genkart/reqlog.py"
+          ]
+        },
+        {
+          "path": "src/genkart/feedback.py",
+          "does": "Personalisation by feedback (the Rocchio method): move the query toward products the shopper liked and away from ones they did not.",
+          "lines": 21,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/graph.py",
+          "does": "A small knowledge graph: occasion -> usage -> (gender, usage) -> garment types, by outfit role.",
+          "lines": 170,
+          "uses": [
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "src/genkart/guard.py",
+          "does": "Content-safety guard for shopper requests. Runs BEFORE the language model and the search.",
+          "lines": 123,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/index.py",
+          "does": "A small persistent vector index: product ids + unit-length embeddings + the facts needed to trust it later.",
+          "lines": 59,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/ingest_worker.py",
+          "does": "Ingest worker: takes new-product messages from the job queue, embeds the photo, adds the product to EVERY replica of its shard.",
+          "lines": 273,
+          "uses": [
+            "src/genkart/jobqueue.py",
+            "src/genkart/sqs_queue.py"
+          ]
+        },
+        {
+          "path": "src/genkart/jobqueue.py",
+          "does": "A small durable job queue with Amazon SQS semantics, backed by SQLite (survives restarts).",
+          "lines": 105,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/metrics.py",
+          "does": "Ranking metrics. Relevance comes from the dataset: each ranked product has a graded score (1-100, higher = better).",
+          "lines": 88,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/outfit.py",
+          "does": "Choose one product per piece so the outfit goes together, not just each piece in isolation.",
+          "lines": 87,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/colour.py"
+          ]
+        },
+        {
+          "path": "src/genkart/recording.py",
+          "does": "Recorded runs for the public Viewer: real pipeline traces made safe to publish.",
+          "lines": 84,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/reqlog.py",
+          "does": "One JSON log line per request, carrying the search's ticket number (the x-request-id header the router sends).",
+          "lines": 28,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/resources.py",
+          "does": "What running Lucida takes from THIS computer, measured now: memory of the web server, of the local model server (Ollama) and of any local",
+          "lines": 40,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/retrieval.py",
+          "does": "Retrieval baselines and brute-force cosine search.",
+          "lines": 50,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/server.py",
+          "does": "Web backend for the UI: one request runs the whole pipeline, and every step is streamed to the page as a small \"trace\" event.",
+          "lines": 1070,
+          "uses": [
+            "src/genkart/brain.py",
+            "src/genkart/catalogue.py",
+            "src/genkart/checks.py",
+            "src/genkart/colour.py",
+            "src/genkart/embed.py",
+            "src/genkart/feedback.py",
+            "src/genkart/graph.py",
+            "src/genkart/guard.py",
+            "src/genkart/outfit.py",
+            "src/genkart/resources.py",
+            "src/genkart/study.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "src/genkart/shard_worker.py",
+          "does": "One shard worker: holds a slice of the products and answers \"your best matches for this vector\".",
+          "lines": 180,
+          "uses": [
+            "src/genkart/reqlog.py",
+            "src/genkart/sharding.py"
+          ]
+        },
+        {
+          "path": "src/genkart/sharding.py",
+          "does": "Sharded search: split all catalogues' products over N shards by product id, scatter every query to all shards, gather and merge.",
+          "lines": 175,
+          "uses": [
+            "src/genkart/catalogue.py"
+          ]
+        },
+        {
+          "path": "src/genkart/sqs_queue.py",
+          "does": "The same queue calls as genkart.jobqueue.JobQueue, on Amazon SQS (FIFO queue + its dead-letter queue). IngestWorker works with either.",
+          "lines": 115,
+          "uses": [
+            "src/genkart/jobqueue.py"
+          ]
+        },
+        {
+          "path": "src/genkart/study.py",
+          "does": "The consented study: does a drawn preview change how people rate the SAME search results?",
+          "lines": 154,
+          "uses": [
+            "src/genkart/studystore.py"
+          ]
+        },
+        {
+          "path": "src/genkart/studystats.py",
+          "does": "What the consented study found: the same search results rated with and without the AI drawing beside them.",
+          "lines": 31,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/studystore.py",
+          "does": "Where the consented study keeps its answers. Two places, one small interface (save / has / delete a document by id, delete_many in one request):",
+          "lines": 133,
+          "uses": []
+        },
+        {
+          "path": "src/genkart/understand.py",
+          "does": "Turn a shopper's free-text request into a structured product search plan with a local language model (LangChain + Ollama).",
+          "lines": 223,
+          "uses": []
+        }
+      ]
+    },
+    {
+      "id": "scripts",
+      "title": "Scripts",
+      "what": "One command per experiment, data build, test run or cloud task. Each writes its result to runs/.",
+      "files": [
+        {
+          "path": "scripts/analyze_agreement.py",
+          "does": "How much do two human raters agree on a blind sheet, and do they reach the same headline conclusion?",
+          "lines": 156,
+          "uses": [
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/analyze_duplicates.py",
+          "does": "Do duplicate products (same image, different seller titles) distort our scores and the user's ratings?",
+          "lines": 191,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py",
+            "src/genkart/metrics.py",
+            "src/genkart/retrieval.py"
+          ]
+        },
+        {
+          "path": "scripts/analyze_judge.py",
+          "does": "How far can the LLM judge be trusted? Compares judge ratings with the user's 141 human ratings (test set 4) and writes runs/judge-validate.summary.json.",
+          "lines": 26,
+          "uses": [
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/analyze_judge5.py",
+          "does": "Judge vs human on test set 5 (options the judge never saw before; the judge setup was fixed before these ratings existed).",
+          "lines": 32,
+          "uses": [
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/aws_env.sh",
+          "does": "Sets the login profile and the bucket name so commands never see an empty $B. The bucket name is read from data/aws-bucket.txt (git-ignored,",
+          "lines": 12,
+          "uses": []
+        },
+        {
+          "path": "scripts/aws_loadtest.py",
+          "does": "Load test for the router. Standard library only, Python 3.9+ (the router host's default python3), so it runs on the AWS machine with no installs.",
+          "lines": 106,
+          "uses": []
+        },
+        {
+          "path": "scripts/aws_probe.py",
+          "does": "Send one search per second to the router and print one line each; append every line to a JSONL file (a logged run).",
+          "lines": 27,
+          "uses": []
+        },
+        {
+          "path": "scripts/aws_run.sh",
+          "does": "Run a shell command ON an EC2 machine from your Mac, through SSM Run Command (no black screen, no open port), wait, print what it printed.",
+          "lines": 21,
+          "uses": []
+        },
+        {
+          "path": "scripts/build_index.py",
+          "does": "Save the product-photo embeddings of one model as a persistent VectorIndex (data/index/<name>.npz + .meta.json).",
+          "lines": 36,
+          "uses": [
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/build_kaggle_index.py",
+          "does": "Embed the Kaggle fashion-product-images (small, 60x80 px, India-heavy, local only) with Marqo-FashionSigLIP and save a VectorIndex.",
+          "lines": 31,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/build_map.py",
+          "does": "Build the project map for the Docs page: web/src/content/map.json.",
+          "lines": 138,
+          "uses": []
+        },
+        {
+          "path": "scripts/build_mens3_index.py",
+          "does": "Embed the men's western basics (Kaggle prashantsharma526/e-commerce-mens-clothing-dataset, CC-BY-NC-SA-4.0, local research use only).",
+          "lines": 34,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/build_myntra2_index.py",
+          "does": "Embed the sharp Myntra-derived images (Kaggle hiteshsuthar101/myntra-fashion-product-dataset, local only) with Marqo-FashionSigLIP.",
+          "lines": 30,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/build_pilot_sample.py",
+          "does": "Build the apparel pilot sample from the downloaded Marqo-GS-10M shards.",
+          "lines": 72,
+          "uses": [
+            "src/genkart/data.py"
+          ]
+        },
+        {
+          "path": "scripts/build_scale_sample.py",
+          "does": "Milestone 3: build the scaled apparel sample from the 20 downloaded Marqo-GS-10M shards (pilot 2 + 18 new).",
+          "lines": 69,
+          "uses": [
+            "src/genkart/data.py"
+          ]
+        },
+        {
+          "path": "scripts/build_shards.py",
+          "does": "Split the combined catalogue into N shard files for the shard workers (data/shards/n<N>/shard-<i>.npz).",
+          "lines": 49,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/sharding.py"
+          ]
+        },
+        {
+          "path": "scripts/chaos.py",
+          "does": "Milestone 6, step 3: load, a slow shard, a dead shard, and what partial answers cost. Needs the cluster (scripts/cluster.sh start).",
+          "lines": 195,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/embed.py",
+            "src/genkart/metrics.py",
+            "src/genkart/sharding.py"
+          ]
+        },
+        {
+          "path": "scripts/chaos_replicas.py",
+          "does": "Milestone 6, step 3b: what two replicas per shard change (failover and hedging). Needs the cluster with REPLICAS=2.",
+          "lines": 88,
+          "uses": []
+        },
+        {
+          "path": "scripts/check_myntra2_alignment.py",
+          "does": "Does image file N belong to CSV row N in the sharp Myntra set? Tested numerically, not assumed.",
+          "lines": 42,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/check_router_e2e.py",
+          "does": "The running cluster (encoder + 4 shard workers + TypeScript router) against the single-process search, on real queries.",
+          "lines": 49,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/embed.py"
+          ]
+        },
+        {
+          "path": "scripts/check_sharding.py",
+          "does": "Is sharded search exactly the single-process search? Real catalogues, real queries, 2/4/8 shards.",
+          "lines": 48,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/embed.py",
+            "src/genkart/sharding.py"
+          ]
+        },
+        {
+          "path": "scripts/cluster.sh",
+          "does": "Start / stop / status of the local cluster: encoder (9000), shard workers, router (9100). PIDs in data/run/.",
+          "lines": 42,
+          "uses": []
+        },
+        {
+          "path": "scripts/compare_judged.py",
+          "does": "Paired comparison of Qwen3-plan options (C) vs Claude-plan options (D) on test set 4 using the LLM judge (validated: see runs/judge-validate.summary.json).",
+          "lines": 26,
+          "uses": []
+        },
+        {
+          "path": "scripts/compare_plans.py",
+          "does": "Claude vs local Qwen3 plans on test set 4 (50 prompts): checkable properties only (no relevance labels exist for these plans).",
+          "lines": 31,
+          "uses": []
+        },
+        {
+          "path": "scripts/compare_runs.py",
+          "does": "Print a results table from runs/*.summary.json and paired comparisons between runs (same queries, bootstrap CI of the difference).",
+          "lines": 35,
+          "uses": [
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/data_quality.py",
+          "does": "Data-quality pass over the scaled sample (40,513 products, 852 queries). Done late; it should have come first.",
+          "lines": 90,
+          "uses": [
+            "src/genkart/dedup.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/data_quality_4.py",
+          "does": "Duplicate and quality pass over all four catalogues: Marqo, Kaggle small, sharp Myntra (image-only), men's western basics.",
+          "lines": 148,
+          "uses": [
+            "src/genkart/dedup.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/data_quality_all.py",
+          "does": "Data-quality pass over the COMBINED catalogue: Marqo subset (40,513 products, titles) + Kaggle small (44,419 products, labels).",
+          "lines": 154,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/dedup.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/eval_checks.py",
+          "does": "How often the top picks break a plain rule, before and after the candidate checks (src/genkart/checks.py). A COUNT of rule breaks, not a quality rating.",
+          "lines": 64,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/checks.py",
+            "src/genkart/server.py"
+          ]
+        },
+        {
+          "path": "scripts/eval_feedback.py",
+          "does": "Milestone 8: does feedback help? A SIMULATED shopper, never a real one.",
+          "lines": 110,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/feedback.py",
+            "src/genkart/index.py",
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/eval_graph.py",
+          "does": "Milestone 5: does the knowledge graph predict garment types for products it has not seen? (sanity test on the Kaggle labels)",
+          "lines": 58,
+          "uses": [
+            "src/genkart/graph.py",
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/eval_guard.py",
+          "does": "Evaluate the content-safety guard (src/genkart/guard.py). No paid calls; the local Qwen3 model reviews only 'review' cases.",
+          "lines": 43,
+          "uses": [
+            "src/genkart/guard.py"
+          ]
+        },
+        {
+          "path": "scripts/eval_heldout.py",
+          "does": "Milestone 4: score prompt v1 vs v2 on the user's held-out prompts with a fixed checklist (no answer labels exist for these).",
+          "lines": 76,
+          "uses": [
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/eval_kaggle_attr.py",
+          "does": "Does text search find the right garment, gender and colour in the Kaggle catalogue (60x80 px photos)? Weak labels from the data itself.",
+          "lines": 77,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py",
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/evidence_paired.py",
+          "does": "Paired differences behind the Evidence page's first question (is the fashion model better than a general model, and than BM25?).",
+          "lines": 72,
+          "uses": [
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/export_drawings.py",
+          "does": "Publish the Stable Diffusion drawings of Milestone 2 with the site: data/generated/<query id>.png -> web/public/drawings/<query id>.jpg (512 px, small).",
+          "lines": 14,
+          "uses": []
+        },
+        {
+          "path": "scripts/export_viewer_photo_map.py",
+          "does": "Write web/src/recorded/photo-ids.json: the recorded products (published id -> real id) whose photos the hosted Lab serves.",
+          "lines": 8,
+          "uses": []
+        },
+        {
+          "path": "scripts/fetch_pilot_shards.py",
+          "does": "Download two parquet shards of Marqo-GS-10M (about 0.2 GB each) for the pilot sample, and record exactly what was fetched.",
+          "lines": 26,
+          "uses": []
+        },
+        {
+          "path": "scripts/fetch_scale_shards.py",
+          "does": "Milestone 3: download 18 more Marqo-GS-10M shards (about 3.9 GB) for the scaled sample, and record exactly what was fetched.",
+          "lines": 33,
+          "uses": []
+        },
+        {
+          "path": "scripts/gen_images.py",
+          "does": "Milestone 2, step 1: draw one image per query with local Stable Diffusion 1.5 (free, on the Apple GPU).",
+          "lines": 57,
+          "uses": []
+        },
+        {
+          "path": "scripts/ingest_aws_producer.py",
+          "does": "Put NEW (test) products on the AWS ingest queue, from your Mac, using YOUR AWS login (the \"genkart\" profile). Claude never runs this.",
+          "lines": 63,
+          "uses": []
+        },
+        {
+          "path": "scripts/ingest_experiment.py",
+          "does": "Milestone 6, step 4: ingest 500 held-out products through the queue while things break, then prove the cluster converged.",
+          "lines": 172,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/embed.py",
+            "src/genkart/jobqueue.py"
+          ]
+        },
+        {
+          "path": "scripts/ingest_producer.py",
+          "does": "Producer: puts the held-out products on the ingest queue. Honours backpressure (QueueFull -> wait and retry) and is safe to run twice",
+          "lines": 39,
+          "uses": [
+            "src/genkart/jobqueue.py"
+          ]
+        },
+        {
+          "path": "scripts/inspect_marqo.py",
+          "does": "Inspect the first rows of Marqo-GS-10M without downloading the whole dataset.",
+          "lines": 49,
+          "uses": []
+        },
+        {
+          "path": "scripts/judge_options.py",
+          "does": "LLM judge for blind-sheet options (test set 4). Claude sees the shopper's request and ONE picture per option (a row of 4 photos per search;",
+          "lines": 79,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/claude_client.py",
+            "src/genkart/embed.py",
+            "src/genkart/graph.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/judge_test5.py",
+          "does": "LLM judge for blind-sheet options (test set 5; derived from judge_options.py). Claude sees the shopper's request and ONE picture per option (a row of 4 photos per search;",
+          "lines": 64,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/claude_client.py",
+            "src/genkart/embed.py"
+          ]
+        },
+        {
+          "path": "scripts/lock.sh",
+          "does": "Rebuild every requirements lock from its .in file, with hashes, so an install can only get exactly the files that were checked:",
+          "lines": 52,
+          "uses": []
+        },
+        {
+          "path": "scripts/logs_query.py",
+          "does": "Run a CloudWatch Logs Insights query from the Mac and print the result as a table (no console clicking).",
+          "lines": 36,
+          "uses": []
+        },
+        {
+          "path": "scripts/make_blind_sheet.py",
+          "does": "Milestone 5: a BLIND photo sheet for test set 3 (the user's fresh prompts).",
+          "lines": 123,
+          "uses": [
+            "src/genkart/dedup.py",
+            "src/genkart/embed.py",
+            "src/genkart/graph.py",
+            "src/genkart/index.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/make_blind_sheet4.py",
+          "does": "Blind sheet for test set 4 (50 Indian-occasion prompts; a fair test, nothing tuned on it).",
+          "lines": 104,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/embed.py",
+            "src/genkart/graph.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/make_blind_sheet5.py",
+          "does": "Blind sheet for test set 5 (50 fresh prompts, written 2026-10-14, nothing tuned on them). Options per prompt, shuffled and unlabelled:",
+          "lines": 89,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/claude_client.py",
+            "src/genkart/embed.py",
+            "src/genkart/graph.py",
+            "src/genkart/guard.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/make_contact_sheet.py",
+          "does": "Milestone 5, step 1: a photo contact sheet of what the search really returns for each plan piece, for human judging.",
+          "lines": 112,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/make_figures.py",
+          "does": "Figures for the write-up, drawn ONLY from logged runs (nothing typed in by hand):",
+          "lines": 67,
+          "uses": []
+        },
+        {
+          "path": "scripts/make_guard_cases.py",
+          "does": "Writes data/fixtures/guard_cases.jsonl: hand-written guard test cases (label allow/refuse + kind). Written BEFORE running the guard.",
+          "lines": 33,
+          "uses": []
+        },
+        {
+          "path": "scripts/make_messy_prompts.py",
+          "does": "Milestone 4: write messy, realistic versions of real Marqo shopper searches with the local model (free).",
+          "lines": 69,
+          "uses": []
+        },
+        {
+          "path": "scripts/make_outfit_sheet.py",
+          "does": "Blind sheet for outfit coherence: does choosing pieces jointly (colour harmony) beat taking each piece's best match on its own?",
+          "lines": 126,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/colour.py",
+            "src/genkart/embed.py",
+            "src/genkart/graph.py",
+            "src/genkart/outfit.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/make_pilot_ratings_set.py",
+          "does": "Write benchmark/: a PILOT ratings set (prompts, blind human ratings, product ids only) from tracked run files.",
+          "lines": 110,
+          "uses": []
+        },
+        {
+          "path": "scripts/make_report.py",
+          "does": "Write REPORT.md from runs/*.summary.json. Every number is read from a file, none is typed here.",
+          "lines": 182,
+          "uses": []
+        },
+        {
+          "path": "scripts/make_router_fixtures.py",
+          "does": "Fixtures for the TypeScript router tests: per-shard answers and the Python reference's merged result (genkart.sharding.merge_route).",
+          "lines": 105,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/embed.py",
+            "src/genkart/sharding.py"
+          ]
+        },
+        {
+          "path": "scripts/make_space.sh",
+          "does": "Assemble the folder that is built into the hosted Lab's Docker image: space-build/. Nothing here is committed to this repository.",
+          "lines": 36,
+          "uses": []
+        },
+        {
+          "path": "scripts/make_space_photos.py",
+          "does": "Thumbnails of the Kaggle, Myntra and men's-western photos for the hosted Lab image: <output folder>/<product id>.jpg (longest side 400 px;",
+          "lines": 42,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "scripts/package_shard_code.sh",
+          "does": "Packs the code the AWS machines need into data/deploy/ (git-ignored): one .tgz per program, the CPU torch lock (requirements-torch-cpu.txt)",
+          "lines": 39,
+          "uses": []
+        },
+        {
+          "path": "scripts/ratings_from_paste.py",
+          "does": "Turn the text a rater pasted back ('Copy my ratings' on a blind sheet) into the flat {id: word} JSON the analysis scripts read.",
+          "lines": 86,
+          "uses": []
+        },
+        {
+          "path": "scripts/record_runs.py",
+          "does": "Record real pipeline runs for the public Viewer: web/src/recorded/runs.json (no photos, closed catalogues anonymised).",
+          "lines": 72,
+          "uses": [
+            "src/genkart/recording.py"
+          ]
+        },
+        {
+          "path": "scripts/redact_screenshot.py",
+          "does": "Blur the confidential parts of console and terminal screenshots before they are published.",
+          "lines": 55,
+          "uses": []
+        },
+        {
+          "path": "scripts/run_claude_plans.py",
+          "does": "Compare Claude with the local Qwen3 on the same job: turn a shopper request into a Plan (src/genkart/understand.py).",
+          "lines": 44,
+          "uses": [
+            "src/genkart/claude_client.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/run_eval.py",
+          "does": "Evaluate text-query retrieval on the apparel pilot sample and log every query.",
+          "lines": 131,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/metrics.py",
+            "src/genkart/retrieval.py"
+          ]
+        },
+        {
+          "path": "scripts/run_m2.py",
+          "does": "Milestone 2, step 2: does 'draw the outfit, then match the drawing' beat direct text-to-product retrieval?",
+          "lines": 129,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/metrics.py",
+            "src/genkart/retrieval.py"
+          ]
+        },
+        {
+          "path": "scripts/run_m4.py",
+          "does": "Milestone 4: does understanding a messy request (local LLM via LangChain) win back the search quality that messy wording loses?",
+          "lines": 132,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/index.py",
+            "src/genkart/metrics.py",
+            "src/genkart/retrieval.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "scripts/run_variant.sh",
+          "does": "Switch the router host to one overload-handling variant and load-test it, in one command (runs on the Mac, works on the router through SSM).",
+          "lines": 12,
+          "uses": []
+        },
+        {
+          "path": "scripts/setup_env.sh",
+          "does": "One command to build the project environment from nothing:   scripts/setup_env.sh [folder]     (default folder: .venv)",
+          "lines": 11,
+          "uses": []
+        },
+        {
+          "path": "scripts/space_fetch_photos.py",
+          "does": "Fetch the Marqo product photos for the hosted Lab while its image is BUILT (space/Dockerfile runs this; nothing is downloaded at start-up),",
+          "lines": 83,
+          "uses": []
+        },
+        {
+          "path": "scripts/study_export.py",
+          "does": "Download the study's answers from Firestore (yours: you run this, signed in with `gcloud auth login`) and summarise them honestly.",
+          "lines": 44,
+          "uses": [
+            "src/genkart/studystats.py"
+          ]
+        },
+        {
+          "path": "scripts/summarise_blind.py",
+          "does": "Recompute the blind-test and outfit-rating results from the raw human ratings and the answer keys, and log them under runs/.",
+          "lines": 89,
+          "uses": [
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "scripts/summarise_blind5.py",
+          "does": "Test set 5 results: per-method mean rating (good=2, okay=1, bad=0) from the user's blind ratings, paired by prompt, bootstrap 95% CIs over prompts.",
+          "lines": 20,
+          "uses": []
+        },
+        {
+          "path": "scripts/summarise_overload.py",
+          "does": "Summarise runs/aws-overload-experiment.jsonl (written by scripts/aws_loadtest.py via scripts/run_variant.sh): one table per variant, a side-by-side view",
+          "lines": 27,
+          "uses": []
+        },
+        {
+          "path": "scripts/teardown_check.sh",
+          "does": "After `cdk destroy`: list everything this project could have left running or costing money in ap-south-1 and print a verdict per category.",
+          "lines": 25,
+          "uses": []
+        },
+        {
+          "path": "scripts/test_metric_filters.py",
+          "does": "Check every CloudWatch metric-filter pattern in infra/cloudwatch/metric-filters.json against REAL-shaped log lines, using CloudWatch's own",
+          "lines": 57,
+          "uses": []
+        },
+        {
+          "path": "scripts/verify_fleet.sh",
+          "does": "Ask the three machines (through SSM) whether the startup script finished and everything is running. Usage: source scripts/aws_env.sh; scripts/verify_fleet.sh <routerId> <shardAId> <shardBId>",
+          "lines": 11,
+          "uses": []
+        },
+        {
+          "path": "scripts/wait_bootstrap.sh",
+          "does": "Wait until a freshly built machine has finished its startup script. Runs on the Mac, asks the machine through SSM every 30 s (up to 30 minutes).",
+          "lines": 13,
+          "uses": []
+        }
+      ]
+    },
+    {
+      "id": "router",
+      "title": "Router (TypeScript)",
+      "what": "Asks all shards at once, merges the answers, survives failures.",
+      "files": [
+        {
+          "path": "services/router/src/config.ts",
+          "does": "Router settings read from the environment: ports, shard addresses (with replicas), deadlines, hedge delay, in-flight limit.",
+          "lines": 35,
+          "uses": []
+        },
+        {
+          "path": "services/router/src/hedge.ts",
+          "does": "Adaptive hedging. A fixed hedge delay (say 40 ms) is too short when a shard is simply slow today: every search would then ask",
+          "lines": 39,
+          "uses": []
+        },
+        {
+          "path": "services/router/src/index.ts",
+          "does": "Starts the router process.",
+          "lines": 8,
+          "uses": [
+            "services/router/src/config.ts",
+            "services/router/src/server.ts"
+          ]
+        },
+        {
+          "path": "services/router/src/merge.ts",
+          "does": "The router's merge and routing rule. Mirrors src/genkart/sharding.py (merge_route) exactly; test/merge.test.ts checks it",
+          "lines": 48,
+          "uses": []
+        },
+        {
+          "path": "services/router/src/server.ts",
+          "does": "The router: asks the encoder, asks every shard at once (failover and hedging across replicas), merges, refuses past the limit with HTTP 429.",
+          "lines": 251,
+          "uses": [
+            "services/router/src/config.ts",
+            "services/router/src/hedge.ts",
+            "services/router/src/merge.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "infra",
+      "title": "AWS stacks (TypeScript, CDK)",
+      "what": "The cloud machines, network, queue and monitoring as code.",
+      "files": [
+        {
+          "path": "infra/lib/compute-stack.ts",
+          "does": "The three machines (router host, shard hosts in two zones) with their startup scripts and permissions.",
+          "lines": 154,
+          "uses": []
+        },
+        {
+          "path": "infra/lib/data-stack.ts",
+          "does": "The storage and queues: the photo bucket, the ingestion queue and its dead-letter queue.",
+          "lines": 73,
+          "uses": []
+        },
+        {
+          "path": "infra/lib/network-stack.ts",
+          "does": "Your own public IP as a /32, e.g. \"203.0.113.7/32\". Only this address may reach the router.",
+          "lines": 54,
+          "uses": []
+        },
+        {
+          "path": "infra/lib/observability-stack.ts",
+          "does": "Logs, metric filters, the dashboard and alarms, and the budget alert.",
+          "lines": 110,
+          "uses": []
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "title": "This website (TypeScript, React)",
+      "what": "Pages and parts of the site you are reading.",
+      "files": [
+        {
+          "path": "web/src/App.tsx",
+          "does": "The page frame: routes, the server health check, and the Replay / Try it live switch.",
+          "lines": 112,
+          "uses": [
+            "web/src/api.ts",
+            "web/src/brain.ts",
+            "web/src/brand.ts",
+            "web/src/components/ModeMenu.tsx",
+            "web/src/components/ModeSwitch.tsx",
+            "web/src/components/PhotoCredits.tsx",
+            "web/src/components/Safety.tsx",
+            "web/src/pages/Docs.tsx",
+            "web/src/pages/Evidence.tsx",
+            "web/src/pages/Glossary.tsx",
+            "web/src/pages/Search.tsx",
+            "web/src/pages/Study.tsx",
+            "web/src/pages/System.tsx",
+            "web/src/pages/Wake.tsx",
+            "web/src/recorded.ts"
+          ]
+        },
+        {
+          "path": "web/src/api.ts",
+          "does": "The page's calls to the server: health and readiness, example prompts, the live step stream (a POST read as server-sent events), plain search.",
+          "lines": 225,
+          "uses": [
+            "web/src/brain.ts",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/brain.ts",
+          "does": "The visitor's own model for the understand step. Held in memory only (never localStorage, never a cookie, never the URL): reloading the page forgets it.",
+          "lines": 43,
+          "uses": []
+        },
+        {
+          "path": "web/src/brand.ts",
+          "does": "One place for the product name, so renaming (or adding a distinguishing handle) is a one-line change.",
+          "lines": 6,
+          "uses": []
+        },
+        {
+          "path": "web/src/components/CompareCard.tsx",
+          "does": "\"Did the plan help?\": plain search of the sentence as typed, next to the outfit the plan built, with the time each took and (in the Viewer) the author's blind rating of each.",
+          "lines": 51,
+          "uses": [
+            "web/src/components/Sheet.tsx",
+            "web/src/recorded.ts",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/CostPanel.tsx",
+          "does": "What a run costs, in one short table: time, memory held and money, per part of the run. Every number is measured or read from a logged file; where a number",
+          "lines": 89,
+          "uses": [
+            "web/src/brain.ts",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/EvidenceKit.tsx",
+          "does": "The building blocks of the Evidence page: the claim card (question, computed verdict, chart with its 95% ranges, how it was measured,",
+          "lines": 280,
+          "uses": [
+            "web/src/components/Interval.tsx",
+            "web/src/components/Plain.tsx",
+            "web/src/components/Term.tsx"
+          ]
+        },
+        {
+          "path": "web/src/components/Explain.tsx",
+          "does": "Plain-language notes about time. While a step is slow: what is happening right now. After a run: why a step took long, with a dashed arrow at its band.",
+          "lines": 79,
+          "uses": [
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/Findings.tsx",
+          "does": "The claim cards of the Evidence page, in page order. Each card is built from one claim in virtual:evidence (question, computed verdict,",
+          "lines": 11,
+          "uses": [
+            "web/src/components/EvidenceKit.tsx"
+          ]
+        },
+        {
+          "path": "web/src/components/ForestPlot.tsx",
+          "does": "The scorecard: every paired difference on the page as one forest plot (each effect an interval against zero), in two panels because the",
+          "lines": 79,
+          "uses": [
+            "web/src/components/EvidenceKit.tsx",
+            "web/src/components/Interval.tsx"
+          ]
+        },
+        {
+          "path": "web/src/components/Hero.tsx",
+          "does": "Chapter 1 of the Viewer: the problem in one line, what this is (the headline), why it matters (one line), and an explainer that loops through the",
+          "lines": 207,
+          "uses": [
+            "web/src/brand.ts",
+            "web/src/components/Sheet.tsx",
+            "web/src/content/story.ts",
+            "web/src/recorded.ts",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/Interval.tsx",
+          "does": "One measured value drawn on a real number line: a hatched 95% range, a tick at the average, an optional reference line (zero for a",
+          "lines": 90,
+          "uses": []
+        },
+        {
+          "path": "web/src/components/JourneyCanvas.tsx",
+          "does": "One small drawing for the \"journey of one request\" (How it works page): the recorded sentence moving through the six steps.",
+          "lines": 259,
+          "uses": [
+            "web/src/content/story.ts",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/ModeMenu.tsx",
+          "does": "\"AI model\": the dialog at the top right of the navigation, shown only in Lab, where the visitor picks which AI reads their sentence:",
+          "lines": 222,
+          "uses": [
+            "web/src/api.ts",
+            "web/src/brain.ts",
+            "web/src/ui.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/ModeSwitch.tsx",
+          "does": "The two ways to use the site, always in the header: Replay (recorded runs, nothing is searched) and Try it live (search your own words).",
+          "lines": 16,
+          "uses": [
+            "web/src/recorded.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/Panels.tsx",
+          "does": "The step panels: plan card, graph sheet, run log, time strip, search and compose panels. Inside the results stepper they drop their own step headings (head=false).",
+          "lines": 256,
+          "uses": [
+            "web/src/components/Explain.tsx",
+            "web/src/trace.ts",
+            "web/src/ui.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/PhotoCredits.tsx",
+          "does": "Credits and the way to ask for a removal: shown at the bottom of every page, because the hosted Lab serves product photos that belong to their sellers.",
+          "lines": 10,
+          "uses": []
+        },
+        {
+          "path": "web/src/components/Plain.tsx",
+          "does": "Two parts of every long section: the answer in plain words (always visible), and the exact numbers (one click away, so no detail is lost).",
+          "lines": 17,
+          "uses": []
+        },
+        {
+          "path": "web/src/components/Refine.tsx",
+          "does": "\"More like what you liked\": the visitor marks products with a thumbs-up, and this panel searches again with the query moved toward them (server: /api/refine).",
+          "lines": 53,
+          "uses": [
+            "web/src/api.ts",
+            "web/src/components/Sheet.tsx"
+          ]
+        },
+        {
+          "path": "web/src/components/Safety.tsx",
+          "does": "Two safety nets so no visitor is ever stuck: a message with a way out when a page breaks, and a way back to the top of a long page.",
+          "lines": 44,
+          "uses": []
+        },
+        {
+          "path": "web/src/components/Sentence.tsx",
+          "does": "Marks the words of the request that the plan was built from. This is only an overlay: the plan card below lists every field exactly.",
+          "lines": 65,
+          "uses": [
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/Sheet.tsx",
+          "does": "The contact sheet, outfit print and at-a-glance row, with a placeholder where the Viewer has no photo.",
+          "lines": 154,
+          "uses": [
+            "web/src/brand.ts",
+            "web/src/flats.tsx",
+            "web/src/trace.ts",
+            "web/src/ui.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/Stepper.tsx",
+          "does": "\"How it got there\": the six steps of one run as a vertical stepper. Each closed card says, in one plain sentence, what that step did",
+          "lines": 62,
+          "uses": [
+            "web/src/content/story.ts",
+            "web/src/trace.ts",
+            "web/src/ui.ts"
+          ]
+        },
+        {
+          "path": "web/src/components/Term.tsx",
+          "does": "An inline glossary word: a button in the sentence that opens a short plain definition beside it. Click or Enter opens it, Escape or a",
+          "lines": 53,
+          "uses": [
+            "web/src/content/glossary.ts"
+          ]
+        },
+        {
+          "path": "web/src/demo.ts",
+          "does": "The demo replay: a made-up run, emitted in the same event shape as the real server, so the same screen renders both.",
+          "lines": 54,
+          "uses": [
+            "web/src/flats.tsx",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/evidence-front.d.ts",
+          "does": "Built by vite.config.ts (evidenceFront): the few logged values the first download needs. Same files, same numbers as virtual:evidence.",
+          "lines": 15,
+          "uses": []
+        },
+        {
+          "path": "web/src/flats.tsx",
+          "does": "Technical flats: the line drawings designers use for garments. They stand in for product photos in the demo replay only.",
+          "lines": 41,
+          "uses": []
+        },
+        {
+          "path": "web/src/pages/AwsTour.tsx",
+          "does": "The recorded AWS runs (Mumbai, 2026-10-15 to 2026-10-16), as parts the System page lays out: the architecture drawing, the charts and tables",
+          "lines": 206,
+          "uses": []
+        },
+        {
+          "path": "web/src/pages/Docs.tsx",
+          "does": "The \"How it works\" page (route #/docs): the journey of one recorded request through the six steps, the decisions with their reasons,",
+          "lines": 384,
+          "uses": [
+            "web/src/components/JourneyCanvas.tsx",
+            "web/src/components/Plain.tsx",
+            "web/src/components/Sheet.tsx",
+            "web/src/content/docs.ts",
+            "web/src/content/map.json",
+            "web/src/content/story.ts",
+            "web/src/recorded.ts",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/pages/Evidence.tsx",
+          "does": "The Evidence page: one plain sentence, the scorecard (every paired difference as an interval against zero, with its computed verdict),",
+          "lines": 121,
+          "uses": [
+            "web/src/components/EvidenceKit.tsx",
+            "web/src/components/Findings.tsx",
+            "web/src/components/ForestPlot.tsx",
+            "web/src/components/Term.tsx",
+            "web/src/content/glossary.ts",
+            "web/src/recorded.ts"
+          ]
+        },
+        {
+          "path": "web/src/pages/Glossary.tsx",
+          "does": "The Glossary page: every plain-language definition the site uses, with a filter box. Works without any server.",
+          "lines": 26,
+          "uses": [
+            "web/src/content/glossary.ts"
+          ]
+        },
+        {
+          "path": "web/src/pages/Search.tsx",
+          "does": "The Search page. Replay (the Viewer) is a short story in three chapters: the problem and the explainer replay (Hero), what we learned, your turn (the run picker).",
+          "lines": 355,
+          "uses": [
+            "web/src/api.ts",
+            "web/src/brain.ts",
+            "web/src/brand.ts",
+            "web/src/components/CompareCard.tsx",
+            "web/src/components/CostPanel.tsx",
+            "web/src/components/Explain.tsx",
+            "web/src/components/Hero.tsx",
+            "web/src/components/Panels.tsx",
+            "web/src/components/Refine.tsx",
+            "web/src/components/Sentence.tsx",
+            "web/src/components/Sheet.tsx",
+            "web/src/components/Stepper.tsx",
+            "web/src/demo.ts",
+            "web/src/recorded.ts",
+            "web/src/trace.ts",
+            "web/src/ui.ts"
+          ]
+        },
+        {
+          "path": "web/src/pages/Study.tsx",
+          "does": "The consented study: does a drawn preview change how people rate the same search results? (server: src/genkart/study.py)",
+          "lines": 152,
+          "uses": [
+            "web/src/api.ts",
+            "web/src/components/Sheet.tsx",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/pages/System.tsx",
+          "does": "The System page (route #/system): \"We broke it on purpose\". One sentence and the AWS drawing, then three experiments, each with",
+          "lines": 276,
+          "uses": [
+            "web/src/api.ts",
+            "web/src/components/Plain.tsx",
+            "web/src/pages/AwsTour.tsx"
+          ]
+        },
+        {
+          "path": "web/src/pages/Wake.tsx",
+          "does": "The \"waking up\" page of the public Viewer: the hosted Lab sleeps when nobody uses it, and a sleeping server cannot show anything itself.",
+          "lines": 72,
+          "uses": [
+            "web/src/api.ts",
+            "web/src/recorded.ts"
+          ]
+        },
+        {
+          "path": "web/src/recorded.ts",
+          "does": "Recorded runs for the public Viewer: real pipeline traces made by scripts/record_runs.py, with no photos.",
+          "lines": 76,
+          "uses": [
+            "web/src/components/CostPanel.tsx",
+            "web/src/recorded/photo-ids.json",
+            "web/src/recorded/runs.json",
+            "web/src/trace.ts"
+          ]
+        },
+        {
+          "path": "web/src/trace.ts",
+          "does": "The one contract between the backend and this page: every pipeline step reports itself as a trace event.",
+          "lines": 79,
+          "uses": []
+        },
+        {
+          "path": "web/src/ui.ts",
+          "does": "Small page helpers shared by several components (kept out of component files so fast refresh keeps working).",
+          "lines": 16,
+          "uses": []
+        }
+      ]
+    },
+    {
+      "id": "tests",
+      "title": "Tests",
+      "what": "What is checked on every change.",
+      "files": [
+        {
+          "path": "tests/test_admission.py",
+          "does": "The encoder's gate: at most N jobs at once, and a waiting job whose deadline passed is dropped, never run.",
+          "lines": 57,
+          "uses": [
+            "src/genkart/admission.py"
+          ]
+        },
+        {
+          "path": "tests/test_agreement.py",
+          "does": "Rater agreement: lifted kappa functions, prompt-level bootstrap, and the analyze_agreement script on synthetic ratings.",
+          "lines": 141,
+          "uses": [
+            "src/genkart/metrics.py"
+          ]
+        },
+        {
+          "path": "tests/test_brain.py",
+          "does": "Bring your own model: the visitor's key is validated, used for one request, and must never appear in an event, an error, a repr or a response.",
+          "lines": 339,
+          "uses": [
+            "src/genkart/brain.py",
+            "src/genkart/server.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "tests/test_catalogue.py",
+          "does": "Searching several catalogues: general first, specialists when the match is weak, gender respected.",
+          "lines": 148,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/dedup.py",
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "tests/test_checks.py",
+          "does": "The candidate checks: slot fit, no children's items unless asked, one gender per outfit, the named colour first, and never an empty slot.",
+          "lines": 49,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/checks.py"
+          ]
+        },
+        {
+          "path": "tests/test_claude_client.py",
+          "does": "The Claude spend caps: per purpose, and one total over every purpose that no script can pass.",
+          "lines": 59,
+          "uses": [
+            "src/genkart/claude_client.py"
+          ]
+        },
+        {
+          "path": "tests/test_cloudrun_name.py",
+          "does": "The Cloud Run service must keep the live name genkart-lab (a new name is a new service with a new URL, which breaks the Pages site's PHOTO_BASE).",
+          "lines": 20,
+          "uses": []
+        },
+        {
+          "path": "tests/test_colour.py",
+          "does": "Reading a garment's colour from its photo, and the colour-harmony score of an outfit.",
+          "lines": 38,
+          "uses": [
+            "src/genkart/colour.py"
+          ]
+        },
+        {
+          "path": "tests/test_data.py",
+          "does": "The rule that decides which dataset queries are about clothing.",
+          "lines": 47,
+          "uses": [
+            "src/genkart/data.py"
+          ]
+        },
+        {
+          "path": "tests/test_dedup.py",
+          "does": "Finding near-identical products across catalogues and keeping one of each.",
+          "lines": 37,
+          "uses": [
+            "src/genkart/dedup.py"
+          ]
+        },
+        {
+          "path": "tests/test_dockerfile.py",
+          "does": "The hosted image's settings: every ENV line is a clean list of NAME=value words, and the settings the hosted Lab depends on are all there.",
+          "lines": 64,
+          "uses": []
+        },
+        {
+          "path": "tests/test_docs_coverage.py",
+          "does": "The documentation must cover the project: every code file is on the map with a description, every logged run is cited by the site",
+          "lines": 82,
+          "uses": []
+        },
+        {
+          "path": "tests/test_encoder_paths.py",
+          "does": "The encoder reads only real files inside data/: ../ tricks, symlinks that point outside, folders and missing files are all refused.",
+          "lines": 163,
+          "uses": [
+            "src/genkart/embed.py",
+            "src/genkart/encoder_service.py"
+          ]
+        },
+        {
+          "path": "tests/test_feedback.py",
+          "does": "The feedback step: a query moves toward liked products, away from disliked ones, stays unit length, and is unchanged with no feedback.",
+          "lines": 32,
+          "uses": [
+            "src/genkart/feedback.py"
+          ]
+        },
+        {
+          "path": "tests/test_graph.py",
+          "does": "The knowledge graph: occasion words, garment suggestions, replacing generic pieces, adding missing roles.",
+          "lines": 69,
+          "uses": [
+            "src/genkart/graph.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "tests/test_guard.py",
+          "does": "The safety guard: ordinary fashion allowed, harmful and injection requests refused.",
+          "lines": 47,
+          "uses": [
+            "src/genkart/guard.py"
+          ]
+        },
+        {
+          "path": "tests/test_index.py",
+          "does": "The vector index: best first, exact match found, save and load, damaged files detected.",
+          "lines": 60,
+          "uses": [
+            "src/genkart/index.py"
+          ]
+        },
+        {
+          "path": "tests/test_ingest_worker.py",
+          "does": "Adding products through the queue: every replica gets it, retries do not duplicate, a bad photo is parked.",
+          "lines": 209,
+          "uses": [
+            "src/genkart/ingest_worker.py",
+            "src/genkart/jobqueue.py"
+          ]
+        },
+        {
+          "path": "tests/test_jobqueue.py",
+          "does": "The local queue: hiding time, acknowledge, dead-letter after too many tries, repeated keys ignored.",
+          "lines": 116,
+          "uses": [
+            "src/genkart/jobqueue.py"
+          ]
+        },
+        {
+          "path": "tests/test_make_report.py",
+          "does": "scripts/make_report.py: offline, deterministic, fully filled, and its numbers equal the values in the run files.",
+          "lines": 59,
+          "uses": []
+        },
+        {
+          "path": "tests/test_metrics_retrieval.py",
+          "does": "The ranking measures (DCG, NDCG, recall, reciprocal rank) against hand calculations.",
+          "lines": 50,
+          "uses": [
+            "src/genkart/metrics.py",
+            "src/genkart/retrieval.py"
+          ]
+        },
+        {
+          "path": "tests/test_no_identifiers_published.py",
+          "does": "Nothing that identifies the owner's cloud account may sit in a file git would publish: no bucket name, instance id, public address or key.",
+          "lines": 41,
+          "uses": []
+        },
+        {
+          "path": "tests/test_outfit.py",
+          "does": "Building an outfit: harmony swaps, keeping the best match when alternatives are much worse, no repeated product.",
+          "lines": 94,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/colour.py",
+            "src/genkart/outfit.py"
+          ]
+        },
+        {
+          "path": "tests/test_pilot_ratings_set.py",
+          "does": "scripts/make_pilot_ratings_set.py: whitelist of keys, string ids, deterministic, counts equal the source files.",
+          "lines": 47,
+          "uses": []
+        },
+        {
+          "path": "tests/test_ratings_from_paste.py",
+          "does": "ratings_from_paste: tolerant of messy pasted text, strict about ids, words and conflicting duplicates.",
+          "lines": 58,
+          "uses": []
+        },
+        {
+          "path": "tests/test_recording.py",
+          "does": "Recorded runs must never carry a photo address, and must not republish ids or titles from catalogues the project rules keep local.",
+          "lines": 89,
+          "uses": [
+            "src/genkart/recording.py"
+          ]
+        },
+        {
+          "path": "tests/test_reqlog.py",
+          "does": "One JSON log line per request with its ticket number; hostile ticket numbers cannot forge log lines.",
+          "lines": 56,
+          "uses": [
+            "src/genkart/reqlog.py"
+          ]
+        },
+        {
+          "path": "tests/test_resources.py",
+          "does": "The memory numbers come from the operating system and Ollama's own report: a snapshot must be well formed even with nothing running.",
+          "lines": 30,
+          "uses": [
+            "src/genkart/resources.py",
+            "src/genkart/server.py"
+          ]
+        },
+        {
+          "path": "tests/test_server.py",
+          "does": "The pipeline streams one event per step, in order, with exact product ids as text. Everything outside is replaced by fakes: no model,",
+          "lines": 944,
+          "uses": [
+            "src/genkart/brain.py",
+            "src/genkart/catalogue.py",
+            "src/genkart/colour.py",
+            "src/genkart/embed.py",
+            "src/genkart/guard.py",
+            "src/genkart/outfit.py",
+            "src/genkart/server.py",
+            "src/genkart/study.py",
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "tests/test_server_router_retry.py",
+          "does": "The web server's call to the router: HTTP 429 means \"busy, ask again shortly\", not \"the search failed\".",
+          "lines": 98,
+          "uses": [
+            "src/genkart/server.py"
+          ]
+        },
+        {
+          "path": "tests/test_sharding.py",
+          "does": "Splitting products over shards gives exactly the single-process answer for any shard count.",
+          "lines": 254,
+          "uses": [
+            "src/genkart/catalogue.py",
+            "src/genkart/shard_worker.py",
+            "src/genkart/sharding.py"
+          ]
+        },
+        {
+          "path": "tests/test_sqs_queue.py",
+          "does": "SqsJobQueue and the S3 photo hook, against a small fake of the SQS calls we use (no AWS needed).",
+          "lines": 296,
+          "uses": [
+            "src/genkart/ingest_worker.py",
+            "src/genkart/jobqueue.py",
+            "src/genkart/sqs_queue.py"
+          ]
+        },
+        {
+          "path": "tests/test_study.py",
+          "does": "The consented study's server side: off unless configured, input checked, one answer per participant and prompt, withdrawal deletes, a failing store says 503.",
+          "lines": 179,
+          "uses": [
+            "src/genkart/server.py",
+            "src/genkart/study.py",
+            "src/genkart/studystore.py"
+          ]
+        },
+        {
+          "path": "tests/test_studystats.py",
+          "does": "The study's analysis: per-participant with-minus-without differences, only people with both arms, honest when there is no data.",
+          "lines": 27,
+          "uses": [
+            "src/genkart/studystats.py"
+          ]
+        },
+        {
+          "path": "tests/test_studystore.py",
+          "does": "The study's answer storage: the local file store (replace, delete, survive a damaged line) and the Firestore store's requests, checked against a fake Google.",
+          "lines": 65,
+          "uses": [
+            "src/genkart/studystore.py"
+          ]
+        },
+        {
+          "path": "tests/test_understand.py",
+          "does": "Checking the language model's plan against the sentence: invented colours and genders are removed.",
+          "lines": 204,
+          "uses": [
+            "src/genkart/understand.py"
+          ]
+        },
+        {
+          "path": "tests/test_sheet_grease.py",
+          "does": "Verifies the pink grease-circle SVG indicator is rendered in the Print component and ContactSheet behaviour is unchanged.",
+          "lines": 57,
+          "uses": [
+            "web/src/components/Sheet.tsx"
+          ]
+        }
+      ]
     }
-   ]
-  },
-  {
-   "id": "router",
-   "title": "Router (TypeScript)",
-   "what": "Asks all shards at once, merges the answers, survives failures.",
-   "files": [
-    {
-     "path": "services/router/src/config.ts",
-     "does": "Router settings read from the environment: ports, shard addresses (with replicas), deadlines, hedge delay, in-flight limit.",
-     "lines": 35,
-     "uses": []
-    },
-    {
-     "path": "services/router/src/hedge.ts",
-     "does": "Adaptive hedging. A fixed hedge delay (say 40 ms) is too short when a shard is simply slow today: every search would then ask",
-     "lines": 39,
-     "uses": []
-    },
-    {
-     "path": "services/router/src/index.ts",
-     "does": "Starts the router process.",
-     "lines": 8,
-     "uses": [
-      "services/router/src/config.ts",
-      "services/router/src/server.ts"
-     ]
-    },
-    {
-     "path": "services/router/src/merge.ts",
-     "does": "The router's merge and routing rule. Mirrors src/genkart/sharding.py (merge_route) exactly; test/merge.test.ts checks it",
-     "lines": 48,
-     "uses": []
-    },
-    {
-     "path": "services/router/src/server.ts",
-     "does": "The router: asks the encoder, asks every shard at once (failover and hedging across replicas), merges, refuses past the limit with HTTP 429.",
-     "lines": 251,
-     "uses": [
-      "services/router/src/config.ts",
-      "services/router/src/hedge.ts",
-      "services/router/src/merge.ts"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "infra",
-   "title": "AWS stacks (TypeScript, CDK)",
-   "what": "The cloud machines, network, queue and monitoring as code.",
-   "files": [
-    {
-     "path": "infra/lib/compute-stack.ts",
-     "does": "The three machines (router host, shard hosts in two zones) with their startup scripts and permissions.",
-     "lines": 154,
-     "uses": []
-    },
-    {
-     "path": "infra/lib/data-stack.ts",
-     "does": "The storage and queues: the photo bucket, the ingestion queue and its dead-letter queue.",
-     "lines": 73,
-     "uses": []
-    },
-    {
-     "path": "infra/lib/network-stack.ts",
-     "does": "Your own public IP as a /32, e.g. \"203.0.113.7/32\". Only this address may reach the router.",
-     "lines": 54,
-     "uses": []
-    },
-    {
-     "path": "infra/lib/observability-stack.ts",
-     "does": "Logs, metric filters, the dashboard and alarms, and the budget alert.",
-     "lines": 110,
-     "uses": []
-    }
-   ]
-  },
-  {
-   "id": "web",
-   "title": "This website (TypeScript, React)",
-   "what": "Pages and parts of the site you are reading.",
-   "files": [
-    {
-     "path": "web/src/App.tsx",
-     "does": "The page frame: routes, the server health check, and the Replay / Try it live switch.",
-     "lines": 112,
-     "uses": [
-      "web/src/api.ts",
-      "web/src/brain.ts",
-      "web/src/brand.ts",
-      "web/src/components/ModeMenu.tsx",
-      "web/src/components/ModeSwitch.tsx",
-      "web/src/components/PhotoCredits.tsx",
-      "web/src/components/Safety.tsx",
-      "web/src/pages/Docs.tsx",
-      "web/src/pages/Evidence.tsx",
-      "web/src/pages/Glossary.tsx",
-      "web/src/pages/Search.tsx",
-      "web/src/pages/Study.tsx",
-      "web/src/pages/System.tsx",
-      "web/src/pages/Wake.tsx",
-      "web/src/recorded.ts"
-     ]
-    },
-    {
-     "path": "web/src/api.ts",
-     "does": "The page's calls to the server: health and readiness, example prompts, the live step stream (a POST read as server-sent events), plain search.",
-     "lines": 225,
-     "uses": [
-      "web/src/brain.ts",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/brain.ts",
-     "does": "The visitor's own model for the understand step. Held in memory only (never localStorage, never a cookie, never the URL): reloading the page forgets it.",
-     "lines": 43,
-     "uses": []
-    },
-    {
-     "path": "web/src/brand.ts",
-     "does": "One place for the product name, so renaming (or adding a distinguishing handle) is a one-line change.",
-     "lines": 6,
-     "uses": []
-    },
-    {
-     "path": "web/src/components/CompareCard.tsx",
-     "does": "\"Did the plan help?\": plain search of the sentence as typed, next to the outfit the plan built, with the time each took and (in the Viewer) the author's blind rating of each.",
-     "lines": 51,
-     "uses": [
-      "web/src/components/Sheet.tsx",
-      "web/src/recorded.ts",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/CostPanel.tsx",
-     "does": "What a run costs, in one short table: time, memory held and money, per part of the run. Every number is measured or read from a logged file; where a number",
-     "lines": 89,
-     "uses": [
-      "web/src/brain.ts",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/EvidenceKit.tsx",
-     "does": "The building blocks of the Evidence page: the claim card (question, computed verdict, chart with its 95% ranges, how it was measured,",
-     "lines": 280,
-     "uses": [
-      "web/src/components/Interval.tsx",
-      "web/src/components/Plain.tsx",
-      "web/src/components/Term.tsx"
-     ]
-    },
-    {
-     "path": "web/src/components/Explain.tsx",
-     "does": "Plain-language notes about time. While a step is slow: what is happening right now. After a run: why a step took long, with a dashed arrow at its band.",
-     "lines": 79,
-     "uses": [
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/Findings.tsx",
-     "does": "The claim cards of the Evidence page, in page order. Each card is built from one claim in virtual:evidence (question, computed verdict,",
-     "lines": 11,
-     "uses": [
-      "web/src/components/EvidenceKit.tsx"
-     ]
-    },
-    {
-     "path": "web/src/components/ForestPlot.tsx",
-     "does": "The scorecard: every paired difference on the page as one forest plot (each effect an interval against zero), in two panels because the",
-     "lines": 79,
-     "uses": [
-      "web/src/components/EvidenceKit.tsx",
-      "web/src/components/Interval.tsx"
-     ]
-    },
-    {
-     "path": "web/src/components/Hero.tsx",
-     "does": "Chapter 1 of the Viewer: the problem in one line, what this is (the headline), why it matters (one line), and an explainer that loops through the",
-     "lines": 207,
-     "uses": [
-      "web/src/brand.ts",
-      "web/src/components/Sheet.tsx",
-      "web/src/content/story.ts",
-      "web/src/recorded.ts",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/Interval.tsx",
-     "does": "One measured value drawn on a real number line: a hatched 95% range, a tick at the average, an optional reference line (zero for a",
-     "lines": 90,
-     "uses": []
-    },
-    {
-     "path": "web/src/components/JourneyCanvas.tsx",
-     "does": "One small drawing for the \"journey of one request\" (How it works page): the recorded sentence moving through the six steps.",
-     "lines": 259,
-     "uses": [
-      "web/src/content/story.ts",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/ModeMenu.tsx",
-     "does": "\"AI model\": the dialog at the top right of the navigation, shown only in Lab, where the visitor picks which AI reads their sentence:",
-     "lines": 222,
-     "uses": [
-      "web/src/api.ts",
-      "web/src/brain.ts",
-      "web/src/ui.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/ModeSwitch.tsx",
-     "does": "The two ways to use the site, always in the header: Replay (recorded runs, nothing is searched) and Try it live (search your own words).",
-     "lines": 16,
-     "uses": [
-      "web/src/recorded.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/Panels.tsx",
-     "does": "The step panels: plan card, graph sheet, run log, time strip, search and compose panels. Inside the results stepper they drop their own step headings (head=false).",
-     "lines": 256,
-     "uses": [
-      "web/src/components/Explain.tsx",
-      "web/src/trace.ts",
-      "web/src/ui.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/PhotoCredits.tsx",
-     "does": "Credits and the way to ask for a removal: shown at the bottom of every page, because the hosted Lab serves product photos that belong to their sellers.",
-     "lines": 10,
-     "uses": []
-    },
-    {
-     "path": "web/src/components/Plain.tsx",
-     "does": "Two parts of every long section: the answer in plain words (always visible), and the exact numbers (one click away, so no detail is lost).",
-     "lines": 17,
-     "uses": []
-    },
-    {
-     "path": "web/src/components/Refine.tsx",
-     "does": "\"More like what you liked\": the visitor marks products with a thumbs-up, and this panel searches again with the query moved toward them (server: /api/refine).",
-     "lines": 53,
-     "uses": [
-      "web/src/api.ts",
-      "web/src/components/Sheet.tsx"
-     ]
-    },
-    {
-     "path": "web/src/components/Safety.tsx",
-     "does": "Two safety nets so no visitor is ever stuck: a message with a way out when a page breaks, and a way back to the top of a long page.",
-     "lines": 44,
-     "uses": []
-    },
-    {
-     "path": "web/src/components/Sentence.tsx",
-     "does": "Marks the words of the request that the plan was built from. This is only an overlay: the plan card below lists every field exactly.",
-     "lines": 65,
-     "uses": [
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/Sheet.tsx",
-     "does": "The contact sheet, outfit print and at-a-glance row, with a placeholder where the Viewer has no photo.",
-     "lines": 154,
-     "uses": [
-      "web/src/brand.ts",
-      "web/src/flats.tsx",
-      "web/src/trace.ts",
-      "web/src/ui.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/Stepper.tsx",
-     "does": "\"How it got there\": the six steps of one run as a vertical stepper. Each closed card says, in one plain sentence, what that step did",
-     "lines": 62,
-     "uses": [
-      "web/src/content/story.ts",
-      "web/src/trace.ts",
-      "web/src/ui.ts"
-     ]
-    },
-    {
-     "path": "web/src/components/Term.tsx",
-     "does": "An inline glossary word: a button in the sentence that opens a short plain definition beside it. Click or Enter opens it, Escape or a",
-     "lines": 53,
-     "uses": [
-      "web/src/content/glossary.ts"
-     ]
-    },
-    {
-     "path": "web/src/demo.ts",
-     "does": "The demo replay: a made-up run, emitted in the same event shape as the real server, so the same screen renders both.",
-     "lines": 54,
-     "uses": [
-      "web/src/flats.tsx",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/evidence-front.d.ts",
-     "does": "Built by vite.config.ts (evidenceFront): the few logged values the first download needs. Same files, same numbers as virtual:evidence.",
-     "lines": 15,
-     "uses": []
-    },
-    {
-     "path": "web/src/flats.tsx",
-     "does": "Technical flats: the line drawings designers use for garments. They stand in for product photos in the demo replay only.",
-     "lines": 41,
-     "uses": []
-    },
-    {
-     "path": "web/src/pages/AwsTour.tsx",
-     "does": "The recorded AWS runs (Mumbai, 2026-10-15 to 2026-10-16), as parts the System page lays out: the architecture drawing, the charts and tables",
-     "lines": 206,
-     "uses": []
-    },
-    {
-     "path": "web/src/pages/Docs.tsx",
-     "does": "The \"How it works\" page (route #/docs): the journey of one recorded request through the six steps, the decisions with their reasons,",
-     "lines": 384,
-     "uses": [
-      "web/src/components/JourneyCanvas.tsx",
-      "web/src/components/Plain.tsx",
-      "web/src/components/Sheet.tsx",
-      "web/src/content/docs.ts",
-      "web/src/content/map.json",
-      "web/src/content/story.ts",
-      "web/src/recorded.ts",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/pages/Evidence.tsx",
-     "does": "The Evidence page: one plain sentence, the scorecard (every paired difference as an interval against zero, with its computed verdict),",
-     "lines": 121,
-     "uses": [
-      "web/src/components/EvidenceKit.tsx",
-      "web/src/components/Findings.tsx",
-      "web/src/components/ForestPlot.tsx",
-      "web/src/components/Term.tsx",
-      "web/src/content/glossary.ts",
-      "web/src/recorded.ts"
-     ]
-    },
-    {
-     "path": "web/src/pages/Glossary.tsx",
-     "does": "The Glossary page: every plain-language definition the site uses, with a filter box. Works without any server.",
-     "lines": 26,
-     "uses": [
-      "web/src/content/glossary.ts"
-     ]
-    },
-    {
-     "path": "web/src/pages/Search.tsx",
-     "does": "The Search page. Replay (the Viewer) is a short story in three chapters: the problem and the explainer replay (Hero), what we learned, your turn (the run picker).",
-     "lines": 355,
-     "uses": [
-      "web/src/api.ts",
-      "web/src/brain.ts",
-      "web/src/brand.ts",
-      "web/src/components/CompareCard.tsx",
-      "web/src/components/CostPanel.tsx",
-      "web/src/components/Explain.tsx",
-      "web/src/components/Hero.tsx",
-      "web/src/components/Panels.tsx",
-      "web/src/components/Refine.tsx",
-      "web/src/components/Sentence.tsx",
-      "web/src/components/Sheet.tsx",
-      "web/src/components/Stepper.tsx",
-      "web/src/demo.ts",
-      "web/src/recorded.ts",
-      "web/src/trace.ts",
-      "web/src/ui.ts"
-     ]
-    },
-    {
-     "path": "web/src/pages/Study.tsx",
-     "does": "The consented study: does a drawn preview change how people rate the same search results? (server: src/genkart/study.py)",
-     "lines": 152,
-     "uses": [
-      "web/src/api.ts",
-      "web/src/components/Sheet.tsx",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/pages/System.tsx",
-     "does": "The System page (route #/system): \"We broke it on purpose\". One sentence and the AWS drawing, then three experiments, each with",
-     "lines": 276,
-     "uses": [
-      "web/src/api.ts",
-      "web/src/components/Plain.tsx",
-      "web/src/pages/AwsTour.tsx"
-     ]
-    },
-    {
-     "path": "web/src/pages/Wake.tsx",
-     "does": "The \"waking up\" page of the public Viewer: the hosted Lab sleeps when nobody uses it, and a sleeping server cannot show anything itself.",
-     "lines": 72,
-     "uses": [
-      "web/src/api.ts",
-      "web/src/recorded.ts"
-     ]
-    },
-    {
-     "path": "web/src/recorded.ts",
-     "does": "Recorded runs for the public Viewer: real pipeline traces made by scripts/record_runs.py, with no photos.",
-     "lines": 76,
-     "uses": [
-      "web/src/components/CostPanel.tsx",
-      "web/src/recorded/photo-ids.json",
-      "web/src/recorded/runs.json",
-      "web/src/trace.ts"
-     ]
-    },
-    {
-     "path": "web/src/trace.ts",
-     "does": "The one contract between the backend and this page: every pipeline step reports itself as a trace event.",
-     "lines": 79,
-     "uses": []
-    },
-    {
-     "path": "web/src/ui.ts",
-     "does": "Small page helpers shared by several components (kept out of component files so fast refresh keeps working).",
-     "lines": 16,
-     "uses": []
-    }
-   ]
-  },
-  {
-   "id": "tests",
-   "title": "Tests",
-   "what": "What is checked on every change.",
-   "files": [
-    {
-     "path": "tests/test_admission.py",
-     "does": "The encoder's gate: at most N jobs at once, and a waiting job whose deadline passed is dropped, never run.",
-     "lines": 57,
-     "uses": [
-      "src/genkart/admission.py"
-     ]
-    },
-    {
-     "path": "tests/test_agreement.py",
-     "does": "Rater agreement: lifted kappa functions, prompt-level bootstrap, and the analyze_agreement script on synthetic ratings.",
-     "lines": 141,
-     "uses": [
-      "src/genkart/metrics.py"
-     ]
-    },
-    {
-     "path": "tests/test_brain.py",
-     "does": "Bring your own model: the visitor's key is validated, used for one request, and must never appear in an event, an error, a repr or a response.",
-     "lines": 339,
-     "uses": [
-      "src/genkart/brain.py",
-      "src/genkart/server.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "tests/test_catalogue.py",
-     "does": "Searching several catalogues: general first, specialists when the match is weak, gender respected.",
-     "lines": 148,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/dedup.py",
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "tests/test_checks.py",
-     "does": "The candidate checks: slot fit, no children's items unless asked, one gender per outfit, the named colour first, and never an empty slot.",
-     "lines": 49,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/checks.py"
-     ]
-    },
-    {
-     "path": "tests/test_claude_client.py",
-     "does": "The Claude spend caps: per purpose, and one total over every purpose that no script can pass.",
-     "lines": 59,
-     "uses": [
-      "src/genkart/claude_client.py"
-     ]
-    },
-    {
-     "path": "tests/test_cloudrun_name.py",
-     "does": "The Cloud Run service must keep the live name genkart-lab (a new name is a new service with a new URL, which breaks the Pages site's PHOTO_BASE).",
-     "lines": 20,
-     "uses": []
-    },
-    {
-     "path": "tests/test_colour.py",
-     "does": "Reading a garment's colour from its photo, and the colour-harmony score of an outfit.",
-     "lines": 38,
-     "uses": [
-      "src/genkart/colour.py"
-     ]
-    },
-    {
-     "path": "tests/test_data.py",
-     "does": "The rule that decides which dataset queries are about clothing.",
-     "lines": 47,
-     "uses": [
-      "src/genkart/data.py"
-     ]
-    },
-    {
-     "path": "tests/test_dedup.py",
-     "does": "Finding near-identical products across catalogues and keeping one of each.",
-     "lines": 37,
-     "uses": [
-      "src/genkart/dedup.py"
-     ]
-    },
-    {
-     "path": "tests/test_dockerfile.py",
-     "does": "The hosted image's settings: every ENV line is a clean list of NAME=value words, and the settings the hosted Lab depends on are all there.",
-     "lines": 64,
-     "uses": []
-    },
-    {
-     "path": "tests/test_docs_coverage.py",
-     "does": "The documentation must cover the project: every code file is on the map with a description, every logged run is cited by the site",
-     "lines": 82,
-     "uses": []
-    },
-    {
-     "path": "tests/test_encoder_paths.py",
-     "does": "The encoder reads only real files inside data/: ../ tricks, symlinks that point outside, folders and missing files are all refused.",
-     "lines": 163,
-     "uses": [
-      "src/genkart/embed.py",
-      "src/genkart/encoder_service.py"
-     ]
-    },
-    {
-     "path": "tests/test_feedback.py",
-     "does": "The feedback step: a query moves toward liked products, away from disliked ones, stays unit length, and is unchanged with no feedback.",
-     "lines": 32,
-     "uses": [
-      "src/genkart/feedback.py"
-     ]
-    },
-    {
-     "path": "tests/test_graph.py",
-     "does": "The knowledge graph: occasion words, garment suggestions, replacing generic pieces, adding missing roles.",
-     "lines": 69,
-     "uses": [
-      "src/genkart/graph.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "tests/test_guard.py",
-     "does": "The safety guard: ordinary fashion allowed, harmful and injection requests refused.",
-     "lines": 47,
-     "uses": [
-      "src/genkart/guard.py"
-     ]
-    },
-    {
-     "path": "tests/test_index.py",
-     "does": "The vector index: best first, exact match found, save and load, damaged files detected.",
-     "lines": 60,
-     "uses": [
-      "src/genkart/index.py"
-     ]
-    },
-    {
-     "path": "tests/test_ingest_worker.py",
-     "does": "Adding products through the queue: every replica gets it, retries do not duplicate, a bad photo is parked.",
-     "lines": 209,
-     "uses": [
-      "src/genkart/ingest_worker.py",
-      "src/genkart/jobqueue.py"
-     ]
-    },
-    {
-     "path": "tests/test_jobqueue.py",
-     "does": "The local queue: hiding time, acknowledge, dead-letter after too many tries, repeated keys ignored.",
-     "lines": 116,
-     "uses": [
-      "src/genkart/jobqueue.py"
-     ]
-    },
-    {
-     "path": "tests/test_make_report.py",
-     "does": "scripts/make_report.py: offline, deterministic, fully filled, and its numbers equal the values in the run files.",
-     "lines": 59,
-     "uses": []
-    },
-    {
-     "path": "tests/test_metrics_retrieval.py",
-     "does": "The ranking measures (DCG, NDCG, recall, reciprocal rank) against hand calculations.",
-     "lines": 50,
-     "uses": [
-      "src/genkart/metrics.py",
-      "src/genkart/retrieval.py"
-     ]
-    },
-    {
-     "path": "tests/test_no_identifiers_published.py",
-     "does": "Nothing that identifies the owner's cloud account may sit in a file git would publish: no bucket name, instance id, public address or key.",
-     "lines": 41,
-     "uses": []
-    },
-    {
-     "path": "tests/test_outfit.py",
-     "does": "Building an outfit: harmony swaps, keeping the best match when alternatives are much worse, no repeated product.",
-     "lines": 94,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/colour.py",
-      "src/genkart/outfit.py"
-     ]
-    },
-    {
-     "path": "tests/test_pilot_ratings_set.py",
-     "does": "scripts/make_pilot_ratings_set.py: whitelist of keys, string ids, deterministic, counts equal the source files.",
-     "lines": 47,
-     "uses": []
-    },
-    {
-     "path": "tests/test_ratings_from_paste.py",
-     "does": "ratings_from_paste: tolerant of messy pasted text, strict about ids, words and conflicting duplicates.",
-     "lines": 58,
-     "uses": []
-    },
-    {
-     "path": "tests/test_recording.py",
-     "does": "Recorded runs must never carry a photo address, and must not republish ids or titles from catalogues the project rules keep local.",
-     "lines": 89,
-     "uses": [
-      "src/genkart/recording.py"
-     ]
-    },
-    {
-     "path": "tests/test_reqlog.py",
-     "does": "One JSON log line per request with its ticket number; hostile ticket numbers cannot forge log lines.",
-     "lines": 56,
-     "uses": [
-      "src/genkart/reqlog.py"
-     ]
-    },
-    {
-     "path": "tests/test_resources.py",
-     "does": "The memory numbers come from the operating system and Ollama's own report: a snapshot must be well formed even with nothing running.",
-     "lines": 30,
-     "uses": [
-      "src/genkart/resources.py",
-      "src/genkart/server.py"
-     ]
-    },
-    {
-     "path": "tests/test_server.py",
-     "does": "The pipeline streams one event per step, in order, with exact product ids as text. Everything outside is replaced by fakes: no model,",
-     "lines": 944,
-     "uses": [
-      "src/genkart/brain.py",
-      "src/genkart/catalogue.py",
-      "src/genkart/colour.py",
-      "src/genkart/embed.py",
-      "src/genkart/guard.py",
-      "src/genkart/outfit.py",
-      "src/genkart/server.py",
-      "src/genkart/study.py",
-      "src/genkart/understand.py"
-     ]
-    },
-    {
-     "path": "tests/test_server_router_retry.py",
-     "does": "The web server's call to the router: HTTP 429 means \"busy, ask again shortly\", not \"the search failed\".",
-     "lines": 98,
-     "uses": [
-      "src/genkart/server.py"
-     ]
-    },
-    {
-     "path": "tests/test_sharding.py",
-     "does": "Splitting products over shards gives exactly the single-process answer for any shard count.",
-     "lines": 254,
-     "uses": [
-      "src/genkart/catalogue.py",
-      "src/genkart/shard_worker.py",
-      "src/genkart/sharding.py"
-     ]
-    },
-    {
-     "path": "tests/test_sqs_queue.py",
-     "does": "SqsJobQueue and the S3 photo hook, against a small fake of the SQS calls we use (no AWS needed).",
-     "lines": 296,
-     "uses": [
-      "src/genkart/ingest_worker.py",
-      "src/genkart/jobqueue.py",
-      "src/genkart/sqs_queue.py"
-     ]
-    },
-    {
-     "path": "tests/test_study.py",
-     "does": "The consented study's server side: off unless configured, input checked, one answer per participant and prompt, withdrawal deletes, a failing store says 503.",
-     "lines": 179,
-     "uses": [
-      "src/genkart/server.py",
-      "src/genkart/study.py",
-      "src/genkart/studystore.py"
-     ]
-    },
-    {
-     "path": "tests/test_studystats.py",
-     "does": "The study's analysis: per-participant with-minus-without differences, only people with both arms, honest when there is no data.",
-     "lines": 27,
-     "uses": [
-      "src/genkart/studystats.py"
-     ]
-    },
-    {
-     "path": "tests/test_studystore.py",
-     "does": "The study's answer storage: the local file store (replace, delete, survive a damaged line) and the Firestore store's requests, checked against a fake Google.",
-     "lines": 65,
-     "uses": [
-      "src/genkart/studystore.py"
-     ]
-    },
-    {
-     "path": "tests/test_understand.py",
-     "does": "Checking the language model's plan against the sentence: invented colours and genders are removed.",
-     "lines": 77,
-     "uses": [
-      "src/genkart/understand.py"
-     ]
-    }
-   ]
-  }
- ]
+  ]
 }

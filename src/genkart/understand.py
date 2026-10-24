@@ -214,6 +214,11 @@ _COMPAT_Q = re.compile(
     re.IGNORECASE,
 )
 
+# Style/formality modifiers extracted from the query and applied to every recovered piece.
+# Single-word terms are matched with word boundaries; "smart casual" is handled as a phrase.
+_FORMALITY_WORDS: frozenset[str] = frozenset({"casual", "formal", "dressy", "relaxed"})
+_SMART_CASUAL_RE = re.compile(r"\bsmart\s+casual\b", re.IGNORECASE)
+
 
 def _garments_from_text(text: str) -> "tuple[list[Piece], list[str]] | None":
     """Deterministic multi-garment recovery for bare fallback plans.
@@ -267,16 +272,39 @@ def _garments_from_text(text: str) -> "tuple[list[Piece], list[str]] | None":
     if any(slot == "dress" for _, _, slot, _ in raw_hits):
         return None   # dress-category = potentially complete outfit; don't split
 
+    # ── Formality modifiers in the full query ────────────────────────────────
+    # Applied to every recovered piece: a follow-up like "make it more casual"
+    # appends "; casual" to the standalone query, which must survive into search_text.
+    formality_words: list[str] = []
+    if _SMART_CASUAL_RE.search(low):
+        formality_words.append("smart casual")
+    formality_words += sorted(
+        fw for fw in _FORMALITY_WORDS
+        if re.search(rf"\b{re.escape(fw)}\b", low) and fw not in " ".join(formality_words)
+    )
+
     # ── Classify hits and build pieces ────────────────────────────────────────
     pieces_out: list[Piece] = []
     owned_out: list[str] = []
     prev_end = 0
 
     for start, end, slot, word in raw_hits:
-        # Colours in the text segment before this garment
-        segment = low[prev_end:start]
-        colour_words = [w for w in re.findall(r"[a-z]+", segment) if w in colour_keys]
-        search_text = " ".join(colour_words + [word])
+        # Colours in the text segment BEFORE this garment (existing behaviour).
+        before_segment = low[prev_end:start]
+        # Also scan AFTER the garment, but only when there is no subsequent garment.
+        # With a following garment, any colour between them belongs to that next piece;
+        # the existing prev_end logic already attributes it via before_segment.
+        next_starts = [s for s, _, _, _ in raw_hits if s > start]
+        if next_starts:
+            colour_words = [w for w in re.findall(r"[a-z]+", before_segment) if w in colour_keys]
+        else:
+            next_start = len(low)
+            after_segment = low[end:next_start]
+            colour_words = list(dict.fromkeys(
+                w for w in re.findall(r"[a-z]+", before_segment + " " + after_segment)
+                if w in colour_keys
+            ))
+        search_text = " ".join([*formality_words, *colour_words, word])
         prev_end = end
 
         if has_compat_q and _is_owned(start):

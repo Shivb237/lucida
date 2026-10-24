@@ -97,7 +97,12 @@ export function Print({ items, alreadyHas, mode }: { items: OutfitItem[]; alread
         <div className="board" style={{ gridTemplateColumns: `repeat(${items.length === 4 ? 2 : Math.min(items.length, 3)}, minmax(0, 1fr))` }}>
           {items.map((it) => (
             <figure key={it.pick.id} style={{ margin: 0 }}>
-              <div className="positive"><Picture hit={it.pick} /></div>
+              <div style={{ position: 'relative' }}>
+                <div className="positive"><Picture hit={it.pick} /></div>
+                <svg className="grease" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ transform: `rotate(${(hash(it.pick.id) % 13) - 6}deg) scale(${1 + (hash(it.pick.id) % 7) / 100})` }}>
+                  <path pathLength={100} d={CIRCLES[hash(it.pick.id) % 3]} fill="none" stroke="var(--mag-film)" strokeWidth="3.4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                </svg>
+              </div>
               <figcaption className="lg" style={{ marginTop: 6, color: 'var(--z4)' }}>{it.kind}</figcaption>
             </figure>
           ))}
