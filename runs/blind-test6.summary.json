@@ -1,0 +1,24 @@
+{
+  "prompts_total": 60,
+  "prompts_rated": 15,
+  "prompts_identical": 45,
+  "mean_with_tiny": 1,
+  "mean_without_tiny": 0.733,
+  "without_minus_with_among_rated": {
+    "mean": -0.267,
+    "ci95": [
+      -0.733,
+      0.2
+    ],
+    "better": 3,
+    "worse": 5,
+    "equal": 7
+  },
+  "without_minus_with_all_60": {
+    "mean": -0.067,
+    "ci95": [
+      -0.2,
+      0.05
+    ]
+  }
+}

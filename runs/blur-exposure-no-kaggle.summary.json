@@ -1,0 +1,32 @@
+{
+  "top": 6,
+  "searches": 246,
+  "by_mode": {
+    "sentence": {
+      "searches": 100,
+      "results_shown": 600,
+      "share_by_source": {
+        "myntra2": 0.6933,
+        "marqo": 0.27,
+        "mens3": 0.0367
+      },
+      "searches_with_any_kaggle_small": 0.0,
+      "mean_top1_score": 0.1288,
+      "searches_with_no_result": 0,
+      "searches_with_only_kaggle_small": 0.0
+    },
+    "plan_piece": {
+      "searches": 146,
+      "results_shown": 876,
+      "share_by_source": {
+        "myntra2": 0.484,
+        "marqo": 0.3493,
+        "mens3": 0.1667
+      },
+      "searches_with_any_kaggle_small": 0.0,
+      "mean_top1_score": 0.1143,
+      "searches_with_no_result": 0,
+      "searches_with_only_kaggle_small": 0.0
+    }
+  }
+}

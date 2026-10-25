@@ -146,3 +146,18 @@ def test_a_catalogue_search_with_ties_returns_what_the_full_sort_returned():
     full = np.lexsort((src._ids_u64, -(vecs @ q)))[:300]
     assert [h.product_id for h in hits] == [ids[i] for i in full][:250]
     assert top_rows(vecs @ q, src._ids_u64, 300).tolist() == full.tolist()
+
+
+def test_drop_kaggle_small_switch_removes_that_source_only(monkeypatch):
+    import pathlib
+
+    import pytest
+
+    from genkart.catalogue import Catalogue
+
+    if not pathlib.Path("data/index/kaggle-marqo-fashionsiglip.npz").exists():
+        pytest.skip("needs the local catalogue files")
+    monkeypatch.setenv("GENKART_DROP_KAGGLE_SMALL", "1")
+    assert [s.name for s in Catalogue.load().specialists] == ["myntra2", "mens3"]
+    monkeypatch.delenv("GENKART_DROP_KAGGLE_SMALL")
+    assert [s.name for s in Catalogue.load().specialists] == ["kaggle", "myntra2", "mens3"]

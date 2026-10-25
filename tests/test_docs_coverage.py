@@ -11,6 +11,9 @@ SITE_TEXT = "\n".join(p.read_text() for p in SITE_SOURCES) + "\n" + (ROOT / "web
 
 # Runs that are on purpose not cited by the site, each with the reason (a new summary file is NOT silently excluded: add it here or cite it).
 NOT_CITED = {
+    "blind-test6.summary.json": "tiny-photo A/B (blind test 6, 2026-10-25): removal did not improve ratings; cited after it is added to the Evidence page",
+    "blur-exposure.summary.json": "how often tiny Kaggle photos are shown (blur investigation, 2026-10-25); cited after the blind test 6 decision",
+    "blur-exposure-no-kaggle.summary.json": "the same search with the tiny Kaggle photos switched off (blur investigation); cited after the blind test 6 decision",
     "random.summary.json": "pilot baseline, shown on the Evidence page by key",
     "bm25.summary.json": "pilot baseline, shown on the Evidence page by key",
     "siglip-base.summary.json": "pilot baseline, shown on the Evidence page by key",

@@ -218,7 +218,10 @@ class Catalogue:
         with open(ROOT / "data/clean/mens3_labels.json") as f:
             lab = json.load(f)
         mens3 = Source("mens3", m3, [lab[str(i)]["title"] for i in m3.ids], np.array(["Men"] * len(m3.ids)), clusters(m3.ids))
-        return cls(general, [kaggle, myntra2, mens3], shared_clusters=True)     # every label above comes from dup_clusters_4.json
+        specialists = [kaggle, myntra2, mens3]
+        if os.environ.get("GENKART_DROP_KAGGLE_SMALL") == "1":     # every Kaggle small photo is 60 x 80 px (blurry when shown): switch it off, no file touched
+            specialists = [s for s in specialists if s.name != "kaggle"]
+        return cls(general, specialists, shared_clusters=True)     # every label above comes from dup_clusters_4.json
 
 
 def image_path(pid: int) -> str:

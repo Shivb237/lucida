@@ -43,13 +43,6 @@ runs/m4-heldout.pre-fix.summary.json
 /REPORT.md
 /RATING_GUIDE.md
 
-# Local AI-tool instructions and configuration are never project artifacts.
-/.codex/
-/.claude/
-/.agents/
-/AGENTS.md
-/CLAUDE.md
-
 # OS
 .DS_Store
 

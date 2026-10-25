@@ -70,7 +70,7 @@ export const STATUS_WORD: Record<Status, string> = { waiting: 'waiting', started
 export const emptySteps = (): Record<StageId, StepState> =>
   Object.fromEntries(STEPS.map((s) => [s.id, { status: 'waiting', seconds: null, payload: {} }])) as Record<StageId, StepState>
 
-export const SOURCE_LABEL: Record<string, string> = { marqo: 'Marqo', kaggle: 'Kaggle', myntra2: 'Myntra photos', mens3: "Men's set", demo: 'Demo' }
+export const SOURCE_LABEL: Record<string, string> = { marqo: 'Marqo', kaggle: 'Kaggle · small photo', myntra2: 'Myntra photos', mens3: "Men's set", demo: 'Demo' }
 export const SOURCE_NOTE: Record<string, string> = {
   marqo: 'the big general collection: sharp photos, mostly from US stores',
   kaggle: 'many Indian items, men and women, tiny photos',

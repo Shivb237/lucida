@@ -1,0 +1,246 @@
+{"test": 4, "n": 1, "mode": "sentence", "text": "Roka ceremony outfit groom side simple pastel bandhgala", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1344}
+{"test": 4, "n": 1, "mode": "plan_piece", "text": "men's pastel bandhgala", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.094}
+{"test": 4, "n": 2, "mode": "sentence", "text": "Engagement dress for bride pastel lehenga with mirror work", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1482}
+{"test": 4, "n": 2, "mode": "plan_piece", "text": "women's pastel lehenga with mirror work", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1534}
+{"test": 4, "n": 3, "mode": "sentence", "text": "Cocktails shaadi outfit women sequin saree black", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1916}
+{"test": 4, "n": 3, "mode": "plan_piece", "text": "women's sequin saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1609}
+{"test": 4, "n": 4, "mode": "sentence", "text": "Haldi function men yellow chikankari kurta pyjama setup", "sources": ["myntra2", "mens3", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1099}
+{"test": 4, "n": 4, "mode": "plan_piece", "text": "men's yellow chikankari kurta", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.1113}
+{"test": 4, "n": 4, "mode": "plan_piece", "text": "men's pyjama", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1102}
+{"test": 4, "n": 5, "mode": "sentence", "text": "Mehendi ceremony outfit bride friend olive green sharara set", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1555}
+{"test": 4, "n": 5, "mode": "plan_piece", "text": "women's olive green sharara set", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1671}
+{"test": 4, "n": 6, "mode": "sentence", "text": "Sangeet dance performance lehenga lightweight flared floral", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1451}
+{"test": 4, "n": 6, "mode": "plan_piece", "text": "lightweight flared floral lehenga", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1525}
+{"test": 4, "n": 7, "mode": "sentence", "text": "Wedding pheras guest outfit women banarasi silk saree royal blue", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1577}
+{"test": 4, "n": 7, "mode": "plan_piece", "text": "women's royal blue banarasi silk saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1446}
+{"test": 4, "n": 8, "mode": "sentence", "text": "Indian wedding reception suit men double breasted tuxedo dark green", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1034}
+{"test": 4, "n": 8, "mode": "plan_piece", "text": "men's double breasted tuxedo", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1256}
+{"test": 4, "n": 9, "mode": "sentence", "text": "Bidai function simple cotton suit outfit for bride sister", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1354}
+{"test": 4, "n": 9, "mode": "plan_piece", "text": "women's simple cotton suit outfit", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1226}
+{"test": 4, "n": 10, "mode": "sentence", "text": "Griha Pravesh pooja ethnic dress women gota patti suit", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1479}
+{"test": 4, "n": 10, "mode": "plan_piece", "text": "women's gota patti ethnic suit", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.141}
+{"test": 4, "n": 11, "mode": "sentence", "text": "Satyanarayan pooja simple silk saree yellow contrast blouse", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1339}
+{"test": 4, "n": 11, "mode": "plan_piece", "text": "silk saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1078}
+{"test": 4, "n": 11, "mode": "plan_piece", "text": "contrast blouse", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1125}
+{"test": 4, "n": 12, "mode": "sentence", "text": "Chhath Puja traditional outfit women yellow red bandhani saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1804}
+{"test": 4, "n": 12, "mode": "plan_piece", "text": "women's yellow red bandhani saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1704}
+{"test": 4, "n": 13, "mode": "sentence", "text": "Baisakhi celebration Punjabi suit full phulkari dupatta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1455}
+{"test": 4, "n": 13, "mode": "plan_piece", "text": "punjabi suit top", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1176}
+{"test": 4, "n": 13, "mode": "plan_piece", "text": "punjabi suit bottom", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1183}
+{"test": 4, "n": 13, "mode": "plan_piece", "text": "phulkari dupatta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1616}
+{"test": 4, "n": 14, "mode": "sentence", "text": "Janmashtami outfit baby boy kanha getup yellow dhoti set", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1012}
+{"test": 4, "n": 14, "mode": "plan_piece", "text": "baby boy yellow dhoti set", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.0571}
+{"test": 4, "n": 15, "mode": "sentence", "text": "Raksha Bandhan gifting ethnic dress for sister under 1500", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1032}
+{"test": 4, "n": 15, "mode": "plan_piece", "text": "women's ethnic dress for sister", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1131}
+{"test": 4, "n": 16, "mode": "sentence", "text": "Teej festival green leheriya saree with gota work", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.162}
+{"test": 4, "n": 16, "mode": "plan_piece", "text": "green leheriya saree with gota work", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1773}
+{"test": 4, "n": 17, "mode": "sentence", "text": "Dhanteras shopping outfit comfortable cotton kurti pant set", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.148}
+{"test": 4, "n": 17, "mode": "plan_piece", "text": "cotton kurti", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1024}
+{"test": 4, "n": 17, "mode": "plan_piece", "text": "cotton pant", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1064}
+{"test": 4, "n": 18, "mode": "sentence", "text": "Govardhan pooja family matching traditional wear outfit", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1028}
+{"test": 4, "n": 18, "mode": "plan_piece", "text": "kurtas", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1167}
+{"test": 4, "n": 18, "mode": "plan_piece", "text": "traditional pants", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1094}
+{"test": 4, "n": 18, "mode": "plan_piece", "text": "traditional footwear", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1207}
+{"test": 4, "n": 19, "mode": "sentence", "text": "Chhoti Diwali outfit men casual short kurta with jeans", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1019}
+{"test": 4, "n": 19, "mode": "plan_piece", "text": "men's casual short kurta", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1043}
+{"test": 4, "n": 19, "mode": "plan_piece", "text": "men's jeans", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0996}
+{"test": 4, "n": 20, "mode": "sentence", "text": "Tulsi Vivah ethnic look maroon kanjeevaram saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1605}
+{"test": 4, "n": 20, "mode": "plan_piece", "text": "maroon kanjeevaram saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1555}
+{"test": 4, "n": 21, "mode": "sentence", "text": "New born naming ceremony Namakaran mother outfit pastel Anarkali", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.0994}
+{"test": 4, "n": 21, "mode": "plan_piece", "text": "women's pastel anarkali dress", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1005}
+{"test": 4, "n": 22, "mode": "sentence", "text": "Annaprashan baby girl traditional pattu pavadai dress", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1445}
+{"test": 4, "n": 22, "mode": "plan_piece", "text": "baby girl traditional pattu pavadai dress", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.0602}
+{"test": 4, "n": 23, "mode": "sentence", "text": "Godh Bharai baby shower traditional silk saree light pink", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1284}
+{"test": 4, "n": 23, "mode": "plan_piece", "text": "traditional silk saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1134}
+{"test": 4, "n": 24, "mode": "sentence", "text": "Upanayana Munj thread ceremony boy white silk dhoti dupatta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1063}
+{"test": 4, "n": 24, "mode": "plan_piece", "text": "men's white silk dhoti", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0522}
+{"test": 4, "n": 24, "mode": "plan_piece", "text": "men's white silk dupatta", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.051}
+{"test": 4, "n": 25, "mode": "sentence", "text": "50th Wedding Anniversary parents ethnic co-ord silk set mom dad", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1033}
+{"test": 4, "n": 25, "mode": "plan_piece", "text": "ethnic silk co-ord set", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1337}
+{"test": 4, "n": 26, "mode": "sentence", "text": "Mata ki Chowki simple salwar suit for women red dupatta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1591}
+{"test": 4, "n": 26, "mode": "plan_piece", "text": "women's simple salwar suit", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1175}
+{"test": 4, "n": 26, "mode": "plan_piece", "text": "women's red dupatta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1885}
+{"test": 4, "n": 27, "mode": "sentence", "text": "Jagran night comfortable ethnic dress long kurti palazzos", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1123}
+{"test": 4, "n": 27, "mode": "plan_piece", "text": "long kurti", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0993}
+{"test": 4, "n": 27, "mode": "plan_piece", "text": "palazzos", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1038}
+{"test": 4, "n": 28, "mode": "sentence", "text": "Sufi night sangeet theme outfit chikankari Anarkali gown", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.117}
+{"test": 4, "n": 28, "mode": "plan_piece", "text": "chikankari anarkali gown", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1237}
+{"test": 4, "n": 29, "mode": "sentence", "text": "Bollywood theme sangeet party retro 70s Mumtaz draped saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1355}
+{"test": 4, "n": 29, "mode": "plan_piece", "text": "mumtaz draped saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1442}
+{"test": 4, "n": 30, "mode": "sentence", "text": "Royal Rajputana theme wedding guest rajputi poshak orange", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1237}
+{"test": 4, "n": 30, "mode": "plan_piece", "text": "rajputi poshak", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0952}
+{"test": 4, "n": 31, "mode": "sentence", "text": "South Indian wedding guest temple border kanjivaram saree gold", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1539}
+{"test": 4, "n": 31, "mode": "plan_piece", "text": "temple border kanjivaram saree gold", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1377}
+{"test": 4, "n": 32, "mode": "sentence", "text": "Maharashtrian wedding guest nauvari saree silk green", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1377}
+{"test": 4, "n": 32, "mode": "plan_piece", "text": "nauvari saree silk green", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1335}
+{"test": 4, "n": 33, "mode": "sentence", "text": "Bengali wedding guest Tussar silk saree beige maroon border", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1545}
+{"test": 4, "n": 33, "mode": "plan_piece", "text": "tussar silk saree beige maroon border", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1458}
+{"test": 4, "n": 34, "mode": "sentence", "text": "Gujarati wedding guest bandhani gharchola saree red", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1312}
+{"test": 4, "n": 34, "mode": "plan_piece", "text": "gujarati wedding guest bandhani gharchola saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1282}
+{"test": 4, "n": 35, "mode": "sentence", "text": "Punjabi wedding sangeet heavy Patiala suit with paranda", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1259}
+{"test": 4, "n": 35, "mode": "plan_piece", "text": "kurtas", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1167}
+{"test": 4, "n": 35, "mode": "plan_piece", "text": "paranda", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0793}
+{"test": 4, "n": 36, "mode": "sentence", "text": "Indo-western jumpsuit for ladies wedding cocktail night", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1309}
+{"test": 4, "n": 36, "mode": "plan_piece", "text": "women's indo-western jumpsuit", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1339}
+{"test": 4, "n": 37, "mode": "sentence", "text": "Chikankari jacket with kurta men wedding guest look", "sources": ["mens3", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1071}
+{"test": 4, "n": 37, "mode": "plan_piece", "text": "men's chikankari jacket", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.1264}
+{"test": 4, "n": 37, "mode": "plan_piece", "text": "men's kurta", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0971}
+{"test": 4, "n": 38, "mode": "sentence", "text": "Printed organza floral saree for daytime outdoor Haldi", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1741}
+{"test": 4, "n": 38, "mode": "plan_piece", "text": "printed organza floral saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1656}
+{"test": 4, "n": 39, "mode": "sentence", "text": "Velvet sherwani for groom father winter wedding", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0794}
+{"test": 4, "n": 39, "mode": "plan_piece", "text": "men's velvet sherwani", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0353}
+{"test": 4, "n": 40, "mode": "sentence", "text": "Brocade lehenga skirt with plain shirt indo-western reception look", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.16}
+{"test": 4, "n": 40, "mode": "plan_piece", "text": "broad lehenga skirt", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1111}
+{"test": 4, "n": 40, "mode": "plan_piece", "text": "plain shirt", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0992}
+{"test": 4, "n": 41, "mode": "sentence", "text": "Pearl white lehenga for bridesmaid pastel aesthetic", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.145}
+{"test": 4, "n": 41, "mode": "plan_piece", "text": "pearl white lehenga", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.139}
+{"test": 4, "n": 42, "mode": "sentence", "text": "Traditional Paithani saree peacock blue for cousin wedding", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1587}
+{"test": 4, "n": 42, "mode": "plan_piece", "text": "traditional paithani saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1476}
+{"test": 4, "n": 43, "mode": "sentence", "text": "Sharara suit set for Eid celebration lavender chikankari", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1606}
+{"test": 4, "n": 43, "mode": "plan_piece", "text": "sharara suit set", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.132}
+{"test": 4, "n": 44, "mode": "sentence", "text": "Garba night day 1 outfit traditional chaniya choli multi color", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1065}
+{"test": 4, "n": 44, "mode": "plan_piece", "text": "chaniya choli", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1032}
+{"test": 4, "n": 45, "mode": "sentence", "text": "Ugadi traditional wear women pure silk pattu saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1176}
+{"test": 4, "n": 45, "mode": "plan_piece", "text": "women's pure silk pattu saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1103}
+{"test": 4, "n": 46, "mode": "sentence", "text": "Lohri celebration outfit Punjabi jutti with dhoti suit girl", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1234}
+{"test": 4, "n": 46, "mode": "plan_piece", "text": "punjabi dhoti", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1101}
+{"test": 4, "n": 46, "mode": "plan_piece", "text": "punjabi jutti", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0564}
+{"test": 4, "n": 47, "mode": "sentence", "text": "Bihu traditional dress Mekhela Chador Assam silk", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1324}
+{"test": 4, "n": 47, "mode": "plan_piece", "text": "Assam silk mekhela chador", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1337}
+{"test": 4, "n": 48, "mode": "sentence", "text": "Navratri dandiya outfit men Kediyu dhoti set Gujarati traditional", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0871}
+{"test": 4, "n": 48, "mode": "plan_piece", "text": "men's kediyu dhoti set", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0321}
+{"test": 4, "n": 49, "mode": "sentence", "text": "Thread work Nehru jacket over white kurta pajama for cousin engagement", "sources": ["myntra2", "myntra2", "myntra2", "mens3", "mens3", "myntra2"], "top1": 0.1238}
+{"test": 4, "n": 49, "mode": "plan_piece", "text": "nehru jacket", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0893}
+{"test": 4, "n": 49, "mode": "plan_piece", "text": "white kurta pajama", "sources": ["mens3", "mens3", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1013}
+{"test": 4, "n": 50, "mode": "sentence", "text": "Haldi function ke liye yellow kurti set budget 1000 rupees", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1498}
+{"test": 4, "n": 50, "mode": "plan_piece", "text": "yellow kurti set", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1484}
+{"test": 5, "n": 1, "mode": "sentence", "text": "Haldi ceremony outfit for bride's brother, yellow kurta with white pyjama", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1165}
+{"test": 5, "n": 1, "mode": "plan_piece", "text": "yellow kurta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1422}
+{"test": 5, "n": 1, "mode": "plan_piece", "text": "white pyjama", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1261}
+{"test": 5, "n": 2, "mode": "sentence", "text": "Pre-wedding photoshoot outfit for couple, pastel tones, women's anarkali under 6000", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1289}
+{"test": 5, "n": 2, "mode": "plan_piece", "text": "women's pastel anarkali", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.0982}
+{"test": 5, "n": 3, "mode": "sentence", "text": "Karva Chauth look, red or maroon saree with heavy border", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1423}
+{"test": 5, "n": 3, "mode": "plan_piece", "text": "saree with heavy border", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1239}
+{"test": 5, "n": 4, "mode": "sentence", "text": "Kids ethnic wear for 5 year old boy for Diwali puja, kurta with jacket", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1223}
+{"test": 5, "n": 4, "mode": "plan_piece", "text": "kurta for 5 year old boy", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1216}
+{"test": 5, "n": 4, "mode": "plan_piece", "text": "jacket for 5 year old boy", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1176}
+{"test": 5, "n": 5, "mode": "sentence", "text": "Baby girl first birthday frock, pink and gold, party wear", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1095}
+{"test": 5, "n": 5, "mode": "plan_piece", "text": "baby girl first birthday frock", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1138}
+{"test": 5, "n": 6, "mode": "sentence", "text": "Office farewell party saree, elegant, not too heavy", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1266}
+{"test": 5, "n": 6, "mode": "plan_piece", "text": "elegant saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.109}
+{"test": 5, "n": 7, "mode": "sentence", "text": "Wedding guest outfit for men in Rajasthan summer, light colours, safa optional", "sources": ["mens3", "mens3", "myntra2", "mens3", "myntra2", "myntra2"], "top1": 0.073}
+{"test": 5, "n": 7, "mode": "plan_piece", "text": "men's kurtas", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.1017}
+{"test": 5, "n": 7, "mode": "plan_piece", "text": "men's wedding guest pants", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1204}
+{"test": 5, "n": 7, "mode": "plan_piece", "text": "men's wedding guest shoes", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.103}
+{"test": 5, "n": 8, "mode": "sentence", "text": "Navratri chaniya choli for teenage girl, mirror work, under 3000", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1198}
+{"test": 5, "n": 8, "mode": "plan_piece", "text": "women's navratri chaniya choli for teenage  with mirror work", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.099}
+{"test": 5, "n": 9, "mode": "sentence", "text": "Eid outfit for men, white pathani suit with waistcoat", "sources": ["mens3", "mens3", "myntra2", "mens3", "mens3", "mens3"], "top1": 0.0788}
+{"test": 5, "n": 9, "mode": "plan_piece", "text": "men's white pathani suit with waistcoat", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0713}
+{"test": 5, "n": 10, "mode": "sentence", "text": "Christmas dinner dress for women, green or red velvet, knee length", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1056}
+{"test": 5, "n": 10, "mode": "plan_piece", "text": "women's green or red velvet knee length dress", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.125}
+{"test": 5, "n": 11, "mode": "sentence", "text": "Interview outfit for a fresher woman, formal blazer and trousers, navy", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1487}
+{"test": 5, "n": 11, "mode": "plan_piece", "text": "women's formal blazer", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1081}
+{"test": 5, "n": 11, "mode": "plan_piece", "text": "women's formal trousers", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1171}
+{"test": 5, "n": 12, "mode": "sentence", "text": "Engagement ring ceremony groom, sherwani in ivory with stole", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1081}
+{"test": 5, "n": 12, "mode": "plan_piece", "text": "men's sherwani in ivory with stole", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0504}
+{"test": 5, "n": 13, "mode": "sentence", "text": "Sister's mehendi, I want a light green lehenga that is comfortable to dance in", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1411}
+{"test": 5, "n": 13, "mode": "plan_piece", "text": "women's light green lehenga", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1614}
+{"test": 5, "n": 14, "mode": "sentence", "text": "Beach wedding in Goa, men's linen shirt and shorts set", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.137}
+{"test": 5, "n": 14, "mode": "plan_piece", "text": "men's linen shirt", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1049}
+{"test": 5, "n": 14, "mode": "plan_piece", "text": "men's linen shorts", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.12}
+{"test": 5, "n": 15, "mode": "sentence", "text": "Rainy day college outfit for girls, quick dry, kurti with leggings", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1071}
+{"test": 5, "n": 15, "mode": "plan_piece", "text": "kurti", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1024}
+{"test": 5, "n": 15, "mode": "plan_piece", "text": "leggings", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0867}
+{"test": 5, "n": 16, "mode": "sentence", "text": "Gym wear set for men, black, breathable, size L", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1432}
+{"test": 5, "n": 16, "mode": "plan_piece", "text": "men's black gym wear set size L", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1321}
+{"test": 5, "n": 17, "mode": "sentence", "text": "Winter wedding in Delhi, women's velvet suit with shawl", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1243}
+{"test": 5, "n": 17, "mode": "plan_piece", "text": "women's velvet suit", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1369}
+{"test": 5, "n": 17, "mode": "plan_piece", "text": "women's shawl", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1059}
+{"test": 5, "n": 18, "mode": "sentence", "text": "Casual Friday office look for men, chinos and a checked shirt", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1232}
+{"test": 5, "n": 18, "mode": "plan_piece", "text": "men's chinos", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1024}
+{"test": 5, "n": 18, "mode": "plan_piece", "text": "men's checked shirt", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1005}
+{"test": 5, "n": 19, "mode": "sentence", "text": "Durga Puja pandal hopping outfit, white saree with red border for women", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1532}
+{"test": 5, "n": 19, "mode": "plan_piece", "text": "women's white saree with red border", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1599}
+{"test": 5, "n": 20, "mode": "sentence", "text": "Onam kasavu saree, simple, cotton, with matching blouse", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1959}
+{"test": 5, "n": 20, "mode": "plan_piece", "text": "cotton onam kasavu saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1735}
+{"test": 5, "n": 20, "mode": "plan_piece", "text": "matching blouse", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1036}
+{"test": 5, "n": 21, "mode": "sentence", "text": "Lohri party outfit, women's sweater dress or kurti with jacket", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1355}
+{"test": 5, "n": 21, "mode": "plan_piece", "text": "women's sweater dress", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1063}
+{"test": 5, "n": 21, "mode": "plan_piece", "text": "women's kurti", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1067}
+{"test": 5, "n": 21, "mode": "plan_piece", "text": "women's jacket", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1001}
+{"test": 5, "n": 22, "mode": "sentence", "text": "Sangeet night for groom, indo-western jacket with kurta, royal blue", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0929}
+{"test": 5, "n": 22, "mode": "plan_piece", "text": "men's indo-western jacket", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0759}
+{"test": 5, "n": 22, "mode": "plan_piece", "text": "men's kurta", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0971}
+{"test": 5, "n": 23, "mode": "sentence", "text": "What to wear with my beige palazzo pants for a brunch with friends", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1297}
+{"test": 5, "n": 23, "mode": "plan_piece", "text": "casual shirt", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.1021}
+{"test": 5, "n": 23, "mode": "plan_piece", "text": "casual shoes", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0877}
+{"test": 5, "n": 24, "mode": "sentence", "text": "Something to wear with my white sneakers for a college fest", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1139}
+{"test": 5, "n": 24, "mode": "plan_piece", "text": "casual t-shirt", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0983}
+{"test": 5, "n": 24, "mode": "plan_piece", "text": "casual jeans", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1014}
+{"test": 5, "n": 24, "mode": "plan_piece", "text": "white sneakers", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1306}
+{"test": 5, "n": 25, "mode": "sentence", "text": "Funeral visit outfit, modest, plain cotton salwar suit in white or grey", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1107}
+{"test": 5, "n": 25, "mode": "plan_piece", "text": "cotton salwar suit", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1149}
+{"test": 5, "n": 26, "mode": "sentence", "text": "Godh bharai ceremony for me, soft pastel silk saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1447}
+{"test": 5, "n": 26, "mode": "plan_piece", "text": "soft pastel silk saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1351}
+{"test": 5, "n": 27, "mode": "sentence", "text": "Teachers day school function, simple cotton saree with small print", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1307}
+{"test": 5, "n": 27, "mode": "plan_piece", "text": "cotton saree with small print", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1389}
+{"test": 5, "n": 28, "mode": "sentence", "text": "Baby boy naming ceremony, dhoti kurta set, cream", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1143}
+{"test": 5, "n": 28, "mode": "plan_piece", "text": "baby boy dhoti kurta set", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.0764}
+{"test": 5, "n": 29, "mode": "sentence", "text": "Cocktail party gown for women, black, off shoulder, under 7000", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1002}
+{"test": 5, "n": 29, "mode": "plan_piece", "text": "women's black off-shoulder cocktail party gown", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.104}
+{"test": 5, "n": 30, "mode": "sentence", "text": "Family photoshoot matching outfits, mom and daughter ethnic wear in maroon", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1202}
+{"test": 5, "n": 30, "mode": "plan_piece", "text": "ethnic top maroon", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.178}
+{"test": 5, "n": 30, "mode": "plan_piece", "text": "ethnic bottom maroon", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.103}
+{"test": 5, "n": 31, "mode": "sentence", "text": "Trekking trip to Himachal, women's jacket and trek pants, waterproof", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1058}
+{"test": 5, "n": 31, "mode": "plan_piece", "text": "women's waterproof jacket", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1072}
+{"test": 5, "n": 31, "mode": "plan_piece", "text": "women's trek pants", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1285}
+{"test": 5, "n": 32, "mode": "sentence", "text": "Oversized hoodie and joggers combo for men, grey, winter", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1477}
+{"test": 5, "n": 32, "mode": "plan_piece", "text": "men's oversized hoodie", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1272}
+{"test": 5, "n": 32, "mode": "plan_piece", "text": "men's joggers", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1101}
+{"test": 5, "n": 33, "mode": "sentence", "text": "Diwali pooja at home, men's silk kurta in mustard or orange", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1335}
+{"test": 5, "n": 33, "mode": "plan_piece", "text": "men's silk kurta", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0681}
+{"test": 5, "n": 34, "mode": "sentence", "text": "Wedding reception bride's mother, banarasi saree in deep green", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1796}
+{"test": 5, "n": 34, "mode": "plan_piece", "text": "women's banarasi saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1294}
+{"test": 5, "n": 35, "mode": "sentence", "text": "Haldi guest dress for girls, yellow co-ord set, floral", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1105}
+{"test": 5, "n": 35, "mode": "plan_piece", "text": "women's ' yellow floral co-ord set", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1176}
+{"test": 5, "n": 36, "mode": "sentence", "text": "Boys wedding outfit age 8, sherwani set in gold, with mojari", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.131}
+{"test": 5, "n": 36, "mode": "plan_piece", "text": "men's wedding sherwani set gold", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.053}
+{"test": 5, "n": 36, "mode": "plan_piece", "text": "men's mojari for", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1193}
+{"test": 5, "n": 37, "mode": "sentence", "text": "Pongal celebration, men's veshti with silk shirt, traditional", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0786}
+{"test": 5, "n": 37, "mode": "plan_piece", "text": "men's silk shirt", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1171}
+{"test": 5, "n": 37, "mode": "plan_piece", "text": "men's veshti", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0607}
+{"test": 5, "n": 38, "mode": "sentence", "text": "Thanksgiving potluck casual dress for women, autumn colours, cozy", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.119}
+{"test": 5, "n": 38, "mode": "plan_piece", "text": "women's casual autumn dress", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.056}
+{"test": 5, "n": 39, "mode": "sentence", "text": "Gujarati garba dandiya men, kediyu and churidar set, colourful", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.093}
+{"test": 5, "n": 39, "mode": "plan_piece", "text": "gujarati garba dandiya men kediyu and churidar set", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.049}
+{"test": 5, "n": 40, "mode": "sentence", "text": "Bengali wedding guest, women's tant saree in cream with red border", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1525}
+{"test": 5, "n": 40, "mode": "plan_piece", "text": "women's tant saree cream with red border", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1385}
+{"test": 5, "n": 41, "mode": "sentence", "text": "Lehenga for cousin's wedding but I am plus size, flowy, navy", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1523}
+{"test": 5, "n": 41, "mode": "plan_piece", "text": "lehenga for plus size", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1541}
+{"test": 5, "n": 42, "mode": "sentence", "text": "Dhoti pants and crop top for a festive evening, women, silk", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1115}
+{"test": 5, "n": 42, "mode": "plan_piece", "text": "women's silk dhoti pants", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1452}
+{"test": 5, "n": 42, "mode": "plan_piece", "text": "women's silk crop top", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1211}
+{"test": 5, "n": 43, "mode": "sentence", "text": "Airport comfy look, women's loose t-shirt, joggers and slip-on shoes", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.0984}
+{"test": 5, "n": 43, "mode": "plan_piece", "text": "women's loose t-shirt", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0848}
+{"test": 5, "n": 43, "mode": "plan_piece", "text": "women's joggers", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1103}
+{"test": 5, "n": 43, "mode": "plan_piece", "text": "women's slip-on shoes", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1182}
+{"test": 5, "n": 44, "mode": "sentence", "text": "Date night at a rooftop restaurant, men's black shirt with jeans and loafers", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1204}
+{"test": 5, "n": 44, "mode": "plan_piece", "text": "men's black shirt", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1236}
+{"test": 5, "n": 44, "mode": "plan_piece", "text": "men's jeans", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.0996}
+{"test": 5, "n": 44, "mode": "plan_piece", "text": "men's loafers", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1066}
+{"test": 5, "n": 45, "mode": "sentence", "text": "Bridal shower outfit, white or pastel midi dress with heels", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1049}
+{"test": 5, "n": 45, "mode": "plan_piece", "text": "white or pastel midi dress", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1097}
+{"test": 5, "n": 45, "mode": "plan_piece", "text": "heels", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.0943}
+{"test": 5, "n": 46, "mode": "sentence", "text": "Ugadi festival, women's kanjeevaram saree in green and gold", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1862}
+{"test": 5, "n": 46, "mode": "plan_piece", "text": "women's kanjeevaram saree", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1385}
+{"test": 5, "n": 47, "mode": "sentence", "text": "Pagdi ceremony for men, cream bandhgala with embroidered stole", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1053}
+{"test": 5, "n": 47, "mode": "plan_piece", "text": "men's cream bandhgala", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.1108}
+{"test": 5, "n": 47, "mode": "plan_piece", "text": "embroidered stole for men", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1226}
+{"test": 5, "n": 48, "mode": "sentence", "text": "New Year's Eve party sequin top and black trousers for women", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1357}
+{"test": 5, "n": 48, "mode": "plan_piece", "text": "women's sequin top", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.1221}
+{"test": 5, "n": 48, "mode": "plan_piece", "text": "women's black trousers", "sources": ["marqo", "marqo", "marqo", "marqo", "marqo", "marqo"], "top1": 0.0983}
+{"test": 5, "n": 49, "mode": "sentence", "text": "Baisakhi celebration, Punjabi suit women's yellow with phulkari dupatta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1559}
+{"test": 5, "n": 49, "mode": "plan_piece", "text": "women's yellow punjabi suit", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.1479}
+{"test": 5, "n": 49, "mode": "plan_piece", "text": "women's phulkari dupatta", "sources": ["myntra2", "myntra2", "myntra2", "myntra2", "myntra2", "myntra2"], "top1": 0.168}
+{"test": 5, "n": 50, "mode": "sentence", "text": "Kurta set for men in cotton for daily office wear, light blue, under 1500", "sources": ["mens3", "myntra2", "myntra2", "mens3", "mens3", "mens3"], "top1": 0.1026}
+{"test": 5, "n": 50, "mode": "plan_piece", "text": "men's cotton kurta set", "sources": ["mens3", "mens3", "mens3", "mens3", "mens3", "mens3"], "top1": 0.1036}

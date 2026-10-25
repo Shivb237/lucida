@@ -175,7 +175,7 @@ export function buildLimits(ev: Ev = evidence): string[] {
     'The AWS adding-products numbers were copied by hand from command output. The two copies were compared by counts, not product by product.',
     'The switch-off test phases were worked out afterwards from when the backup was used: start and stop times were not logged.',
     'One early test run was invalid (a helper program was down, cause unknown) and is kept out of the results.',
-    'The real AWS bill has not been read: Cost Explorer lags 1 to 2 days. The machines were deleted on 2026-10-16, so the AWS cost shown is an estimate.',
+    'AWS Cost Explorer showed $0.66 for the whole account for 1 September to 24 October 2026 (AWS marks it an estimate until the month closes). The per-search AWS figures use an estimated $0.10 an hour for the three machines, which was not checked against that bill.',
     ...(j ? [`The ${j.hand_rules_only.n_unsafe} unsafe safety-check test cases were written by the author.`] : []),
     'A plan that never drops a product word is an idea, not built. Testing it needs a new set of requests.',
   ]
