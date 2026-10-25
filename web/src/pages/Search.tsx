@@ -20,6 +20,7 @@ import {
   emptySteps, STEPS, type OutfitPayload, type PieceResult, type RequestPayload, type SearchPayload, type StageId, type StepState, type TraceEvent, type UnderstandPayload,
 } from '../trace'
 import { fmt, openModelDialog, scrollToId } from '../ui'
+import { ReaderChoice } from '../components/ReaderChoice'
 
 // "Search again, toward what you liked" only shows after a live run, so it loads then
 const RefinePanel = lazy(() => import('../components/Refine').then((m) => ({ default: m.RefinePanel })))
@@ -260,7 +261,7 @@ function Notice({ id, style, children }: { id: string; style?: React.CSSProperti
   )
 }
 
-export function SearchPage({ health, viewer, brain }: { health: Health | null | undefined; viewer: boolean; brain: BrainSetting }) {
+export function SearchPage({ health, viewer, brain, onBrain }: { health: Health | null | undefined; viewer: boolean; brain: BrainSetting; onBrain: (b: BrainSetting) => void }) {
   const [query, setQuery] = useState('')
   const [shown, setShown] = useState('')
   const [retrievalQuery, setRetrievalQuery] = useState('')
@@ -365,7 +366,8 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
     setRid(e.request_id)
     if (e.kind === 'end') { setEndAt(performance.now()); setRunning(false); return }
     if (e.status === 'started') setStartedAt((s) => ({ ...s, [e.stage]: performance.now() }))
-    setSteps((s) => ({ ...s, [e.stage]: { status: e.status, seconds: e.seconds, payload: e.payload } }))
+    const shownStatus = e.status === 'failed' && e.stage === 'understand' && (e.payload as { expected?: boolean })?.expected ? 'skipped' : e.status     // no model chosen or running is not an error
+    setSteps((s) => ({ ...s, [e.stage]: { status: shownStatus, seconds: e.seconds, payload: e.payload } }))
     const name = STEPS.find((s) => s.id === e.stage)?.name
     if (e.status === 'done') setAnnounce(e.seconds != null && e.seconds > 0 ? `${name} finished in ${fmt(e.seconds, 2)} seconds` : `${name} finished`)
     if (e.status === 'failed') setAnnounce(`${name} failed`)
@@ -442,7 +444,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const demo = mode === 'demo'
   const live = mode === 'live'
   const recorded = mode === 'recorded'
-  const under = steps.understand.status === 'done' || steps.understand.status === 'failed' ? (steps.understand.payload as unknown as UnderstandPayload) : null
+  const under = steps.understand.status === 'done' || steps.understand.status === 'failed' || (steps.understand.status === 'skipped' && (steps.understand.payload as { fell_back?: boolean } | undefined)?.fell_back) ? (steps.understand.payload as unknown as UnderstandPayload) : null
   const search = steps.search.status === 'done' ? (steps.search.payload as unknown as SearchPayload) : null
   const outfit = steps.outfit.status === 'done' ? (steps.outfit.payload as OutfitPayload) : null
   const items = outfit?.items ?? []
@@ -454,7 +456,6 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
   const hasFollowUp = live && ((finished && !!search && !refused) || history.length > 0)
   const examplesShown = examples.length ? examples : RECORDED.runs.map((r) => r.prompt)
   const hosted = !!health?.hosted
-  const reader = hosted && brain.kind === 'local' ? 'no AI here, so your words are searched as typed' : describe(brain)
   // The first-screen board is a real recorded contact sheet until this search has returned its own candidates.
   const recordedSearch = withPhotos(RECORDED.runs.find((r) => r.id === 't5-p17') ?? bestRun(), photos.current).events.find((e): e is Extract<TraceEvent, { kind: 'step' }> => e.kind === 'step' && e.stage === 'search' && e.status === 'done')
   const recordedPieces = recordedSearch?.payload as unknown as { pieces?: PieceResult[] } | undefined
@@ -512,31 +513,22 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
         <section className="lab-hero" aria-labelledby="lab-h">
           <div className="lab-top">
             <h1 id="lab-h" className="voice lab-h">{HEADLINE}</h1>
-            {hosted && brain.kind === 'local' && (
-              <Notice id="hosted"><span className="lg">Hosted Lab</span><span className="notice-text">This Lab has no AI model of its own. Add your own key under AI model.</span></Notice>
-            )}
-            {health && !hosted && !health.ollama && (
-              <Notice id="ollama"><span className="lg">Ollama off</span><span className="notice-text">Start Ollama with <code>qwen3:4b-instruct</code>. Until then your words are searched as typed.</span></Notice>
-            )}
+            {health && <ReaderChoice hosted={hosted} ollamaUp={!!health.ollama} canByo={!!health.byo} brain={brain} onBrain={onBrain} />}
             <form className="req" onSubmit={(e) => { e.preventDefault(); if (running && live) stopRun(); else runLive(query) }}>
               <label htmlFor="req" className="lg dim" style={{ width: '100%', marginBottom: 4 }}>What do you need to wear?</label>
-              <p id="req-help" className="req-help">Name the occasion, a garment, a colour, the season, or a piece you own. Up to 300 characters.</p>
+              <p id="req-help" className="req-help">The occasion, a garment, a colour or the season. Up to 300 characters.</p>
               <input id="req" type="text" value={query} maxLength={300} onChange={(e) => { setQuery(e.target.value); setHint(false) }} autoComplete="off"
                 placeholder="A men's outfit for Diwali with a black kurta and ivory trousers" aria-describedby={hint ? 'req-help req-hint' : 'req-help'} aria-invalid={hint || undefined} />
               <button type="submit" className="btn-expose">{running && live ? 'Stop' : 'Search outfit'}</button>
               {hint && <p id="req-hint" role="alert" className="req-hint"><span className="tile cross" aria-hidden="true" />Write one sentence first, for example the occasion and the garment. Nothing was searched.</p>}
             </form>
             <div className="chip-row" style={{ marginTop: 14 }} role="group" aria-labelledby="ex-h">
-              <span id="ex-h" className="lg dim" style={{ marginRight: 4 }}>Examples: tap to fill, then edit</span>
-              {examplesShown.map((s) => <button key={s} type="button" className="chip" onClick={() => { setQuery(s); setHint(false); document.getElementById('req')?.focus() }}>{s}</button>)}
+              <span id="ex-h" className="lg dim" style={{ marginRight: 4 }}>Try one</span>
+              {examplesShown.slice(0, 4).map((s) => <button key={s} type="button" className="chip" onClick={() => { setQuery(s); setHint(false); document.getElementById('req')?.focus() }}>{s}</button>)}
               <button type="button" className="chip" style={{ borderStyle: 'dashed' }} onClick={runDemo}>Play the demo replay</button>
             </div>
-            {health && (
-              <p className="lab-status">
-                <span className="lg dim">Reads your words with</span> {reader}
-                {' · '}<button type="button" className="text-btn" onClick={openModelDialog}>change</button>
-                {ready && !ready.ready && <><br /><span className="lg dim">Still loading</span> {ready.loading.join(', ') || 'the search model'} · <span className="mono">{ready.seconds.toFixed(0)} s</span> so far. Searches wait until it is done.</>}
-              </p>
+            {health && ready && !ready.ready && (
+              <p className="lab-status"><span className="lg dim">Still loading</span> {ready.loading.join(', ') || 'the search model'} · <span className="mono">{ready.seconds.toFixed(0)} s</span> so far. Searches wait until it is done.</p>
             )}
           </div>
           <SearchBoard hits={boardHits} live={live && !!search} />
@@ -564,14 +556,14 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
             <section id="result" aria-labelledby="result-h" className="result">
               <p className="lg dim layer-label">What a shopper sees</p>
               <h2 id="result-h" tabIndex={-1} className="sec-h">Your outfit{demo ? ' (demo)' : recorded ? ' (recorded)' : ''}</h2>
-              <p className="voice result-q">“{shown}”</p>
+              <p className="result-q">“{shown}”</p>
               {recorded && picked_run && (
                 <p className="dim result-note">Recorded on {RECORDED.where} with <span className="mono">{RECORDED.understand_model}</span>. The author's blind score ({picked_run.author_rating_of_raw_search ?? 'none'}) rates plain search of this request, not this outfit.</p>
               )}
               {refused ? (
                 <div role="alert" className="notice" style={{ marginTop: 18, transform: 'none' }}>
                   <span className="lg">Not searched</span><span className="notice-text">{req.message}</span>
-                  <span className="mono" style={{ display: 'block', marginTop: 6, fontSize: 13 }}>reason: {req.category}</span>
+                  <span className="mono" style={{ display: 'block', marginTop: 6, fontSize: 14 }}>reason: {req.category}</span>
                 </div>
               ) : items.length > 0 ? (
                 <>
@@ -591,7 +583,7 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
                     <div className="checks-note" role="note" aria-label="Why the outfit could not be built">
                       <strong>Why no outfit was built</strong> — these checks on the search results explain the gap:
                       <ul>{search.checks.map((c, i) => <li key={i}>{c}</li>)}</ul>
-                      <p style={{ margin: '8px 0 0', color: 'var(--z4)', fontSize: 15 }}>
+                      <p style={{ margin: '8px 0 0', color: 'var(--z4)', fontSize: 16 }}>
                         If the item you requested is not in the catalogue under that name, try a broader term — for example "ethnic dress" instead of a specific garment name — or use the Follow Up box below to refine.
                       </p>
                     </div>
@@ -605,9 +597,9 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
                   which may miss garments the user named explicitly. Show this only for live runs. */}
               {live && under?.fell_back && !refused && (
                 <p className="lg dim" style={{ marginTop: 12 }} role="status">
-                  The AI reading step was unavailable — your words were searched as typed.
-                  {' '}If you asked for multiple garments, some may be missing.
-                  {hasFollowUp && ' Use the Follow Up box below to add a missing piece.'}
+                  Searched as typed, so a garment you named may be missing.{' '}
+                  {health?.byo && <button type="button" className="text-btn" onClick={() => openModelDialog('key')}>Add an AI to read it</button>}
+                  {hasFollowUp && ' Or use the Follow Up box below to add a missing piece.'}
                 </p>
               )}
             </section>
@@ -623,17 +615,19 @@ export function SearchPage({ health, viewer, brain }: { health: Health | null | 
 
             {(live || recorded) && finished && items.length > 0 && (
               <section className="worth" aria-labelledby="worth-h">
-                <h2 id="worth-h" className="sec-h">Was each step worth it?</h2>
-                <CompareCard
-                  plain={recorded ? withPhotos(picked_run!, photos.current).plain ?? null : plainLive && plainLive.q === retrievalQuery ? plainLive.value : 'loading'}
-                  outfit={items} planSeconds={STEPS.reduce((n, s) => n + (steps[s.id].status === 'done' ? steps[s.id].seconds ?? 0 : 0), 0)}
-                  ratings={recorded && picked_run ? { plain: picked_run.author_rating_of_raw_search, plan: picked_run.author_rating_of_plan } : undefined} />
-                {steps.search.status === 'done' && (live || RECORDED.resources) && (
-                  <details className="fold">
-                    <summary>What this run cost: time, memory and money</summary>
-                    <div className="fold-body"><CostPanel steps={steps} mode={live ? 'live' : 'recorded'} brain={brain} live={resources} recorded={RECORDED.resources} /></div>
-                  </details>
-                )}
+                {/* one fold for the whole second opinion: plain search against the plan, then what the run cost. Closed: the outfit above is the answer. */}
+                <details className="fold">
+                  <summary><h2 id="worth-h" className="sec-h worth-h">Was each step worth it?<span className="worth-sub"> Plain search against the plan, and what the run cost.</span></h2></summary>
+                  <div className="fold-body">
+                    <CompareCard
+                      plain={recorded ? withPhotos(picked_run!, photos.current).plain ?? null : plainLive && plainLive.q === retrievalQuery ? plainLive.value : 'loading'}
+                      outfit={items} planSeconds={STEPS.reduce((n, s) => n + (steps[s.id].status === 'done' ? steps[s.id].seconds ?? 0 : 0), 0)}
+                      ratings={recorded && picked_run ? { plain: picked_run.author_rating_of_raw_search, plan: picked_run.author_rating_of_plan } : undefined} />
+                    {steps.search.status === 'done' && (live || RECORDED.resources) && (
+                      <CostPanel steps={steps} mode={live ? 'live' : 'recorded'} brain={brain} live={resources} recorded={RECORDED.resources} />
+                    )}
+                  </div>
+                </details>
               </section>
             )}
             {live && finished && search && search.pieces.length > 0 && (

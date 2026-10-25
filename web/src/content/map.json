@@ -163,7 +163,7 @@
     {
      "path": "src/genkart/server.py",
      "does": "Web backend for the UI: one request runs the whole pipeline, and every step is streamed to the page as a small \"trace\" event.",
-     "lines": 1110,
+     "lines": 1111,
      "uses": [
       "src/genkart/__init__.py",
       "src/genkart/brain.py",
@@ -1024,7 +1024,7 @@
     {
      "path": "web/src/brand.ts",
      "does": "One place for the product name, so renaming (or adding a distinguishing handle) is a one-line change.",
-     "lines": 6,
+     "lines": 5,
      "uses": []
     },
     {
@@ -1049,7 +1049,7 @@
     {
      "path": "web/src/components/EvidenceKit.tsx",
      "does": "The building blocks of the Evidence page: the claim card (question, computed verdict, chart with its 95% ranges, how it was measured,",
-     "lines": 280,
+     "lines": 279,
      "uses": [
       "web/package.json",
       "web/src/components/Interval.tsx",
@@ -1092,7 +1092,7 @@
     {
      "path": "web/src/components/Hero.tsx",
      "does": "Chapter 1 of the Viewer: the problem in one line, what this is (the headline), why it matters (one line), and an explainer that loops through the",
-     "lines": 227,
+     "lines": 226,
      "uses": [
       "web/package.json",
       "web/src/brand.ts",
@@ -1123,7 +1123,7 @@
     {
      "path": "web/src/components/ModeMenu.tsx",
      "does": "\"AI model\": the dialog at the top right of the navigation, shown only in Lab, where the visitor picks which AI reads their sentence:",
-     "lines": 258,
+     "lines": 265,
      "uses": [
       "web/package.json",
       "web/src/api.ts",
@@ -1163,6 +1163,12 @@
      "uses": [
       "web/package.json"
      ]
+    },
+    {
+     "path": "web/src/components/ReaderChoice.tsx",
+     "does": "\"How should your sentence be read?\": the one visible choice above the search box in Try it live. It replaces the two notices and the hidden header dialog",
+     "lines": 37,
+     "uses": []
     },
     {
      "path": "web/src/components/Refine.tsx",
@@ -1292,7 +1298,7 @@
     {
      "path": "web/src/pages/Search.tsx",
      "does": "The Search page. Replay (the Viewer) is a short story in three chapters: the problem and the explainer replay (Hero), what we learned, your turn (the run picker).",
-     "lines": 650,
+     "lines": 644,
      "uses": [
       "web/package.json",
       "web/src/api.ts",
@@ -1363,7 +1369,7 @@
     {
      "path": "web/src/ui.ts",
      "does": "Small page helpers shared by several components (kept out of component files so fast refresh keeps working).",
-     "lines": 16,
+     "lines": 17,
      "uses": []
     }
    ]
@@ -1465,7 +1471,7 @@
     {
      "path": "tests/test_docs_coverage.py",
      "does": "The documentation must cover the project: every code file is on the map with a description, every logged run is cited by the site",
-     "lines": 82,
+     "lines": 85,
      "uses": []
     },
     {
@@ -1598,7 +1604,7 @@
     {
      "path": "tests/test_server.py",
      "does": "The pipeline streams one event per step, in order, with exact product ids as text. Everything outside is replaced by fakes: no model,",
-     "lines": 958,
+     "lines": 960,
      "uses": [
       "src/genkart/__init__.py",
       "src/genkart/catalogue.py",

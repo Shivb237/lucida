@@ -40,7 +40,7 @@ export function ContactSheet({ pieces, picked, mode, liked, onLike, inStep = fal
         </span>
       </div>
       {mode !== 'demo' && sources.length > 0 && (
-        <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: '22px', color: 'var(--z7)' }}>
+        <p style={{ margin: '12px 0 0', fontSize: 16, lineHeight: '22px', color: 'var(--z7)' }}>
           Collections here: {sources.map((s) => `${SOURCE_LABEL[s] ?? s} (${SOURCE_NOTE[s] ?? ''})`).join('; ')}.
         </p>
       )}
@@ -107,16 +107,16 @@ export function Print({ items, alreadyHas, mode }: { items: OutfitItem[]; alread
             </figure>
           ))}
         </div>
-        <div className="mono dim" style={{ position: 'absolute', left: 22, right: 22, bottom: 16, fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
+        <div className="mono dim" style={{ position: 'absolute', left: 22, right: 22, bottom: 16, fontSize: 14, display: 'flex', justifyContent: 'space-between' }}>
           <span>look 01 · {items.length} piece{items.length === 1 ? '' : 's'}</span><span>{mode === 'demo' ? 'demo' : mode === 'recorded' ? 'recorded' : 'real photos'}</span>
         </div>
       </div>
       <div id="outfit-why" style={{ flex: '1 1 380px', minWidth: 0 }}>
         <h3 className="lg dim step-h">Why each piece</h3>
         {alreadyHas.length > 0 && (
-          <p style={{ margin: '10px 0 0', fontSize: 17, lineHeight: '26px' }}>
+          <p style={{ margin: '10px 0 0', fontSize: 16, lineHeight: '26px' }}>
             <span className="lg dim">Built to go with what you own</span><br />
-            <span className="voice" style={{ fontSize: 30 }}>{alreadyHas.join(', ')}</span>
+            <span style={{ fontSize: 24, fontWeight: 600 }}>{alreadyHas.join(', ')}</span>
           </p>
         )}
         <div style={{ marginTop: 20, borderTop: '2px solid var(--ink)' }}>
@@ -124,8 +124,8 @@ export function Print({ items, alreadyHas, mode }: { items: OutfitItem[]; alread
             <div className="credit" key={it.pick.id}>
               <div><div className="lg">{it.kind}</div><SourceChip source={it.pick.source} /></div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 18 }}>{it.pick.title || it.piece} <span className="mono dim" style={{ fontWeight: 400, fontSize: 13, marginLeft: 6 }}>match #{it.rank}</span></div>
-                <ul style={{ margin: '4px 0 0', paddingLeft: '1.1em', fontSize: 17, lineHeight: '26px', color: 'var(--z2a)' }}>
+                <div style={{ fontWeight: 700, fontSize: 18 }}>{it.pick.title || it.piece} <span className="mono dim" style={{ fontWeight: 400, fontSize: 14, marginLeft: 6 }}>match #{it.rank}</span></div>
+                <ul style={{ margin: '4px 0 0', paddingLeft: '1.1em', fontSize: 16, lineHeight: '26px', color: 'var(--z2a)' }}>
                   {it.reasons.map((r, i) => <li key={i}>{r}</li>)}
                 </ul>
               </div>

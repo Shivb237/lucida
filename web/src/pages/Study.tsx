@@ -82,7 +82,7 @@ export function StudyPage() {
   const cur = order[at]
   return (
     <main id="main" tabIndex={-1} className="wrap study">
-      <h1 className="voice" style={{ fontSize: 'clamp(34px, 5vw, 56px)', lineHeight: 1.08, margin: '40px 0 12px' }}>A short study: does a drawing help?</h1>
+      <h1 className="voice" style={{ fontSize: 'var(--t-h1)', lineHeight: 1.08, margin: '40px 0 12px' }}>A short study: does a drawing help?</h1>
       {phase === 'loading' && <p role="status">Loading the study…</p>}
       {phase === 'off' && <p>The study is not running on this server.</p>}
       {phase === 'error' && <p role="alert" className="err-line"><span className="tile cross" aria-hidden="true" />{msg}</p>}

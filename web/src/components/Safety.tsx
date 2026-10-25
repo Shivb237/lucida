@@ -9,8 +9,8 @@ export class ErrorNet extends Component<{ children: ReactNode }, { failed: boole
     if (!this.state.failed) return this.props.children
     return (
       <main id="main" tabIndex={-1} className="wrap" style={{ paddingTop: 64, paddingBottom: 96, maxWidth: 640 }}>
-        <h1 style={{ margin: 0, fontSize: 28, lineHeight: '34px' }}>Something on this page broke.</h1>
-        <p style={{ margin: '14px 0 0', fontSize: 17, lineHeight: '26px' }}>Reloading usually fixes it.</p>
+        <h1 style={{ margin: 0, fontSize: 24, lineHeight: '34px' }}>Something on this page broke.</h1>
+        <p style={{ margin: '14px 0 0', fontSize: 16, lineHeight: '26px' }}>Reloading usually fixes it.</p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
           <button type="button" className="btn-expose" onClick={() => window.location.reload()}>Reload the page</button>
           <a className="btn-line" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} href="#/" onClick={() => { this.setState({ failed: false }) }}>Back to the start</a>

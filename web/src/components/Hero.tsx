@@ -5,7 +5,7 @@
 // with the buttons to step through runs. Every frame is computed once per run from its logged events (no network, nothing re-derived per tick).
 import { useEffect, useMemo, useRef, useState } from 'react'
 import evidence from 'virtual:evidence-front'
-import { HEADLINE, PROBLEM, WHY } from '../brand'
+import { HEADLINE, WHY } from '../brand'
 import { narrateSteps } from '../content/story'
 import { RECORDED, type RecordedRun } from '../recorded'
 import { emptySteps, MARK_CLASS, STAGES, STEPS, type Hit, type OutfitPayload, type StageId, type StepState } from '../trace'
@@ -110,7 +110,6 @@ export function Hero({ runs, onWatch }: { runs: RecordedRun[]; onWatch: (run: Re
   return (
     <section className="hero chapter" aria-labelledby="hero-h">
       <div className="hero-copy">
-        <p className="hero-kicker">{PROBLEM}</p>
         <h1 id="hero-h" className="voice hero-h">{HEADLINE}</h1>
         <p className="hero-why">{WHY}</p>
         <p className="hero-lineage">Evolved from GenKart, a 2023 hackathon idea. Lucida measures what actually works.</p>
@@ -133,7 +132,7 @@ export function Hero({ runs, onWatch }: { runs: RecordedRun[]; onWatch: (run: Re
               <button type="button" className="hero-btn" onClick={() => go(1)} aria-label="Next request"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg></button>
             </div>
           </div>
-          <blockquote className="voice hero-q">“{run.prompt}”</blockquote>
+          <blockquote className="hero-q">“{run.prompt}”</blockquote>
           {/* how it works, inside the replay: the three stages, each with its own steps' marks filling in */}
           <ol className="hero-stages" aria-hidden="true">
             {STAGES.map((st, si) => (

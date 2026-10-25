@@ -146,7 +146,7 @@ function Journey({ onStep }: { onStep: (id: string) => void }) {
   return (
     <section id="story" aria-labelledby="story-h" className="st-chapter">
       <h2 id="story-h" tabIndex={-1} className="st-h2">One recorded request</h2>
-      <p className="voice jr-prompt">“{run.prompt}”</p>
+      <p className="jr-prompt">“{run.prompt}”</p>
       <p className="jr-meta"><span className="mono">{run.wall_seconds.toFixed(2)} s</span> in all, recorded <span className="mono">{RECORDED.recorded_at}</span>.</p>
       <details className="jr-choose">
         <summary>Follow another recorded request</summary>

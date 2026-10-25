@@ -448,7 +448,8 @@ def run_pipeline(q: str, svc: Services, k: int = PER_PIECE, brain: Brain | None 
         fallback_reason = ("this hosted Lab has no built-in AI model (add your own API key in the mode menu to use one)" if os.environ.get("GENKART_HOSTED") == "1"
                            else (svc.ollama_why() if svc.ollama_why else "") or f"Ollama is not running or {MODEL} is not installed")
         plan = _finish_plan(Plan(main_query=q, gender="unknown", pieces=[Piece(kind="other", search_text=q)]), q)
-        yield step("understand", "failed", time.perf_counter() - t_understand, error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True)
+        yield step("understand", "failed", time.perf_counter() - t_understand, error=fallback_reason + ". The whole sentence is searched as it is.", plan=plan.model_dump(), fell_back=True,
+                   expected=True)       # nobody asked for a model and none is here: the page shows "skipped", not an alarm
     else:
         try:
             res = svc.understand_byo(q, brain) if brain else svc.understand(q)

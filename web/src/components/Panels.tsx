@@ -28,14 +28,14 @@ export function PlanCard({ step, demo, head = true }: { step: StepState; demo: b
       ) : (
         <p className="lg dim step-h">The plan{!demo && p.model ? <>, written by <span className="mono">{p.model}</span></> : ''}{demo && <> (demo)</>}</p>
       )}
-      {step.status === 'failed' && <p role="alert" style={{ margin: '10px 0 0', fontSize: 17, fontWeight: 600 }}>{p.error}</p>}
-      {step.status === 'done' && p.fell_back && <p style={{ margin: '10px 0 0', fontSize: 17 }}>The AI gave no usable plan, so your whole sentence is searched as typed.</p>}
+      {step.status === 'failed' && <p role="alert" style={{ margin: '10px 0 0', fontSize: 16, fontWeight: 600 }}>{p.error}</p>}
+      {step.status === 'done' && p.fell_back && <p style={{ margin: '10px 0 0', fontSize: 16 }}>The AI gave no usable plan, so your whole sentence is searched as typed.</p>}
       {plan && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '14px 28px', marginTop: 14 }}>
           <dl style={{ margin: 0 }}>
             {rows.map(([k, v]) => (
               <div key={k} style={{ display: 'grid', gridTemplateColumns: '92px minmax(0, 1fr)', gap: 10, padding: '6px 0', borderTop: '1px solid var(--z8)' }}>
-                <dt className="lg dim">{k}</dt><dd className="mono" style={{ margin: 0, fontSize: 15 }}>{v}</dd>
+                <dt className="lg dim">{k}</dt><dd className="mono" style={{ margin: 0, fontSize: 16 }}>{v}</dd>
               </div>
             ))}
           </dl>
@@ -44,8 +44,8 @@ export function PlanCard({ step, demo, head = true }: { step: StepState; demo: b
             {plan.pieces.map((pc, i) => (
               <div key={i} style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 10px', alignItems: 'baseline', padding: '6px 0', borderTop: '1px solid var(--z8)' }}>
                 <span className="lg dim" style={{ width: 70 }}>{pc.kind}</span>
-                <span style={{ fontSize: 17, fontWeight: 600 }}>{pc.search_text}</span>
-                {pc.colours.length > 0 && <span className="mono dim" style={{ fontSize: 13 }}>{pc.colours.join(', ')}</span>}
+                <span style={{ fontSize: 16, fontWeight: 600 }}>{pc.search_text}</span>
+                {pc.colours.length > 0 && <span className="mono dim" style={{ fontSize: 14 }}>{pc.colours.join(', ')}</span>}
               </div>
             ))}
           </div>
@@ -61,17 +61,17 @@ export function GraphSheet({ step, head = true }: { step: StepState; head?: bool
   return (
     <div className="sheet dev" style={{ marginTop: head ? 28 : 18, marginLeft: head ? 'auto' : undefined, maxWidth: 620, padding: '22px 24px 20px', transform: head ? 'rotate(.7deg)' : undefined }}>
       {head && <h2 className="lg dim step-h">Step 3 · Add missing ideas <span className="mono" style={{ marginLeft: 6 }}>{step.status === 'done' ? `${fmt(step.seconds, 2)} s` : ''}</span></h2>}
-      {step.status === 'skipped' && <p style={{ margin: '8px 0 0', fontSize: 17 }}>Skipped: {p.reason}.</p>}
-      {step.status === 'failed' && <p role="alert" style={{ margin: '8px 0 0', fontSize: 17, fontWeight: 600 }}>{p.error}</p>}
+      {step.status === 'skipped' && <p style={{ margin: '8px 0 0', fontSize: 16 }}>Skipped: {p.reason}.</p>}
+      {step.status === 'failed' && <p role="alert" style={{ margin: '8px 0 0', fontSize: 16, fontWeight: 600 }}>{p.error}</p>}
       {step.status === 'done' && (
         <>
-          <p style={{ margin: '8px 0 12px', fontSize: 17, lineHeight: '26px', color: 'var(--z4)', maxWidth: '54ch' }}>
+          <p style={{ margin: '8px 0 12px', fontSize: 16, lineHeight: '26px', color: 'var(--z4)', maxWidth: '54ch' }}>
             {p.usages && p.usages.length ? <>Occasion recognised: <span className="mono">{p.usages.join(', ')}</span>.</> : 'No occasion word matched, so nothing was added.'}
           </p>
           {(p.notes ?? []).map((n) => (
-            <div key={n} style={{ borderTop: '1px solid var(--z8)', padding: '8px 0', fontSize: 17, lineHeight: '26px' }}>{n.replace(/^graph: /, '')}</div>
+            <div key={n} style={{ borderTop: '1px solid var(--z8)', padding: '8px 0', fontSize: 16, lineHeight: '26px' }}>{n.replace(/^graph: /, '')}</div>
           ))}
-          {p.usages && p.usages.length > 0 && (p.notes ?? []).length === 0 && <div style={{ borderTop: '1px solid var(--z8)', padding: '8px 0', fontSize: 17 }}>The pieces already fit, so nothing was changed.</div>}
+          {p.usages && p.usages.length > 0 && (p.notes ?? []).length === 0 && <div style={{ borderTop: '1px solid var(--z8)', padding: '8px 0', fontSize: 16 }}>The pieces already fit, so nothing was changed.</div>}
         </>
       )}
     </div>
@@ -173,10 +173,10 @@ export function TimeStrip({ steps, mode, clock }: { steps: Steps; mode: string; 
         ))}
       </div>
       <div style={{ display: 'flex', marginTop: 6 }}>
-        {bands.map((b) => <div key={b.label} className="mono dim" style={{ flex: `${(b.seconds / total) * 100} 1 0`, minWidth: 0, overflow: 'hidden', fontSize: 13 }}>{b.seconds / total >= 0.06 ? fmt(b.seconds, 1) : ''}</div>)}
+        {bands.map((b) => <div key={b.label} className="mono dim" style={{ flex: `${(b.seconds / total) * 100} 1 0`, minWidth: 0, overflow: 'hidden', fontSize: 14 }}>{b.seconds / total >= 0.06 ? fmt(b.seconds, 1) : ''}</div>)}
       </div>
       {bands.some((b) => b.seconds / total < 0.06) && (
-        <p className="mono" style={{ margin: '8px 0 0', fontSize: 15, color: 'var(--z4)' }}>
+        <p className="mono" style={{ margin: '8px 0 0', fontSize: 16, color: 'var(--z4)' }}>
           Too thin to label: {bands.filter((b) => b.seconds / total < 0.06).map((b) => `${b.label} = ${fmt(b.seconds, 2)} s`).join(' · ')}
         </p>
       )}
@@ -196,7 +196,7 @@ export function TimeStrip({ steps, mode, clock }: { steps: Steps; mode: string; 
 export function SearchPanel({ step, head = true }: { step: StepState; head?: boolean }) {
   if (step.status !== 'done' && step.status !== 'failed') return null
   const p = step.payload as unknown as SearchPayload
-  if (step.status === 'failed') return <p role="alert" style={{ marginTop: 24, fontSize: 17 }}><strong>Search failed:</strong> {p.error}</p>
+  if (step.status === 'failed') return <p role="alert" style={{ marginTop: 24, fontSize: 16 }}><strong>Search failed:</strong> {p.error}</p>
   const router = p.backend === 'router'
   const local = p.info as LocalInfo
   const reqs = (p.info as RouterInfo).requests ?? []
@@ -211,8 +211,8 @@ export function SearchPanel({ step, head = true }: { step: StepState; head?: boo
               <div style={{ display: 'flex', gap: 4 }} role="img" aria-label={`${r.shards.ok} of ${r.shards.total} slices answered`}>
                 {Array.from({ length: r.shards.total }).map((_, s) => <div key={s} className={s < r.shards.ok ? '' : 'cross'} style={{ flex: 1, height: 22, border: '1px solid var(--ink)', background: s < r.shards.ok ? 'var(--z4)' : undefined }} />)}
               </div>
-              <span className="mono" style={{ fontSize: 15 }}>{fmt(r.timings_ms.total, 1)} ms</span>
-              <span style={{ gridColumn: '1 / -1', fontSize: 15, color: 'var(--z4)' }}>
+              <span className="mono" style={{ fontSize: 16 }}>{fmt(r.timings_ms.total, 1)} ms</span>
+              <span style={{ gridColumn: '1 / -1', fontSize: 16, color: 'var(--z4)' }}>
                 turning words into numbers {fmt(r.timings_ms.encode, 1)} ms · looking up {fmt(r.timings_ms.shards, 1)} ms · combining {fmt(r.timings_ms.merge, 1)} ms
                 {r.shards.failovers > 0 && ` · ${r.shards.failovers} switched to a backup copy`}{r.shards.hedged > 0 && ` · ${r.shards.hedged} also asked a backup because the first was slow`}
                 {r.partial && <strong style={{ color: 'var(--ink)' }}> · incomplete answer: {r.shards.failed} slice(s) did not reply, so some products may be missing</strong>}
@@ -223,7 +223,7 @@ export function SearchPanel({ step, head = true }: { step: StepState; head?: boo
       ) : (
         <p style={{ margin: '10px 0 0', fontSize: 16, lineHeight: '24px', maxWidth: '58ch' }}>
           All four collections were searched inside this one program. Turning the pieces into numbers took <span className="mono">{fmt(local.encode_seconds, 3)} s</span>; comparing with every photo took <span className="mono">{fmt(step.seconds, 3)} s</span>.
-          <span style={{ display: 'block', marginTop: 6, color: 'var(--z4)' }}>To see the split system at work, start it with <code className="mono" style={{ fontSize: 13 }}>scripts/cluster.sh start</code>; this page uses it automatically.</span>
+          <span style={{ display: 'block', marginTop: 6, color: 'var(--z4)' }}>To see the split system at work, start it with <code className="mono" style={{ fontSize: 14 }}>scripts/cluster.sh start</code>; this page uses it automatically.</span>
         </p>
       )}
       {p.checks && p.checks.length > 0 && (
@@ -242,11 +242,11 @@ export function ComposePanel({ step, head = true }: { step: StepState; head?: bo
   return (
     <div className="sheet card dev" style={{ marginTop: head ? 36 : 18, padding: '22px 26px', maxWidth: 820, transform: head ? 'rotate(-.3deg)' : undefined }}>
       {head && <h2 className="lg dim step-h">Step 5 · Pick an outfit <span className="mono" style={{ marginLeft: 6 }}>{step.status === 'done' ? `${fmt(step.seconds, 2)} s` : ''}</span></h2>}
-      {step.status === 'skipped' && <p style={{ margin: '8px 0 0', fontSize: 17 }}>Skipped: {p.reason}.</p>}
+      {step.status === 'skipped' && <p style={{ margin: '8px 0 0', fontSize: 16 }}>Skipped: {p.reason}.</p>}
       {step.status === 'done' && p.harmony && (
         <>
-          <p style={{ margin: '10px 0 0', fontSize: 17, lineHeight: '26px' }}>
-            Colours go together: <span className="mono" style={{ fontSize: 17 }}>{p.harmony.coherent.toFixed(2)}</span> out of 1. <span className="mono" style={{ fontSize: 17 }}>{p.changed}</span> of {p.pieces} picks were swapped for a better colour match. <strong>A check with no measured benefit.</strong>
+          <p style={{ margin: '10px 0 0', fontSize: 16, lineHeight: '26px' }}>
+            Colours go together: <span className="mono" style={{ fontSize: 16 }}>{p.harmony.coherent.toFixed(2)}</span> out of 1. <span className="mono" style={{ fontSize: 16 }}>{p.changed}</span> of {p.pieces} picks were swapped for a better colour match. <strong>A check with no measured benefit.</strong>
           </p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
             {(p.colours ?? []).map((c, i) => <span key={i} className="tagchip">piece {i + 1}: {c ?? 'unreadable'}</span>)}

@@ -155,41 +155,40 @@ export function Card({ claim: c, extra, exact }: { claim: Claim; extra?: ReactNo
           {c.effect && <span className="evd-verdict-n mono">{fmt(c.effect.mean, c.effect.digits, isDiff(c.effect))} {c.effect.ci95 && <small>({range(c.effect, isDiff(c.effect))})</small>}</span>}</p>
         <p className="evd-answer">{c.answer.map((a, i) => <span key={i}>{prose(a, seen, `a${i}`)} </span>)}</p>
         {c.missing.length > 0 && <ul className="evd-missing">{c.missing.map((m) => <li key={m}><VerdictMark verdict={null} /> {prose(m)}</li>)}</ul>}
-        {(shown.length > 0 || groups.length > 0) && (
-          <div className="evd-charts">
-            {shown.map((l) => <Levels key={l.title} level={l} />)}
-            {groups.map((g) => <EffectRows key={g[0].scale} effects={g} />)}
-          </div>
-        )}
         {extra}
-        <div className="evd-facts">
-          <div>
-            <h3 className="lg">How it was measured</h3>
-            <p>{c.method.map((m, i) => <span key={i}>{prose(m, seen, `m${i}`)} </span>)}</p>
-            {c.measured.length > 0 && <dl className="evd-dl">{c.measured.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{prose(v)}</dd></div>)}</dl>}
-            {c.effect && <p className="evd-rule">{prose(c.effect.rule, seen, 'r')}</p>}
+        {/* one fold per card: the charts, how it was measured, the limits, the sources and the exact numbers. The answer above is all most readers need. */}
+        <Exact label="See the evidence: charts, method, limits and exact numbers">
+          {(shown.length > 0 || groups.length > 0) && (
+            <div className="evd-charts">
+              {shown.map((l) => <Levels key={l.title} level={l} />)}
+              {groups.map((g) => <EffectRows key={g[0].scale} effects={g} />)}
+            </div>
+          )}
+          <div className="evd-facts">
+            <div>
+              <h3 className="lg">How it was measured</h3>
+              <p>{c.method.map((m, i) => <span key={i}>{prose(m, seen, `m${i}`)} </span>)}</p>
+              {c.measured.length > 0 && <dl className="evd-dl">{c.measured.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{prose(v)}</dd></div>)}</dl>}
+              {c.effect && <p className="evd-rule">{prose(c.effect.rule, seen, 'r')}</p>}
+            </div>
+            <div>
+              <h3 className="lg">Limits</h3>
+              <ul>{c.limits.map((l) => <li key={l}>{prose(l, seen, l)}</li>)}</ul>
+            </div>
+            <div>
+              <h3 className="lg">Source</h3>
+              <ul className="evd-sources">
+                {c.sources.map((s) => (
+                  <li key={s.file}><a href={blob(s.file)} target="_blank" rel="noreferrer">{s.file}</a>{s.script && <> · made by <a href={blob(s.script)} target="_blank" rel="noreferrer">{s.script}</a></>}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div>
-            <h3 className="lg">Limits</h3>
-            <ul>{c.limits.map((l) => <li key={l}>{prose(l, seen, l)}</li>)}</ul>
-          </div>
-          <div>
-            <h3 className="lg">Source</h3>
-            <ul className="evd-sources">
-              {c.sources.map((s) => (
-                <li key={s.file}><a href={blob(s.file)} target="_blank" rel="noreferrer">{s.file}</a>{s.script && <> · made by <a href={blob(s.script)} target="_blank" rel="noreferrer">{s.script}</a></>}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        {(folded.length > 0 || c.tables.length > 0 || c.effects.length > 0 || exact) && (
-          <Exact label="Show the exact numbers">
-            {c.effects.length > 0 && <EffectTable effects={c.effects} />}
-            {folded.map((l) => <Levels key={l.title} level={l} />)}
-            {c.tables.map((t) => <DataTable key={t.title} table={t} />)}
-            {exact}
-          </Exact>
-        )}
+          {c.effects.length > 0 && <EffectTable effects={c.effects} />}
+          {folded.map((l) => <Levels key={l.title} level={l} />)}
+          {c.tables.map((t) => <DataTable key={t.title} table={t} />)}
+          {exact}
+        </Exact>
       </div>
     </section>
   )
@@ -246,7 +245,7 @@ export function Toc({ items, onChoose }: { items: { id: string; num: string; lab
         ))}
       </nav>
       <div className="evd-toc-foot">
-        <button type="button" aria-pressed={all} onClick={toggleAll}>{all ? 'Close every exact-numbers panel' : 'Open every exact-numbers panel'}</button>
+        <button type="button" aria-pressed={all} onClick={toggleAll}>{all ? 'Close every evidence panel' : 'Open every evidence panel'}</button>
       </div>
     </aside>
   )

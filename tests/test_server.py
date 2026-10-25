@@ -91,6 +91,7 @@ def test_ollama_down_says_so_and_still_searches_the_raw_sentence():
     assert seen["texts"] == ["red lehenga"]
     u = next(e for e in evs if e["stage"] == "understand" and e["status"] == "failed")
     assert "Ollama" in u["payload"]["error"] and u["payload"]["fell_back"] is True
+    assert u["payload"]["expected"] is True            # nobody chose a model and none is running: the page shows "skipped", not an error
 
 
 def test_missing_graph_data_is_skipped_not_hidden():
@@ -395,6 +396,7 @@ def test_first_use_costs_reach_the_expand_step_and_a_failed_provider_call_report
     failed = next(e for e in evs if e["stage"] == "understand" and e["status"] == "failed")
     assert failed["seconds"] is not None and failed["seconds"] >= 0 and "did not accept the request" in failed["payload"]["error"]
     assert "BrainError" not in failed["payload"]["error"]
+    assert "expected" not in failed["payload"]          # a real provider failure stays an error; only "no model here" is expected
     # a server whose expand returns only two things (older code, tests) still works
     ok = [e for e in run_pipeline("anything", base) if e.get("stage") == "expand" and e.get("status") == "done"]
     assert ok and "graph_first_use" not in ok[0]["payload"]

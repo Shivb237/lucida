@@ -3,7 +3,7 @@
 // A modal dialog: Escape and the backdrop close it, Tab stays inside it, focus returns to the button. Other parts of the page open it with openModelDialog() (ui.ts).
 import { useEffect, useRef, useState } from 'react'
 import { deviceModels, loadModels } from '../api'
-import { MODEL_DIALOG_EVENT } from '../ui'
+import { MODEL_DIALOG_EVENT, type ModelDialogOpen } from '../ui'
 import { DEVICE_APPS, describe, LOCAL, PROVIDERS, providerOf, usable, withProvider, type BrainSetting } from '../brain'
 
 
@@ -48,7 +48,14 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
   const toggle = () => { if (!open) opener.current = btn.current; setOpen((wasOpen) => !wasOpen) }
 
   useEffect(() => {
-    const onOpen = (event: Event) => { opener.current = (event as CustomEvent<HTMLElement | null>).detail; setOpen(true) }
+    const onOpen = (event: Event) => {
+      const d = (event as CustomEvent<ModelDialogOpen>).detail
+      opener.current = d.opener
+      if (d.kind === 'key') setDraft((cur) => (cur.kind === 'anthropic' || cur.kind === 'openai' ? cur : withProvider({ ...LOCAL, provider: 'anthropic' }, 'anthropic')))
+      if (d.kind === 'device') setDraft((cur) => (cur.kind === 'device' ? cur : withProvider({ ...LOCAL, provider: 'ollama' }, 'ollama')))
+      if (d.kind) { setModels(null); setTyping(false); setModelState({ loading: false, error: null }) }
+      setOpen(true)
+    }
     window.addEventListener(MODEL_DIALOG_EVENT, onOpen)
     return () => window.removeEventListener(MODEL_DIALOG_EVENT, onOpen)
   }, [])

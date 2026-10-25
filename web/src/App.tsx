@@ -82,7 +82,7 @@ export default function App() {
       <header className="frame-bar">
         <div className="wrap">
           <div className="bar-left">
-            <a href="#/" className="wordmark" aria-label={`${NAME}, start page`}>{NAME.toUpperCase()}</a>
+            <a href="#/" className="wordmark" aria-label={`${NAME}, start page`}>{NAME}<span className="wm-dot" aria-hidden="true">.</span></a>
             <nav className="nav" aria-label="Main">
               {NAV.map(([p, href, label]) => <a key={p} href={href} className="lg" aria-current={page === p ? 'page' : undefined}>{label}</a>)}
               {health?.study && <a href="#/study" className="lg" aria-current={page === 'study' ? 'page' : undefined}>Study</a>}
@@ -99,7 +99,7 @@ export default function App() {
         {page === 'wake' ? <WakePage />
           : page === 'words' ? <GlossaryPage />
           : page === 'study' ? <StudyPage />
-          : page === 'search' ? <SearchPage health={health} viewer={viewer} brain={brain} />
+          : page === 'search' ? <SearchPage health={health} viewer={viewer} brain={brain} onBrain={setBrain} />
           : page === 'system' ? <SystemPage health={health} viewer={viewer} />
           : page === 'docs' ? <DocsPage sub={route.sub} />
           : <EvidencePage sub={route.sub} />}

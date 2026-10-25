@@ -8,7 +8,7 @@ export function GlossaryPage() {
   const shown = GLOSSARY.filter(([t, d]) => words.every((w) => `${t} ${d}`.toLowerCase().includes(w)))
   return (
     <main id="main" tabIndex={-1} className="wrap" style={{ paddingTop: 56, paddingBottom: 110 }}>
-      <h1 className="voice" style={{ margin: 0, fontSize: 'clamp(52px, 7vw, 96px)', lineHeight: 1, letterSpacing: '-.015em', maxWidth: '15ch' }}>Words, in plain English.</h1>
+      <h1 className="voice" style={{ margin: 0, fontSize: 'var(--t-h1)', lineHeight: 1, letterSpacing: '-.015em', maxWidth: '15ch' }}>Words, in plain English.</h1>
       <p className="plain">Every technical term on this site, in one place. The pages also explain each term where it first appears.</p>
       <label className="gl-filter">Filter the terms
         <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="for example: score, replica, Ollama" autoComplete="off" />

@@ -29,7 +29,7 @@ function PctBar({ v, cross }: { v: number | null | undefined; cross?: boolean })
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
       <div className={`pctbar${cross ? ' cross-fill' : ''}`} style={{ flex: 1 }} role="img" aria-label={pc(v)}><div style={{ width: pc(v) }} /></div>
-      <span className="mono" style={{ fontSize: 15, width: 40, textAlign: 'right' }}>{pc(v)}</span>
+      <span className="mono" style={{ fontSize: 16, width: 40, textAlign: 'right' }}>{pc(v)}</span>
     </div>
   )
 }
@@ -60,7 +60,7 @@ function Node({ label, up, sub }: { label: string; up: boolean; sub?: string }) 
   return (
     <div>
       <div className={`node ${up ? 'up' : 'down'}`}><span className="lg">{label}</span></div>
-      <div className="lg" style={{ fontSize: 13, marginTop: 4, textAlign: 'center', color: 'var(--z7)' }}>{sub ?? (up ? 'up' : 'down')}</div>
+      <div className="lg" style={{ fontSize: 14, marginTop: 4, textAlign: 'center', color: 'var(--z7)' }}>{sub ?? (up ? 'up' : 'down')}</div>
     </div>
   )
 }
@@ -69,7 +69,7 @@ function Node({ label, up, sub }: { label: string; up: boolean; sub?: string }) 
 function Experiment({ id, question, value, unit, label, means, children }: { id: string; question: string; value: string; unit?: string; label: string; means: ReactNode; children: ReactNode }) {
   return (
     <section id={id} aria-labelledby={`${id}-h`} className="sy-exp">
-      <h2 id={`${id}-h`} tabIndex={-1} className="voice sy-q">{question}</h2>
+      <h2 id={`${id}-h`} tabIndex={-1} className="sy-q">{question}</h2>
       <div className="sy-exp-body">
         <p className="sy-num"><span className="mono sy-big">{value}{unit && <span className="sy-unit">{unit}</span>}</span><span className="sy-label">{label}</span></p>
         <p className="sy-means">{means}</p>
@@ -259,7 +259,7 @@ export function SystemPage({ health, viewer }: { health: Health | null | undefin
                 {shards.map((g, i) => (
                   <div key={i}>
                     <div style={{ display: 'flex', gap: 6 }}>{g.map((up, j) => <Node key={j} label={`${i}${j ? 'b' : 'a'}`} up={up} />)}</div>
-                    <div className="lg" style={{ fontSize: 13, marginTop: 4, textAlign: 'center', color: 'var(--z7)' }}>slice {i}</div>
+                    <div className="lg" style={{ fontSize: 14, marginTop: 4, textAlign: 'center', color: 'var(--z7)' }}>slice {i}</div>
                   </div>
                 ))}
               </div>

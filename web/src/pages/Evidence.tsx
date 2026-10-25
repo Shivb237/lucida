@@ -97,7 +97,7 @@ export function EvidencePage({ sub }: { sub?: string }) {
       <p className="plain evd-lead"><span className="mono">{claims.length}</span> questions, each answered by a logged test. Each answer comes with a <Term k="95% range">95% range</Term>: how far it could move by luck.</p>
 
       <section className="evd-score" aria-labelledby="evd-score-h">
-        <h2 id="evd-score-h" className="voice evd-h2">The scorecard</h2>
+        <h2 id="evd-score-h" className="evd-h2">The scorecard</h2>
         <p className="evd-score-lead">Each line compares two ways on the same requests (a <Term k="paired">paired</Term> <Term k="difference">difference</Term>). Right of zero means the change helped. Search scores and a person’s ratings use different scales, so they sit in separate panels.</p>
         <ForestPlot claims={claims} onChoose={go} />
         <Legend />
