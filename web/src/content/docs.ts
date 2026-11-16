@@ -24,7 +24,7 @@ const n2 = (x: number) => x.toFixed(2)
 const n3 = (x: number) => x.toFixed(3)
 const sg = (x: number, d = 2) => `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(d)}`
 const pc = (x: number, d = 0) => `${(x * 100).toFixed(d)}%`
-const med = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : 0 }
+const med = (xs: number[]) => { const s = xs.toSorted((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : 0 }
 const sourceFile = (f: string) => `runs/${f}`
 type Agreement = NonNullable<Ev['agreement']['test5']>
 const nWord = (n: number) => ['zero', 'one', 'two', 'three', 'four', 'five'][n] ?? String(n)

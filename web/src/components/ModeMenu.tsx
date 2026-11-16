@@ -42,9 +42,11 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
   const [draft, setDraft] = useState<BrainSetting>(() => (hosted && brain.kind === 'local' ? withProvider({ ...LOCAL, provider: 'anthropic' }, 'anthropic') : brain))
   const btn = useRef<HTMLButtonElement>(null)
   const closeBtn = useRef<HTMLButtonElement>(null)
-  const panel = useRef<HTMLDivElement>(null)
+  const panel = useRef<HTMLDialogElement>(null)
   const opener = useRef<HTMLElement | null>(null)
-  const close = () => { setOpen(false); (opener.current?.isConnected ? opener.current : btn.current)?.focus() }   // return keyboard focus to the control that opened the dialog
+  const close = () => panel.current?.close()
+  // runs for every way of closing (Escape, backdrop, Close, submit); focus goes back to the control that opened it (Safari does not focus a clicked button, so do it here)
+  const onClosed = () => { setOpen(false); (opener.current?.isConnected ? opener.current : btn.current)?.focus() }
   const toggle = () => { if (!open) opener.current = btn.current; setOpen((wasOpen) => !wasOpen) }
 
   useEffect(() => {
@@ -60,26 +62,17 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
     return () => window.removeEventListener(MODEL_DIALOG_EVENT, onOpen)
   }, [])
 
-  // While open this is a modal sheet: the page behind cannot scroll, Escape and the dimmed backdrop close it, a page change closes it,
-  // Tab stays inside it, and focus starts on Close so a keyboard or screen-reader user always has a way out.
+  // A native modal <dialog>: the browser blocks the page behind it, keeps Tab inside, closes it on Escape / the phone back gesture and returns focus.
+  // Focus starts on Close so a keyboard or screen-reader user always has a way out; a page change closes it.
   useEffect(() => {
+    const d = panel.current
+    if (!d) return
+    if (open && !d.open) { d.showModal(); closeBtn.current?.focus() }
+    if (!open && d.open) d.close()
     if (!open) return
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    closeBtn.current?.focus()
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); close(); return }
-      if (e.key !== 'Tab' || !panel.current) return
-      const items = [...panel.current.querySelectorAll<HTMLElement>('button, a[href], input, select, summary, [tabindex]:not([tabindex="-1"])')].filter((el) => !(el as HTMLButtonElement).disabled && el.offsetParent !== null)
-      if (items.length === 0) return
-      const first = items[0], last = items[items.length - 1]
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
-    }
     const onHash = () => setOpen(false)
-    document.addEventListener('keydown', onKey)
     window.addEventListener('hashchange', onHash)
-    return () => { document.body.style.overflow = prevOverflow; document.removeEventListener('keydown', onKey); window.removeEventListener('hashchange', onHash) }
+    return () => window.removeEventListener('hashchange', onHash)
   }, [open])
 
   const kind = draft.kind
@@ -111,9 +104,8 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
         <span className="mode-sub">{brain.kind === 'device' ? 'your device' : using ? 'your key' : hosted ? 'none set' : 'this computer'}</span>
       </button>
 
-      {open && <div className="mode-scrim" onClick={close} aria-hidden="true" />}
-      {open && (
-        <div id="mode-panel" className="mode-panel" role="dialog" aria-modal="true" aria-labelledby="mp-title" ref={panel}>
+      {/* closedby="any" = click outside closes too (newer browsers); the onClick below does the same where it is not supported yet */}
+      <dialog id="mode-panel" className="mode-panel" aria-labelledby="mp-title" ref={panel} onClose={onClosed} onClick={(e) => { if (e.target === e.currentTarget) close() }} {...({ closedby: 'any' } as object)}>
           <div className="mp-top">
             <h2 id="mp-title" className="mp-h">Which AI reads your sentence</h2>
             <button type="button" className="mp-close" ref={closeBtn} onClick={close}>
@@ -126,7 +118,7 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
             {!canByo ? (
               <p className="mp-note">This server is too old to use a key. Update it, or use the model on this computer.</p>
             ) : (
-              <div role="group" aria-label="Choose the model" onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') { e.preventDefault(); submit() } }}>
+              <div role="group" aria-label="Choose the model" onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement).tagName === 'INPUT') { e.preventDefault(); submit() } }}>
                 <fieldset className="mp-kinds">
                   <legend className="sr-only">Which model reads your sentence</legend>
                   {([['local', 'On this computer', 'A free AI program (Ollama) on your computer. Nothing leaves it.'],
@@ -258,8 +250,7 @@ export function ModeMenu({ canByo, hosted = false, brain, onBrain }: {
             )}
           </section>
           </div>
-        </div>
-      )}
+      </dialog>
     </div>
   )
 }

@@ -322,8 +322,9 @@ h2.step-h { margin: 0; }
 .mode-btn:hover, .mode-btn[aria-expanded='true'] { border-color: var(--mag-film); }
 .mode-name { font-weight: 700; letter-spacing: 0; text-transform: none; font-size: 16px; }
 .mode-sub { font-size: 14px; color: var(--z7); }
-.mode-scrim { position: fixed; inset: 0; z-index: 29; background: rgba(20, 20, 22, 0.5); }
-.mode-panel { position: fixed; left: 50%; transform: translateX(-50%); top: 72px; z-index: 30; width: min(540px, calc(100vw - 32px)); max-height: calc(100vh - 96px); overflow: auto; background: var(--paper); color: var(--ink); border: 1px solid var(--ink); box-shadow: 0 14px 34px rgba(20, 20, 22, 0.28); padding: 0; }
+.mode-panel::backdrop { background: rgba(20, 20, 22, 0.5); overflow: hidden; overscroll-behavior: contain; }
+.mode-panel:modal { overscroll-behavior: contain; }
+.mode-panel { position: fixed; margin: 0; right: auto; bottom: auto; left: 50%; transform: translateX(-50%); top: 72px; width: min(540px, calc(100vw - 32px)); max-height: calc(100vh - 96px); overflow: auto; background: var(--paper); color: var(--ink); border: 1px solid var(--ink); box-shadow: 0 14px 34px rgba(20, 20, 22, 0.28); padding: 0; }
 .mp-top { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: var(--paper); border-bottom: 1px solid var(--z8); }
 .mp-top .mp-h { margin: 0; }
 .mp-body { padding: 14px 18px 18px; }
@@ -345,7 +346,8 @@ h2.step-h { margin: 0; }
 .mp-kind input { margin-top: 4px; accent-color: var(--mag); }
 .mp-kind strong { display: block; font-size: 16px; }
 .mp-kind .dim { display: block; font-size: 16px; line-height: 22px; }
-.mp-fields { display: grid; gap: 10px; margin-top: 12px; }
+.mp-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 12px; }
+.mp-fields input, .mp-fields select { width: 100%; min-width: 0; }
 .mp-fields label { display: grid; gap: 4px; font-size: 16px; font-weight: 600; }
 .mp-fields input { min-height: 44px; padding: 8px 12px; font: inherit; font-size: 16px; font-weight: 400; border: 1px solid var(--z4); background: var(--white); color: var(--ink); }
 .mp-model .mp-note { margin-top: 12px; }
@@ -354,7 +356,7 @@ h2.step-h { margin: 0; }
 .mp-now { margin: 12px 0 0; font-size: 16px; color: var(--z4); }
 @media (max-width: 700px) {
   .mode-sub { display: none; }
-  .mode-panel { position: fixed; left: 12px; right: 12px; transform: none; top: 12px; width: auto; max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+  .mode-panel { position: fixed; left: 12px; right: 12px; margin: 0; max-width: none; transform: none; top: 12px; width: auto; max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
   .mp-top { padding: 10px 14px; }
   .mp-body { padding: 12px 14px 16px; }
   .mp-command { grid-template-columns: 1fr; }

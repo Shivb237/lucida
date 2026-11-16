@@ -5,7 +5,7 @@ import evidence, { type AwsPoint, type OverloadVariant } from 'virtual:evidence'
 
 const f = (n: number, d = 0) => n.toFixed(d)
 const pc = (x: number) => `${Math.round(x * 100)}%`
-const sorted = (xs: number[]) => [...xs].sort((a, b) => a - b)
+const sorted = (xs: number[]) => xs.toSorted((a, b) => a - b)
 const pct = (xs: number[], p: number) => { const s = sorted(xs); return s[Math.min(s.length - 1, Math.floor(p * s.length))] }
 
 /** Every search as one mark: height = milliseconds, left to right = order sent. A hollow ring = the router used a second copy because the first failed (failover). */

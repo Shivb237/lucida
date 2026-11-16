@@ -163,7 +163,7 @@ export function Hero({ runs, onWatch }: { runs: RecordedRun[]; onWatch: (run: Re
   )
 }
 
-const med = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : 0 }
+const med = (xs: number[]) => { const s = xs.toSorted((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : 0 }
 
 /** Chapter 2: the project's three results, strongest first, one sentence pair each. Each card links to its claim on the Evidence page. */
 export function Learned() {
